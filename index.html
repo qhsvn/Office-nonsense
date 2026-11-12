@@ -778,7 +778,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div><div class="soopts" id="gaWhy" style="display:none"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
-  <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Chọn nhân viên phải lên phòng quản lý báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
+  <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
   <div class="crow"><button type="button" id="rqCancel" class="cghost">Hủy</button><button type="button" id="rqGo">Gửi yêu cầu 📨</button></div></div></div>
 <div id="tripModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="trTitle"><div class="wcard mcardm">
@@ -4110,15 +4110,17 @@ const RET_RE=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/;
 {const o=end;end=(c,mode)=>{if(c._skipEnds>0){c._skipEnds--;return;}o(c,mode);};}
 
 /* ================= quản lý yêu cầu báo cáo ================= */
-const rqEl=$('#reqModal');let rqPick='all',REPQ=[],REPQ_AT=0,REPQ_END=0;
+const rqEl=$('#reqModal');let rqSel=new Set(),REPQ=[],REPQ_AT=0,REPQ_END=0;
 function openReqReport(){const m=selected&&selected.manager?selected:null;if(!m||(isHuman(m)&&m.id!==ME.id)){setStatus('📋 Chỉ quản lý mới yêu cầu nhân viên báo cáo được.');return;}
   const box=$('#rqWho');box.textContent='';
-  [{id:'all',n:'👥 Tất cả nhân viên',s:`${EMP.filter(e=>!e.away).length} người đang ở văn phòng`}].concat(EMP.map(e=>({id:e.id,n:e.name,s:e.away?'Đang vắng':e.outside?'Đang ra ngoài':e.busy?'Đang bận (làm xong sẽ lên)':isHuman(e)?'Người chơi · sẽ nhận thông báo':'Sẵn sàng',dis:e.away}))).forEach(o=>{
-    const b=document.createElement('button');b.type='button';b.className=(rqPick===o.id?'on ':'')+(o.dis?'dis':'');const a=document.createElement('b');a.textContent=o.n;const sm=document.createElement('small');sm.textContent=o.s;b.append(a,sm);
-    b.onclick=()=>{if(o.dis)return;rqPick=o.id;openReqReport();};box.appendChild(b);});
+  const avail=EMP.filter(e=>!e.away);rqSel.forEach(id=>{if(!avail.some(e=>e.id===id))rqSel.delete(id);});const all=avail.length&&avail.every(e=>rqSel.has(e.id));
+  [{id:'all',n:`${all?'☑️':'⬜'} 👥 Tất cả nhân viên`,s:`${avail.length} người đang ở văn phòng`}].concat(EMP.map(e=>({id:e.id,n:`${rqSel.has(e.id)?'☑️':'⬜'} ${e.name}`,s:e.away?'Đang vắng':e.outside?'Đang ra ngoài':e.busy?'Đang bận (làm xong sẽ lên)':isHuman(e)?'Người chơi · sẽ nhận thông báo':'Sẵn sàng',dis:e.away}))).forEach(o=>{
+    const b=document.createElement('button');b.type='button';b.className=((o.id==='all'?all:rqSel.has(o.id))?'on ':'')+(o.dis?'dis':'');const a=document.createElement('b');a.textContent=o.n;const sm=document.createElement('small');sm.textContent=o.s;b.append(a,sm);
+    b.onclick=()=>{if(o.dis)return;if(o.id==='all'){if(all)rqSel.clear();else avail.forEach(e=>rqSel.add(e.id));}else rqSel.has(o.id)?rqSel.delete(o.id):rqSel.add(o.id);openReqReport();};box.appendChild(b);});
+  const go=$('#rqGo');go.disabled=!rqSel.size;go.textContent=rqSel.size?`Gửi yêu cầu (${rqSel.size}) 📨`:'Chọn nhân viên';
   rqEl.classList.add('show');}
 $('#rqCancel').onclick=()=>rqEl.classList.remove('show');
-$('#rqGo').onclick=()=>{const ids=rqPick==='all'?EMP.filter(e=>!e.away).map(e=>e.id):[rqPick];rqEl.classList.remove('show');if(ids.length)run('reqreport',null,{v:ids.join('.')});};
+$('#rqGo').onclick=()=>{const ids=EMP.filter(e=>!e.away&&rqSel.has(e.id)).map(e=>e.id);if(!ids.length)return;rqEl.classList.remove('show');rqSel.clear();run('reqreport',null,{v:ids.join('.')});};
 function reqReport(v){const ts=String(v||'').split('.').map(byId).filter(c=>c&&!c.manager&&!c.away);if(!ts.length)return false;
   setStatus(`📋 ${MGR.name} yêu cầu ${ts.length===EMP.filter(e=>!e.away).length?'cả team':ts.map(c=>c.name).join(', ')} lên báo cáo.`);
   if(!MGR.away)MGR.say(ts.length>1?'Mọi người lần lượt lên báo cáo cho chị nhé! 📋':`${ts[0].name} lên báo cáo cho chị nhé! 📋`,2.4);
