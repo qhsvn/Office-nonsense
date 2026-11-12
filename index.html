@@ -731,7 +731,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>😴 Ngủ gật trong giờ làm</b> — sếp bắt gặp trừ <b>10 KPI</b>. Muốn nghỉ thì dùng <b>🛏️ Ngủ trưa</b> (không bị trừ).</li>
       <li><b>😜 Khều, trêu đồng nghiệp trong giờ làm</b> — có thể bị trừ <b>3 KPI</b>. Được trêu thoải mái lúc <b>12:00–12:59</b> và <b>sau 17:30</b>.</li>
       <li><b>👨‍💼 Sếp tổng ghé kiểm tra</b> — đang lười trừ <b>8 KPI</b>, bàn bừa bộn trừ <b>5 KPI</b>, văn phòng còn rác (giấy vụn, khay cát Mochi, vũng cà phê) cả team trừ <b>3 KPI</b>.</li>
-      <li><b>📄 KPI tháng bị âm</b> — 2 lần đầu trong tháng nhận thư nhắc nhở, <b>bị âm quá 2 lần thì sa thải</b> và công ty tuyển nhân viên mới (KPI tính lại từ 0).</li>
+      <li><b>📄 KPI tháng bị âm</b> — 2 lần đầu trong tháng nhận thư nhắc nhở, <b>bị âm quá 2 lần</b> thì quản lý xem xét: cho ở lại ngoại lệ hoặc ký đơn thôi việc (công ty tuyển nhân viên mới, KPI tính lại từ 0).</li>
       <li><b>🖥️ Rời bàn phải tắt màn hình</b> — tránh lộ thông tin công việc. Quên tắt quá 15 giây sẽ bị hệ thống bảo mật phát hiện, trừ <b>3 KPI</b> (cả quản lý).</li>
       <li><b>📉 KPI âm</b> thì ngày lương bị trừ tiền theo số điểm âm.</li>
     </ul>
@@ -783,6 +783,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="mgrLetter" class="welcome" role="dialog" aria-modal="true" aria-labelledby="mlTitle"><div class="wcard mcardm">
   <div class="wlogo" id="mlIcon">📄</div><h2 id="mlTitle"></h2><div class="mlbody" id="mlBody"></div>
   <div class="crow"><button type="button" id="mlOk">Đã hiểu 💪</button></div></div></div>
+<div id="fireAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="frTitle"><div class="wcard mcardm">
+  <div class="wlogo">📋</div><h2 id="frTitle"></h2><p class="wsub" id="frSub"></p><div class="bpleft" id="frLeft"></div>
+  <div class="crow"><button type="button" id="frKeep" class="cghost">🙏 Cho ở lại ngoại lệ</button><button type="button" id="frFire">✍️ Ký đơn thôi việc</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -4182,6 +4185,8 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='scroff')return scrOffCmd(c);
   if(n==='scrfine')return scrFine(v);
   if(n==='fire')return runFire(v);
+  if(n==='firereq')return fireReq(v);
+  if(n==='firedec')return fireDec(v);
   if(n==='trip'){if(EV.trip){setStatus('🚌 Cả team đang đi team building rồi!');return false;}if(EV.yep||EV.boss||danceRunning){setStatus('⏳ Đợi xong hoạt động hiện tại rồi đi team building nhé!');return false;}
     if(!v)return false;guard(()=>actTrip(v),[]);return true;}
   if(n==='quiz'){if(!v)return false;return quizStart(v);}
@@ -4459,7 +4464,7 @@ function negHit(c,d,why,before){if(!c||c.manager||d>=0||c.away||c._firing)return
   const o=negStore();const n=(o.n[c.id]||0)+1;o.n[c.id]=n;negSave(o);
   const me=ME.id&&byId(ME.id);
   if(n<=NEG_MAX){if(c.id===ME.id)negLetter(c,n,why,d);else if(me&&me.manager)setStatus(`📄 ${c.name} bị âm KPI tháng (${c.kpiMonth} KPI) — nhận thư nhắc nhở lần ${n}/${NEG_MAX}.`);}
-  else if(CAT_HOST&&!c._firePend){c._firePend=true;setTimeout(()=>{c._firePend=false;run('fire',null,{v:c.id});},2500);}}   // máy chủ phòng quyết định sa thải rồi gửi cho cả phòng
+  else if(CAT_HOST&&!c._firePend){c._firePend=true;setTimeout(()=>{c._firePend=false;run('firereq',null,{v:c.id});},2000);}}   // máy chủ phòng gửi hồ sơ cho quản lý xem xét
 {const o=addKpi;addKpi=(c,d,why)=>{const b=c?(c.kpiMonth||0):0;const r=o(c,d,why);try{negHit(c,d,why,b);}catch(e){}return r;};}
 async function actFire(c){if(!c||c._firing)return;c._firing=true;
   try{
@@ -4487,6 +4492,48 @@ function runFire(v){const c=byId(v);if(!c||c.manager||c._firing)return false;gua
 // hồ sơ KPI của chính mình: số lần bị trừ trong tháng
 {const o=updateKpiBox;updateKpiBox=()=>{o();const c=selected;if(!c||c.manager||c.id!==ME.id)return;const mis=$('#kMis');if(!mis)return;
   const n=negCount(c),r=document.createElement('div');r.className='kmis'+(n?'':' ok');r.textContent=`${n?'⚠️':'✅'} KPI tháng bị âm: ${n} lần · ${NEG_MAX} lần đầu nhận thư nhắc nhở, quá ${NEG_MAX} lần bị sa thải`;mis.appendChild(r);};}
+
+/* ===== quản lý xem xét: cho ở lại ngoại lệ hoặc ký đơn thôi việc ===== */
+const FIRE_WAIT=20000;let FIRE_PEND={},fireTimer=0;
+function fireReq(v){const c=byId(v);if(!c||c.manager||c._firing||FIRE_PEND[c.id])return false;
+  FIRE_PEND[c.id]={at:Date.now()};const me=ME.id&&byId(ME.id),mgrHuman=isHuman(MGR)&&!MGR.away;
+  setStatus(`📋 ${c.name} bị âm KPI quá ${NEG_MAX} lần trong tháng — ${MGR.name} đang xem xét: cho ở lại hay ký đơn thôi việc…`);
+  c.think('😰',2.4);if(!MGR.away)MGR.think('🤔',2.4);
+  if(c.id===ME.id&&!(me&&me.manager)){banner('📋','Quản lý đang xem xét trường hợp của bạn','KPI tháng bị âm quá 2 lần — chờ quyết định cho ở lại hoặc thôi việc…',null,'inc');}
+  if(mgrHuman&&MGR.id===ME.id)openFireAsk(c);
+  if(CAT_HOST){       // máy chủ phòng: quản lý NPC tự quyết, quản lý người chơi quá giờ thì tự ký đơn
+    if(!mgrHuman)setTimeout(()=>{if(FIRE_PEND[c.id])run('firedec',null,{v:c.id+':'+(srand(hashStr(c.id+Date.now()))()<.35?1:0)});},4000);
+    else setTimeout(()=>{if(FIRE_PEND[c.id])run('firedec',null,{v:c.id+':0'});},FIRE_WAIT+4000);}
+  return true;}
+function openFireAsk(c){const end=Date.now()+FIRE_WAIT;$('#frTitle').textContent=`Xem xét trường hợp ${c.name}`;
+  $('#frSub').textContent=`${c.name} để KPI tháng bị âm quá ${NEG_MAX} lần (hiện ${c.kpiMonth||0} KPI) dù đã nhận đủ thư nhắc nhở. Là quản lý, bạn quyết định:`;
+  $('#fireAsk').dataset.id=c.id;$('#fireAsk').classList.add('show');beep(false);clearInterval(fireTimer);
+  const tk=()=>{const l=Math.max(0,Math.ceil((end-Date.now())/1000));$('#frLeft').textContent=`⏳ Còn ${l} giây — không quyết định sẽ tự ký đơn thôi việc`;if(!l||!FIRE_PEND[c.id]){clearInterval(fireTimer);if(!l&&FIRE_PEND[c.id])fireAns(false);}};tk();fireTimer=setInterval(tk,250);}
+function fireAns(keep){const id=$('#fireAsk').dataset.id;$('#fireAsk').classList.remove('show');clearInterval(fireTimer);if(id&&FIRE_PEND[id])run('firedec',null,{v:id+':'+(keep?1:0)});}
+$('#frKeep').onclick=()=>fireAns(true);$('#frFire').onclick=()=>fireAns(false);
+function fireDec(v){const [id,k]=String(v||'').split(':');const c=byId(id);if(!c||!FIRE_PEND[id])return false;delete FIRE_PEND[id];
+  if($('#fireAsk').dataset.id===id){$('#fireAsk').classList.remove('show');clearInterval(fireTimer);}
+  if(c.id===ME.id)bannerOff();
+  if(k==='1'){const o=negStore();o.n[c.id]=NEG_MAX;negSave(o);       // ở lại ngoại lệ: âm thêm lần nữa sẽ bị xem xét lại
+    setStatus(`🙏 ${MGR.name} cho ${c.name} ở lại ngoại lệ lần này. Cố gắng kéo KPI lên nhé!`);
+    if(!MGR.away)MGR.say(`Lần này chị cho ${c.name} ở lại ngoại lệ. Cố gắng lên nha! 🙏`,2.6);
+    wait(1.2).then(()=>{c.gesture&&c.gesture('heart',2);c.say('Em cảm ơn chị nhiều lắm! Em sẽ cố gắng ạ 🥺',2.4);});
+    if(c.id===ME.id){$('#mlIcon').textContent='🙏';$('#mlTitle').textContent='Được ở lại ngoại lệ';
+      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nQuản lý ${MGR.name} đã xem xét và quyết định cho bạn ở lại làm việc ngoại lệ lần này.\n\nHãy kéo KPI tháng lên trên 0 — nếu bị âm thêm lần nữa, quản lý sẽ xem xét lại.\n\n— Quản lý ${MGR.name} 🎖️`;
+      $('#mgrLetter').classList.add('show');beep(true);}
+    return true;}
+  setStatus(`✍️ ${MGR.name} đã ký đơn cho ${c.name} thôi việc.`);if(!MGR.away)MGR.think('✍️',1.8);
+  wait(1.5).then(()=>runFire(c.id));return true;}
+
+/* ===== khóc khi bị sa thải ===== */
+function setCry(c,on){if(!c.tearsG){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:0x6ec6ff,transparent:true,opacity:.85,roughness:.1});const R0=.36;
+    c.tears=[1,-1].map(s=>{const d=new THREE.Mesh(new THREE.SphereGeometry(.018,10,8),m);d.scale.set(.8,1.4,.8);const x=Math.sin(s*.4)*Math.cos(.36)*R0,z=Math.cos(.4)*Math.cos(.36)*R0+.01;d.userData={x,z,y0:-Math.sin(.36)*R0,ph:s>0?0:.5};d.position.set(x,d.userData.y0,z);g.add(d);return d;});
+    c.head.add(g);c.tearsG=g;}
+  c.tearsG.visible=on;c.crying=on;}
+function tearTick(){CHARS.forEach(c=>{if(!c.crying||!c.tears)return;const t=simTime;c.tears.forEach(d=>{const u=d.userData,p=((t*1.1+u.ph)%1);d.position.set(u.x*(1+p*.12),u.y0-p*.16,u.z-p*.02);d.material.opacity=.9*(1-p*.6);});});}
+{const o=scrTick;scrTick=()=>{o();tearTick();};}
+{const o=actFire;actFire=async c=>{if(c&&!c._firing){setCry(c,true);const iv=setInterval(()=>{if(c.root.visible&&!c.outside&&c._firing)c.think(pick(['😭','😢','😅']),1.6);},2600);
+  try{const p=o(c);const chk=setInterval(()=>{if(c.outside){setCry(c,false);clearInterval(chk);clearInterval(iv);}},300);await p;clearInterval(chk);}finally{clearInterval(iv);setCry(c,false);}return;}return o(c);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -4675,7 +4722,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
