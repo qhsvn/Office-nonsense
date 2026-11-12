@@ -450,6 +450,13 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .soopts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .soopts button{font:inherit;font-size:13.5px;font-weight:600;text-align:left;border:2px solid #e3e9f4;background:#f8fbff;color:var(--ink);border-radius:14px;padding:11px 12px;cursor:pointer}
 .soopts button:hover{border-color:#ff8fb8;background:#fff0f6}
+.kpiboard{background:#fff;border-radius:18px;padding:10px 12px;margin-bottom:10px;box-shadow:0 4px 14px rgba(130,153,200,.15)}
+.kbh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.kbh b{font-size:14px}.kbh span{font-size:12px;font-weight:700;color:#3f8ec9;background:#eef6ff;border-radius:999px;padding:3px 9px}
+.kbr{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:12px;cursor:pointer}.kbr:hover{background:#f6f9fe}.kbr.me{background:#fff3f8}
+.kbk{width:24px;text-align:center;font-size:15px;font-weight:700;color:var(--muted)}.kbr .av3{width:32px;height:32px}
+.kbm{flex:1;min-width:0}.kbm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kbm small{display:block;font-size:11px;color:var(--muted)}
+.kbm i{display:block;height:5px;border-radius:99px;background:#edf1f8;margin-top:3px;overflow:hidden}.kbm u{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#8fd9bf,#ffd45e)}.kbm u.neg{background:#ff9b9b}
+.kbv{font-size:13px;font-weight:800;color:#1f9e63;white-space:nowrap}.kbv.neg{color:#e0445a}
 </style>
 </head>
 <body>
@@ -629,6 +636,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 
 
     <section class="tabpane" data-pane="team">
+      <div class="kpiboard" id="kpiBoard"></div>
       <div id="cards"></div>
       <div class="help">💡 Bấm thẳng xuống sàn để nhân vật đang chọn đi bộ tới đó (khu làm việc mở và góc ăn trưa). Chạm vào mèo Mochi để nựng nó, hoặc chọn một người rồi chạm Mochi để người đó ra vuốt ve. Người đang làm dở việc sẽ báo “đang bận”. Không chọn ai thì “Giải lao”, “Đổi diện mạo” áp dụng cho cả nhóm và “Sinh nhật” chọn ngẫu nhiên một người.</div>
     </section>
@@ -3935,11 +3943,12 @@ function quizStart(v){
   setStatus('🎮 Minigame “Đố vui công sở” bắt đầu! Trả lời nhanh và đúng để ghi điểm.');
   players.forEach((c,i)=>wait(i*.2).then(()=>{c.think('🎮',2);}));
   return true;}
-function quizAnswer(cid,qi,o,t){const Q=EV.quiz;if(!Q||!Q.on||!Q.ans[cid]||qi!==Q.cur||(Q.phase!=='ask'&&Q.phase!=='reveal'))return;if(Q.ans[cid][qi])return;
-  const a=Q.ans[cid][qi]={o:clamp(o|0,0,3),t:clamp(t|0,0,QT)};const c=byId(cid);
+function quizAnswer(cid,qi,o,t){const Q=EV.quiz;if(!Q||!Q.on||!Q.ans[cid]||qi!==Q.cur||(Q.phase!=='ask'&&Q.phase!=='reveal'))return;const prev=Q.ans[cid][qi];
+  if(prev&&(Q.phase!=='ask'||Q.npc[cid]||prev.o===(o|0)))return;      // người chơi được đổi đáp án đến khi hết giờ
+  const a=Q.ans[cid][qi]={o:clamp(o|0,0,3),t:clamp(t|0,0,QT)};const c=byId(cid);if(prev){if(c)c.think('🔄',1);renderQuiz();return;}
   if(Q.phase==='reveal'){const q=Q.qs[qi];if(a.o===q.correct){a.g=100+Math.round(50*(1-a.t/QT));Q.score[cid]+=a.g;}}   // tin trả lời đến trễ qua mạng
   else if(c)c.think('✋',1.2);renderQuiz();}
-function myAnswer(o){const Q=EV.quiz;if(!Q||Q.phase!=='ask'||!ME.id||!Q.ans[ME.id]||Q.ans[ME.id][Q.cur])return;
+function myAnswer(o){const Q=EV.quiz;if(!Q||Q.phase!=='ask'||!ME.id||!Q.ans[ME.id])return;const cur=Q.ans[ME.id][Q.cur];if(cur&&cur.o===o)return;
   const t=Date.now()-(Q.start+Q.cur*(QT+QR));const c=byId(ME.id);run('quizans',c,{v:`${Q.cur}:${o}:${Math.max(0,t)}`});}
 function quizScore(Q,qi){const q=Q.qs[qi];Q.players.forEach(c=>{const a=Q.ans[c.id][qi];const c3=c;
     if(a&&a.o===q.correct){const g=100+Math.round(50*(1-a.t/QT));Q.score[c.id]+=g;a.g=g;if(!c3.walking)c3.gesture('cheer',1.4);c3.think('✅',1.6);}
@@ -3971,10 +3980,10 @@ function renderQuiz(light){const Q=EV.quiz;if(!Q)return;const now=Date.now();
     qzH.textContent=`🎮 Câu ${Q.cur+1}/${Q.qs.length}`;qzBar.style.width=Q.phase==='ask'?Math.max(0,100-inq/QT*100)+'%':'0%';
     if(!light){qzQ.textContent=q.q;qzO.textContent='';const my=ME.id&&Q.ans[ME.id]?Q.ans[ME.id][Q.cur]:null;
       q.opts.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.dataset.o=i;b.textContent='ABCD'[i]+'. '+t;
-        if(Q.phase==='reveal'){if(i===q.correct)b.className='ok';else if(my&&my.o===i)b.className='bad';b.disabled=true;}else{if(my){b.disabled=true;if(my.o===i)b.className='pick';}else if(!ME.id||!Q.ans[ME.id])b.disabled=true;}
+        if(Q.phase==='reveal'){if(i===q.correct)b.className='ok';else if(my&&my.o===i)b.className='bad';b.disabled=true;}else{if(my&&my.o===i)b.className='pick';if(!ME.id||!Q.ans[ME.id])b.disabled=true;}
         qzO.appendChild(b);});
       const nA=Q.players.filter(c=>Q.ans[c.id][Q.cur]).length;
-      qzF.textContent=Q.phase==='reveal'?(my?(my.o===q.correct?`✅ Chính xác! +${my.g||0} điểm`:'❌ Sai mất rồi!'):'Đáp án: '+'ABCD'[q.correct]+'. '+q.opts[q.correct]):(my?'⏳ Đã chọn, chờ mọi người…':`${nA}/${Q.players.length} người đã trả lời`);}}
+      qzF.textContent=Q.phase==='reveal'?(my?(my.o===q.correct?`✅ Chính xác! +${my.g||0} điểm`:'❌ Sai mất rồi!'):'Đáp án: '+'ABCD'[q.correct]+'. '+q.opts[q.correct]):(my?`⏳ Đã chọn ${'ABCD'[my.o]} — bấm đáp án khác để đổi trước khi hết giờ`:`${nA}/${Q.players.length} người đã trả lời`);}}
   else if(Q.phase==='end'){qzH.textContent='🏆 Kết quả minigame';qzBar.style.width='0%';const rk=rankOf(Q);
     qzQ.textContent=rk[0]&&Q.score[rk[0].id]>0?`${rk[0].name} vô địch! 🎉`:'Chưa ai ghi điểm 😅';qzO.textContent='';
     rk.slice(0,3).forEach((c,i)=>{const d=document.createElement('div');d.className='qpod p'+i;d.textContent=['🥇','🥈','🥉'][i]+' '+c.name+' · '+Q.score[c.id];qzO.appendChild(d);});
@@ -4196,6 +4205,22 @@ function renderFl(){const S=$('#flSpots'),T=$('#flTypes');S.textContent='';T.tex
   $('#flGo').disabled=!flPick.s;}
 $('#flCancel').onclick=()=>flEl.classList.remove('show');
 $('#flGo').onclick=()=>{const c=byId(flEl.dataset.c);if(!c||!flPick.s)return;flEl.classList.remove('show');run('flowers',c,{v:flPick.s+':'+flPick.t});};
+
+/* ================= 9. Bảng KPI cả team (tab Mọi người) ================= */
+const kbEl=$('#kpiBoard');let kbKey='';
+function renderBoard(){if(!kbEl)return;const emp=EMP.slice().sort((a,b)=>(b.kpi||0)-(a.kpi||0));
+  const key=emp.map(c=>c.id+(c.kpi||0)+c.lv+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
+  const tot=emp.reduce((s,c)=>s+(c.kpi||0),0);kbEl.textContent='';
+  const h=document.createElement('div');h.className='kbh';const t=document.createElement('b');t.textContent='🏆 Bảng KPI cả team';const sm=document.createElement('span');sm.textContent=`Tổng: ${tot} KPI`;h.append(t,sm);kbEl.appendChild(h);
+  const max=Math.max(1,...emp.map(c=>Math.abs(c.kpi||0)));
+  emp.forEach((c,i)=>{const r=document.createElement('div');r.className='kbr'+(c.id===ME.id?' me':'');
+    const rk=document.createElement('span');rk.className='kbk';rk.textContent=['🥇','🥈','🥉'][i]||String(i+1);
+    const av=document.createElement('span');av.className='av3';setAvatar(av,c);
+    const mid=document.createElement('div');mid.className='kbm';const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');const lv=document.createElement('small');lv.textContent=LEVELS[c.lv].e+' '+LEVELS[c.lv].n+(c.away?' · vắng':'');
+    const bar=document.createElement('i');const fill=document.createElement('u');fill.style.width=Math.max(4,Math.abs(c.kpi||0)/max*100)+'%';if((c.kpi||0)<0)fill.className='neg';bar.appendChild(fill);mid.append(nm,lv,bar);
+    const v=document.createElement('span');v.className='kbv'+((c.kpi||0)<0?' neg':'');v.textContent=(c.kpi||0)+' KPI';
+    r.append(rk,av,mid,v);r.onclick=()=>select(c);kbEl.appendChild(r);});}
+{const o=refreshCards;refreshCards=()=>{o();try{renderBoard();}catch(e){}};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
