@@ -3235,7 +3235,7 @@ async function actMeetOnline(o){
       if(k%2===0){const line=GL[(k/2)%GL.length];CALL.talk=simTime+3;$('#callCap').textContent='💬 '+CALL.g.n.split(' · ')[0]+': '+line;setStatus(`💻 ${CALL.g.n}: “${line}”`);for(let w=3.2;w>0&&!o.ended;w-=.4)await wait(.4);}
       else if(here.length){const sp=here[Math.floor(k/2)%here.length];await sp.say(sp.manager?pick(['Cảm ơn anh/chị, bên em ghi nhận ạ 📝','Team em sẽ hoàn thành đúng hạn ạ!']):`Em xin đề xuất: ${ideas[k%ideas.length]}.`,3);}
       k++;for(let w=rand(2,4);w>0&&!o.ended;w-=.5)await wait(.5);}
-    $('#callCap').textContent='👋 Cuộc gọi đã kết thúc';setStatus(o.ended?`⏹ ${o.byName||'Người mời'} kết thúc họp online “${o.topic}” sớm.`:`✅ ${fmt(nowMin())} — Kết thúc họp online “${o.topic}”.`);
+    $('#callCap').textContent='👋 Cuộc gọi đã kết thúc';{const W=o.who&&o.who.length&&go.length?' với '+go.map(c=>c.name).join(', '):'';setStatus(o.ended?`⏹ ${o.byName||'Người mời'} kết thúc họp online “${o.topic}”${W} sớm.`:`✅ ${fmt(nowMin())} — Kết thúc họp online “${o.topic}”${W}.`);}
     go.forEach(c=>{callScreens([c],false);c.think('👋',1.2);});
     await wait(1);go.forEach(c=>{end(c,'working');kpiEvent(c,'meeting');});
   }finally{CALL.on=false;callScreens(go,false);setTimeout(()=>$('#callWin').classList.remove('show'),1500);meetingOn=false;o.state='done';updateMeetInfo();}
@@ -3255,11 +3255,11 @@ async function actMeetSched(o){
     while(nowMin()<o.end&&!o.ended){addLate();const here=go.filter(c=>c.seat===c.meet);
       if(here.length){const sp=here[k%here.length];here.forEach(x=>x.lookAt=x===sp?null:sp);
         const idea=ideas[k%ideas.length];
-        await sp.say(sp.manager?pick([`Họp “${o.topic}” nhé, mọi người cho ý kiến!`,'Ý này hay, ghi lại nha 📝','Tiến độ tuần này ổn chứ cả nhà?']):`Em đề xuất: ${idea}.`,3);
+        await sp.say(sp.manager?pick([`Họp “${o.topic}” nhé, ${o.who&&o.who.length?here.filter(x=>x!==sp).map(x=>x.name).join(', ')||'mọi người':'mọi người'} cho ý kiến!`,'Ý này hay, ghi lại nha 📝','Tiến độ tuần này ổn chứ cả nhà?']):`Em đề xuất: ${idea}.`,3);
         if(!sp.manager&&board.notes.length<6){board.notes.push({who:sp.name,text:idea,color:NOTE_COLORS[sp.id]||'#ffffff',rot:rand(-.05,.05)});drawBoard();}
         k++;}
       for(let w=rand(3,6);w>0&&!o.ended;w-=.5)await wait(.5);}
-    setStatus(o.ended?`⏹ ${o.byName||'Người mời'} kết thúc họp “${o.topic}” sớm — cả nhóm về chỗ làm việc.`:`✅ ${fmt(nowMin())} — Kết thúc họp “${o.topic}”. Mọi người về chỗ làm việc.`);
+    {const W=o.who&&o.who.length&&go.length?go.map(c=>c.name).join(', '):'';setStatus(o.ended?`⏹ ${o.byName||'Người mời'} kết thúc họp “${o.topic}” sớm — ${W||'cả nhóm'} về chỗ làm việc.`:`✅ ${fmt(nowMin())} — Kết thúc họp “${o.topic}”. ${W||'Mọi người'} về chỗ làm việc.`);}
     await Promise.all(go.map(async c=>{c.lookAt=null;setAct(c,'🚶 Quay về chỗ');await c.goSit(c.home);end(c,'working');kpiEvent(c,'meeting');}));
   }finally{meetingOn=false;o.state='done';updateMeetInfo();}
 }
