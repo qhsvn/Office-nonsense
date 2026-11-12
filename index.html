@@ -3141,7 +3141,7 @@ $('#maLater').onclick=closeMeetAsk;
 const meetDay=o=>o.day===dayKey()?'hôm nay':`ngày ${+o.day.slice(6)}/${+o.day.slice(4,6)}`;
 const meetMine=o=>o.by==='me-local'||(meetUid&&o.by===meetUid);
 const meetLive=o=>o.day===dayKey()&&nowMin()>=o.start&&nowMin()<o.end&&!o.ended;
-const meetNames=o=>o&&o.who&&o.who.length?o.who.map(i=>{const x=byId(i);return x?x.name:i;}).join(', '):'';
+var meetNames=window.meetNames=o=>o&&o.who&&o.who.length?o.who.map(i=>{const x=byId(i);return x?x.name:i;}).join(', '):'';
 function meetEnd(o){if(!o||o.ended)return;o.ended=true;const WN=meetNames(o);
   if(window.OFFICE&&OFFICE.sendChat)OFFICE.sendChat(`⏹ Kết thúc cuộc họp “${o.topic}” — cảm ơn ${WN||'mọi người'}! [mtge:${o.id}]`);
   setStatus(`⏹ Bạn đã kết thúc cuộc họp “${o.topic}”, ${WN||'cả nhóm'} ra về chỗ.`);updateMeetInfo();}
