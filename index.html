@@ -491,6 +491,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .lvdates{display:flex;gap:8px;margin-top:6px}.lvdates label{flex:1;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--muted);text-align:left}
 .lvdates input{font:inherit;font-size:14px;font-weight:600;color:var(--ink);border:2px solid #e3e9f4;background:#f8fbff;border-radius:12px;padding:7px 8px}
 .hrpop .prlv{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
+.hrpop.argue .prtop{background:linear-gradient(135deg,#ff5f6d,#ffc371)}.hrpop.argue .prin{box-shadow:0 18px 50px rgba(240,90,80,.4),0 0 0 4px #ffc7b0}
 </style>
 </head>
 <body>
@@ -4544,7 +4545,7 @@ function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;const 
   if(!c._firePend&&!FIRE_PEND[c.id]){c._firePend=true;setTimeout(()=>{c._firePend=false;run('firereq',null,{v:c.id});},2000);}}   // gửi hồ sơ cho quản lý xem xét
 {const o=addKpi;addKpi=(c,d,why)=>{const r=o(c,d,why);try{negHit(c,d,why);}catch(e){}return r;};}
 const hrEl=$('#hrPop');let hrT=0;
-function hrPop(kind,c,top,lv,sub){hrEl.className='promopop hrpop '+kind;const IC={warn:['📄','😰'],ok:['✅','🥳'],no:['❌','😢']}[kind]||['📦','😭'];hrEl.querySelector('.hrbox').textContent=IC[0];hrEl.querySelector('.hrtear').textContent=IC[1];setAvatar($('#hrAv'),c);$('#hrTop').textContent=top;$('#hrName').textContent=c.name;$('#hrLv').textContent=lv;$('#hrSub').textContent=sub;
+function hrPop(kind,c,top,lv,sub){hrEl.className='promopop hrpop '+kind;const IC={warn:['📄','😰'],ok:['✅','🥳'],no:['❌','😢'],argue:['😤','💢']}[kind]||['📦','😭'];hrEl.querySelector('.hrbox').textContent=IC[0];hrEl.querySelector('.hrtear').textContent=IC[1];setAvatar($('#hrAv'),c);$('#hrTop').textContent=top;$('#hrName').textContent=c.name;$('#hrLv').textContent=lv;$('#hrSub').textContent=sub;
   void hrEl.offsetWidth;hrEl.classList.add('show');stage.classList.add('pop-on');beep(kind==='new');clearTimeout(hrT);hrT=setTimeout(hrHide,8000);}
 function hrHide(){hrEl.classList.remove('show');if(!prEl.classList.contains('show'))stage.classList.remove('pop-on');}
 hrEl.onclick=hrHide;
@@ -4558,7 +4559,7 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
   try{
     while(c.busy&&!c.away)await wait(1);
     begin(c,'📦 Ôm thùng đồ nghỉ việc');holdBox(c,true);
-    const FW=c._fireWhy;hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',FW?FW:`KPI tháng ${c.kpiMonth||0}`,`${FW?mgrLabel()+' cho nghỉ việc ngay':mgrLabel()+' đã duyệt'}. Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”`);
+    const FW=c._fireWhy;hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',FW?FW:`KPI tháng ${c.kpiMonth||0}`,`${FW?((ME.id&&byId(ME.id)||{}).manager?'Hệ thống đã mặc định đuổi việc nhân viên này':mgrLabel()+' cho nghỉ việc ngay'):mgrLabel()+' đã duyệt'}. Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”`);
     setStatus(FW?`📦 ${c.name} bị sa thải vì ${FW.toLowerCase()} — phòng nhân sự đang tuyển người mới…`:`📦 ${c.name} bị sa thải (KPI tháng ${c.kpiMonth||0}, đã nhận 2 thư nhắc nhở). ${mgrLabel()} đã ký đơn — phòng nhân sự đang tuyển người mới…`);
     if(wasMe){$('#mlIcon').textContent='📦';$('#mlTitle').textContent='Quyết định thôi việc';
       $('#mlBody').textContent=FW?`Kính gửi ${c.name},\n\nBạn đã ${FW.toLowerCase()} dù đã bị cảnh cáo. ${mgrLabel()} quyết định cho bạn nghỉ việc ngay.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi lại từ đầu nhé! 💪`:`Kính gửi ${c.name},\n\nKPI tháng của bạn xuống ${c.kpiMonth||0} KPI dù đã nhận đủ 2 thư nhắc nhở. ${mgrLabel()} đã ký quyết định chấm dứt hợp đồng.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi tiếp nhé! 💪`;
@@ -4836,9 +4837,10 @@ function runArgue(c){if(!c)return false;if(c.manager){setStatus('🎖️ Quản 
   if(c.away||c.busy){setStatus(`⏳ ${c.name} đang bận.`);return false;}
   const o=argStore(),n=(o.n[c.id]||0)+1;o.n[c.id]=n;argSave(o);
   setStatus(`😤 ${c.name} cãi sếp lần ${n} trong hôm nay!${n===2?' Thêm lần nữa sẽ bị trừ KPI và cảnh cáo.':''}`);
-  guard(async()=>{await actArgue(c,n);
+  guard(async()=>{await actArgue(c,n);const meM=(ME.id&&byId(ME.id)||{}).manager;
+    if(meM&&n<3)hrPop('argue',c,`😤 ${c.name.toUpperCase()} CÃI SẾP`,`Lần ${n}/3 hôm nay`,n===2?'Thêm 1 lần nữa sẽ bị trừ 20 KPI và cảnh cáo đuổi việc.':'Nhân viên đang bất mãn — quá 3 lần/ngày sẽ bị đuổi việc.');
     if(n===3){addKpi(c,-20,'Cãi sếp lần 3 trong ngày');
-      hrPop('warn',c,'⚠️ CẢNH CÁO ĐUỔI VIỆC','Cãi sếp 3 lần hôm nay','Bị trừ 20 KPI. Cãi sếp thêm lần nữa trong hôm nay sẽ bị sa thải ngay!');
+      hrPop('warn',c,'⚠️ CẢNH CÁO ĐUỔI VIỆC','Cãi sếp 3/3 lần hôm nay','Bị trừ 20 KPI. Cãi sếp thêm lần nữa trong hôm nay sẽ bị sa thải ngay!');
       if(c.id===ME.id){$('#mlIcon').textContent='⚠️';$('#mlTitle').textContent='Cảnh cáo đuổi việc';$('#mlBody').textContent=`Kính gửi ${c.name},\n\nHôm nay bạn đã cãi sếp 3 lần và bị trừ 20 KPI.\n\nĐây là cảnh cáo cuối cùng: nếu tiếp tục cãi sếp trong hôm nay, bạn sẽ bị sa thải ngay lập tức.\n\n— ${mgrLabel()} 🎖️`;$('#mgrLetter').classList.add('show');beep(false);}}
     if(n>=4){addKpi(c,-20,'Cãi sếp quá 3 lần trong ngày');o.n[c.id]=0;argSave(o);setStatus(`📦 ${c.name} cãi sếp quá 3 lần hôm nay — bị sa thải ngay!`);end(c,'standing');await wait(.8);c._fireWhy='Cãi sếp quá 3 lần hôm nay';runFire(c.id);}
     else{setAct(c,'🚶 Quay về chỗ');await c.goSit(c.home);end(c,'working');}},[c]);
