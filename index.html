@@ -4185,6 +4185,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='scroff')return scrOffCmd(c);
   if(n==='scrfine')return scrFine(v);
   if(n==='fire')return runFire(v);
+  if(n==='negwarn')return negWarn(v);
   if(n==='firereq')return fireReq(v);
   if(n==='firedec')return fireDec(v);
   if(n==='trip'){if(EV.trip){setStatus('🚌 Cả team đang đi team building rồi!');return false;}if(EV.yep||EV.boss||danceRunning){setStatus('⏳ Đợi xong hoạt động hiện tại rồi đi team building nhé!');return false;}
@@ -4463,9 +4464,9 @@ function negLetter(c,n,why,d){const mon=new Date().getMonth()+1,mg=MGR?MGR.name:
   $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} KPI của bạn đã bị âm ${n} lần (hiện còn ${c.kpiMonth} KPI, lần gần nhất do: ${why||'vi phạm'} ${d} KPI).\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu KPI tháng bị âm thêm lần nữa, công ty sẽ chấm dứt hợp đồng và tuyển nhân viên mới thay thế.':'Mong bạn chú ý hơn: tắt màn hình khi rời bàn, giữ bàn gọn gàng, không lười khi sếp tổng ghé. Hãy kéo KPI lên lại trên 0 — bị âm quá '+NEG_MAX+' lần trong tháng sẽ bị sa thải.'}\n\n— Quản lý ${mg} 🎖️`;
   setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(false);},900);}
 function negHit(c,d,why,before){if(!c||c.manager||d>=0||c.away||c._firing)return;if(!(before>=0&&(c.kpiMonth||0)<0))return;   // chỉ tính khi KPI tháng chuyển từ không âm sang âm
+  if(!CAT_HOST)return;                         // máy chủ phòng đếm và gửi thư cho cả phòng (mọi máy giống nhau)
   const o=negStore();const n=(o.n[c.id]||0)+1;o.n[c.id]=n;negSave(o);
-  const me=ME.id&&byId(ME.id);
-  if(n<=NEG_MAX){if(c.id===ME.id)negLetter(c,n,why,d);else if(me&&me.manager)setStatus(`📄 ${c.name} bị âm KPI tháng (${c.kpiMonth} KPI) — nhận thư nhắc nhở lần ${n}/${NEG_MAX}.`);}
+  if(n<=NEG_MAX){run('negwarn',null,{v:[c.id,n,d,String(why||'').replace(/[|]/g,' ').slice(0,60),c.kpiMonth||0].join('|')});}
   else if(CAT_HOST&&!c._firePend){c._firePend=true;setTimeout(()=>{c._firePend=false;run('firereq',null,{v:c.id});},2000);}}   // máy chủ phòng gửi hồ sơ cho quản lý xem xét
 {const o=addKpi;addKpi=(c,d,why)=>{const b=c?(c.kpiMonth||0):0;const r=o(c,d,why);try{negHit(c,d,why,b);}catch(e){}return r;};}
 async function actFire(c){if(!c||c._firing)return;c._firing=true;
@@ -4536,6 +4537,46 @@ function tearTick(){CHARS.forEach(c=>{if(!c.crying||!c.tears)return;const t=simT
 {const o=scrTick;scrTick=()=>{o();tearTick();};}
 {const o=actFire;actFire=async c=>{if(c&&!c._firing){setCry(c,true);const iv=setInterval(()=>{if(c.root.visible&&!c.outside&&c._firing)c.think(pick(['😭','😢','😅']),1.6);},2600);
   try{const p=o(c);const chk=setInterval(()=>{if(c.outside){setCry(c,false);clearInterval(chk);clearInterval(iv);}},300);await p;clearInterval(chk);}finally{clearInterval(iv);setCry(c,false);}return;}return o(c);};}
+
+function negWarn(v){const [id,nS,dS,why,kmS]=String(v||'').split('|');const c=byId(id);if(!c)return false;const n=+nS||1;
+  if(!CAT_HOST){const o=negStore();o.n[id]=Math.max(o.n[id]||0,n);negSave(o);}
+  const me=ME.id&&byId(ME.id);c.think('📄',2);
+  if(c.id===ME.id)negLetter(c,n,why,+dS||0);
+  else if(me&&me.manager)setStatus(`📄 ${c.name} bị âm KPI tháng (${kmS} KPI) — nhận thư nhắc nhở lần ${n}/${NEG_MAX}.`);
+  return true;}
+
+/* ================= đồng bộ trạng thái phòng: máy chủ phòng gửi ảnh chụp NPC + KPI, người chơi gửi trạng thái nhân vật của mình ================= */
+const r2=v=>Math.round(v*100)/100;
+function charState(c){return[r2(c.root.position.x),r2(c.root.position.z),c.busy?1:0,c.away?1:0,String(c.activity||'').slice(0,40),c.atHome()?1:0,c.outside?1:0];}
+function roomState(){if(!CAT_HOST)return null;const o=negStore();
+  return{t:Date.now(),c:CHARS.map(c=>[c.id,c.kpi||0,c.kpiMonth||0,c.lv||0,o.n[c.id]||0,isHuman(c)?0:JSON.stringify(c.look()).slice(0,400)].concat(isHuman(c)?[]:charState(c)))};}
+function myState(){const c=ME.id&&byId(ME.id);return c?charState(c):null;}
+function mirror(c,s){   // nhân vật trên máy này đứng yên mà máy gốc đang làm việc khác: đi theo cho giống
+  const [x,z,busy,away,act,home,out]=s;c._st=s;c._stAt=Date.now();c._stBusyN=busy?(c._stBusyN||0)+1:0;
+  if(c._firing||c.leavingNow||c.coming||c._mirror)return;
+  if(away&&!c.away&&!c.busy){REMOTE_EXEC=true;try{run('gohome',c);}catch(e){}finally{REMOTE_EXEC=false;}return;}
+  if(!away&&c.away&&!c.busy){REMOTE_EXEC=true;try{run('comein',c);}catch(e){}finally{REMOTE_EXEC=false;}return;}
+  if(away||c.away||out||c.outside||c.busy||c.returning)return;     // đang chạy lệnh đồng bộ: để lệnh tự xong
+  if(busy&&act&&!RET_RE.test(act)){if(c._stBusyN<2)return;          // chờ thêm 1 nhịp để lệnh đồng bộ kịp tới trước
+    const tok=c._mirTok=(c._mirTok||0)+1;c._mirror=true;c.activity=act;refreshCards();
+    (async()=>{try{await c.walkTo(x,z);const t0=Date.now();
+      while(c._mirTok===tok&&c._mirror&&c._st&&c._st[2]&&Date.now()-t0<90000&&Date.now()-c._stAt<12000){if(c._st[4]&&c.activity!==c._st[4]){c.activity=c._st[4];refreshCards();}await wait(1);}
+      if(c._mirTok===tok&&c._mirror&&!c.busy){c._mirror=false;c.activity='🚶 Quay về chỗ';refreshCards();await c.goSit(c.home);if(c._mirTok===tok&&!c.busy){c.activity='💻 Đang làm việc';refreshCards();}}}
+      catch(e){}finally{if(c._mirTok===tok)c._mirror=false;}})();return;}
+  if(home&&!c.atHome()){c.goSit(c.home).catch(()=>{});return;}
+  if(!home&&Math.hypot(c.root.position.x-x,c.root.position.z-z)>1.5)c.walkTo(x,z).catch(()=>{});}
+let ST_SEEN=0;
+function peerState(st){if(CAT_HOST||!st||!Array.isArray(st.c)||st.t===ST_SEEN)return;ST_SEEN=st.t;let ch=false;const o=negStore();
+  st.c.forEach(e=>{const c=byId(e[0]);if(!c)return;const [,kpi,km,lv,ng,lk]=e;
+    if(c.kpi!==kpi||c.kpiMonth!==km||c.lv!==lv){c.kpi=kpi;c.kpiMonth=km;if(c.lv!==lv){c.lv=lv;c.certs=lv;}ch=true;}
+    if(o.n[c.id]!==ng){o.n[c.id]=ng;}
+    if(lk&&!isHuman(c)&&c._stLook!==lk){c._stLook=lk;try{c.applyLook(JSON.parse(lk));ch=true;}catch(e){}}
+    if(!isHuman(c)&&e.length>6)mirror(c,e.slice(6));});
+  negSave(o);if(ch){try{kpiSave();}catch(e){}refreshCards();}}
+function peerPlayer(id,s){const c=byId(id);if(!c||c.id===ME.id||!Array.isArray(s)||!isHuman(c))return;mirror(c,s);}
+{const o=begin;begin=(c,a)=>{if(c&&c._mirror){c._mirror=false;c._mirTok=(c._mirTok||0)+1;}o(c,a);};}
+setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.myState=myState;OFFICE.peerState=peerState;OFFICE.peerPlayer=peerPlayer;}},0);
+setInterval(()=>{if(window.OFFICE&&OFFICE.actPush&&(CAT_HOST||ME.id))OFFICE.actPush();},3000);
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -4724,7 +4765,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
@@ -5377,6 +5418,7 @@ window.OFFICE={hooks:[],say:(id,text)=>{const c=CHARS.find(x=>x.id===id);if(!c||
     }
     onlineEl.textContent=byKey.size?('🟢 '+byKey.size+' đang online'):'';
     if(window.OFFICE&&OFFICE.catSync){const keys=[...byKey.keys()].map(String).sort();let hostP=null;for(const [k,p] of byKey)if(String(k)===keys[0])hostP=p;OFFICE.catSync(!hostP||isMine(hostP),hostP&&!isMine(hostP)&&hostP.presence?hostP.presence.cat:null);}
+    if(window.OFFICE&&OFFICE.peerState){const ks=[...byKey.keys()].map(String).sort();for(const [k,p] of byKey){if(isMine(p)||!p.presence)continue;try{if(String(k)===ks[0]&&p.presence.st)OFFICE.peerState(p.presence.st);if(p.presence.ps&&p.presence.ch)OFFICE.peerPlayer(p.presence.ch,p.presence.ps);}catch(e){}}}
     if(window.OFFICE&&OFFICE.peerAct){for(const [k,p] of byKey){if(!isMine(p)&&p.presence&&p.presence.act)OFFICE.peerAct(String(k),p.presence.act);}}
     if(window.OFFICE&&OFFICE.peerSel){const L=[];for(const [k,p] of byKey){if(!isMine(p)&&p.presence&&typeof p.presence.sel==='string'&&p.presence.sel)L.push({key:String(k),name:String(p.presence.name||'Khách').slice(0,24),sel:p.presence.sel});}OFFICE.peerSel(L);}
     if(window.OFFICE&&OFFICE.setPeers){const claims=[];for(const [k,p] of byKey){if(isMine(p)||!p.presence)continue;if(typeof p.presence.ch==='string'&&typeof p.presence.name==='string')claims.push({ch:p.presence.ch,name:p.presence.name,look:p.presence.look,at:p.presence.at,key:String(k)});}OFFICE.setPeers(claims,String(myKey()));}
@@ -5413,9 +5455,9 @@ window.OFFICE={hooks:[],say:(id,text)=>{const c=CHARS.find(x=>x.id===id);if(!c||
     NET.msgs.push(d);if(NET.msgs.length>100)NET.msgs.shift();
     announce([d]);render(NET.msgs);
   }
-  function netRenderPeers(){const arr=[];NET.peers.forEach((v,k)=>arr.push({kind:'viewer',peer:k,by:k,isMe:k===NET.cid,presence:{name:v.name,ch:v.ch,look:v.look,at:v.at,mu:v.mu,act:v.act,cat:v.cat,sel:v.sel}}));renderPeers(arr);}
+  function netRenderPeers(){const arr=[];NET.peers.forEach((v,k)=>arr.push({kind:'viewer',peer:k,by:k,isMe:k===NET.cid,presence:{name:v.name,ch:v.ch,look:v.look,at:v.at,mu:v.mu,act:v.act,cat:v.cat,sel:v.sel,st:v.st,ps:v.ps}}));renderPeers(arr);}
   function netPresence(){const c=NET.client;if(!c||!c.connected)return;const tp=netTopics();NET.name=myName()||'Khách';
-    if(!myChar()){c.publish(tp.pres,JSON.stringify({name:NET.name,mu:window.roomMusic&&roomMusic()||undefined,sel:OFFICE.mySel&&OFFICE.mySel()||undefined}),{retain:true});NET.peers.set(NET.cid,{name:NET.name,ch:''});netRenderPeers();return;}c.publish(tp.pres,JSON.stringify({name:NET.name,ch:myChar(),look:OFFICE.myLook(),at:OFFICE.myAt(),mu:window.roomMusic&&roomMusic()||undefined,act:OFFICE.myAct&&OFFICE.myAct()||undefined,sel:OFFICE.mySel&&OFFICE.mySel()||undefined,cat:OFFICE.catMsg&&OFFICE.catMsg()||undefined}),{retain:true});NET.peers.set(NET.cid,{name:NET.name,ch:myChar()});netRenderPeers();}
+    if(!myChar()){c.publish(tp.pres,JSON.stringify({name:NET.name,mu:window.roomMusic&&roomMusic()||undefined,sel:OFFICE.mySel&&OFFICE.mySel()||undefined,st:OFFICE.roomState&&OFFICE.roomState()||undefined}),{retain:true});NET.peers.set(NET.cid,{name:NET.name,ch:''});netRenderPeers();return;}c.publish(tp.pres,JSON.stringify({name:NET.name,ch:myChar(),look:OFFICE.myLook(),at:OFFICE.myAt(),mu:window.roomMusic&&roomMusic()||undefined,act:OFFICE.myAct&&OFFICE.myAct()||undefined,sel:OFFICE.mySel&&OFFICE.mySel()||undefined,cat:OFFICE.catMsg&&OFFICE.catMsg()||undefined,st:OFFICE.roomState&&OFFICE.roomState()||undefined,ps:OFFICE.myState&&OFFICE.myState()||undefined}),{retain:true});NET.peers.set(NET.cid,{name:NET.name,ch:myChar()});netRenderPeers();}
   function makeNetCol(){return{add:async d=>{
     if(!NET.client||!NET.client.connected){if(NET.offline){const mid='local-'+Date.now()+'-'+rnd(3);netIngest(Object.assign({},d,{mid,name:myName()||NET.name}));return{id:mid};}throw{code:'unavailable'};}
     const mid=NET.cid+'-'+Date.now()+'-'+rnd(3),m=Object.assign({},d,{mid,name:myName()||NET.name});
@@ -5434,7 +5476,7 @@ window.OFFICE={hooks:[],say:(id,text)=>{const c=CHARS.find(x=>x.id===id);if(!c||
     const onMsg=(topic,payload)=>{if(gen!==NET.gen)return;const str=payload.toString();
       if(topic===tp.chat){let m;try{m=JSON.parse(str);}catch(e){return;}netIngest(m);}
       else if(topic.indexOf('/p/')>0){const k=topic.split('/p/')[1];if(!k)return;
-        if(!str)NET.peers.delete(k);else{try{const o=JSON.parse(str);NET.peers.set(k,{name:String(o.name||'Khách').slice(0,24),ch:typeof o.ch==='string'?o.ch.slice(0,12):'',look:o.look&&typeof o.look==='object'?o.look:null,at:typeof o.at==='number'?o.at:0,mu:o.mu&&typeof o.mu==='object'?o.mu:null,act:o.act&&typeof o.act==='object'?o.act:null,cat:o.cat&&typeof o.cat==='object'?o.cat:null,sel:typeof o.sel==='string'?o.sel.slice(0,40):''});}catch(e){}}netRenderPeers();}};
+        if(!str)NET.peers.delete(k);else{try{const o=JSON.parse(str);NET.peers.set(k,{name:String(o.name||'Khách').slice(0,24),ch:typeof o.ch==='string'?o.ch.slice(0,12):'',look:o.look&&typeof o.look==='object'?o.look:null,at:typeof o.at==='number'?o.at:0,mu:o.mu&&typeof o.mu==='object'?o.mu:null,act:o.act&&typeof o.act==='object'?o.act:null,cat:o.cat&&typeof o.cat==='object'?o.cat:null,sel:typeof o.sel==='string'?o.sel.slice(0,40):'',st:o.st&&typeof o.st==='object'?o.st:null,ps:Array.isArray(o.ps)?o.ps:null});}catch(e){}}netRenderPeers();}};
     BROKERS.forEach(url=>{let c=null;try{c=mqtt.connect(url,{clientId:'lin-'+NET.cid+'-'+rnd(4),clean:true,reconnectPeriod:4000,connectTimeout:8000,will:{topic:tp.pres,payload:'',retain:true,qos:0}});}catch(e){c=null;}
       if(!c)return;cs.push(c);
       c.on('connect',()=>{if(gen!==NET.gen)return;c.subscribe([tp.chat,tp.presAll]);const first=!ok;ok=true;NET.fails=0;clearTimeout(NET.retry);
@@ -5489,7 +5531,7 @@ window.OFFICE={hooks:[],say:(id,text)=>{const c=CHARS.find(x=>x.id===id);if(!c||
     else setComposer(true);
     let unsub=null,sub=null;
     const R=()=>sub||room;
-    const push=async()=>{if(!room)return;const nm=myName()||(me&&me.name)||('Khách '+short(myId()));const mu=window.roomMusic&&roomMusic();const pr=myChar()?{name:nm,ch:myChar(),look:OFFICE.myLook(),at:OFFICE.myAt(),tab:TAB_ID}:{name:nm,tab:TAB_ID};if(mu)pr.mu=mu;{const sl=OFFICE.mySel&&OFFICE.mySel();if(sl)pr.sel=sl;}{const ac=OFFICE.myAct&&OFFICE.myAct();if(ac)pr.act=ac;const cm=OFFICE.catMsg&&OFFICE.catMsg();if(cm)pr.cat=cm;}try{await R().presence(pr);}catch(e){}};
+    const push=async()=>{if(!room)return;const nm=myName()||(me&&me.name)||('Khách '+short(myId()));const mu=window.roomMusic&&roomMusic();const pr=myChar()?{name:nm,ch:myChar(),look:OFFICE.myLook(),at:OFFICE.myAt(),tab:TAB_ID}:{name:nm,tab:TAB_ID};if(mu)pr.mu=mu;{const sl=OFFICE.mySel&&OFFICE.mySel();if(sl)pr.sel=sl;}{const ac=OFFICE.myAct&&OFFICE.myAct();if(ac)pr.act=ac;const st0=OFFICE.roomState&&OFFICE.roomState();if(st0)pr.st=st0;const ps0=OFFICE.myState&&OFFICE.myState();if(ps0)pr.ps=ps0;const cm=OFFICE.catMsg&&OFFICE.catMsg();if(cm)pr.cat=cm;}try{await R().presence(pr);}catch(e){}};
     if(window.OFFICE){OFFICE.musicPush=()=>{push();};OFFICE.actPush=()=>{push();};}
     if(window.OFFICE&&OFFICE.idHooks)OFFICE.idHooks.push(()=>{push();});
     joinRoom=async code=>{
