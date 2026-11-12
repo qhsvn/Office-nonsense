@@ -2,7 +2,7 @@
 
 Văn phòng 3D phong cách pastel, nhân vật chibi, chơi ngay trên trình duyệt (máy tính và điện thoại).
 
-**▶️ Chơi ngay:** https://qhsvn.github.io/office-nonsense/
+**▶️ Chơi ngay:** https://qhsvn.github.io/Office-nonsense/
 
 ## Có gì trong văn phòng
 - 5 nhân vật chibi (1 quản lý, 4 nhân viên): chọn vai, đặt tên, tự đổi tóc, áo, váy, phụ kiện.
