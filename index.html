@@ -4173,7 +4173,7 @@ function reqTick(){if(!REPQ.length||simTime<REPQ_AT)return;REPQ_AT=simTime+1;con
 const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
 {const o=run;run=evRun=(n,c,a)=>{
   const v=a&&typeof a.v==='string'?a.v:'';
-  if((n==='siesta'||n==='siestaall')&&!REMOTE_EXEC&&!siestaOK()){if(!AUTO_EXEC)setStatus('🔒 Chỉ ngủ trưa được khi giờ thật đang là ban ngày và đang chọn ☀️ Ban ngày.');return false;}
+  if((n==='siesta'||n==='siestaall'||n==='lunch')&&!REMOTE_EXEC&&!IN_GRPGO&&!siestaOK()){if(!AUTO_EXEC)setStatus(`🔒 ${n==='lunch'?'Ăn trưa':'Ngủ trưa'} chỉ mở vào ban ngày: theo giờ thật thì phải là ban ngày, không theo giờ thật thì chọn ☀️ Ban ngày.`);return false;}
   if(n==='grpask')return v?grpAsk(v):false;
   if(n==='grpans')return grpAns(c,v);
   if(n==='grpgo')return grpGo(v);
@@ -4625,11 +4625,12 @@ function thankMgr(c){if(!c||c.away)return false;if(c.busy){setTimeout(()=>thankM
 {const ok=$('#mlOk'),o=ok.onclick;ok.onclick=e=>{if(ok.dataset.thank==='1'){ok.dataset.thank='';ok.textContent='Đã hiểu 💪';$('#mgrLetter').classList.remove('show');const me=ME.id&&byId(ME.id);if(me)run('thankmgr',me);return;}if(o)o.call(ok,e);};}
 
 /* ===== ngủ trưa: chỉ khi giờ thật là ban ngày và đang chọn ☀️ Ban ngày ===== */
-function siestaOK(){let ph='day',td='day';try{ph=realPhase(nowMin());}catch(e){}try{td=todName;}catch(e){}return ph==='day'&&td==='day';}
-function siestaLock(){const ok=siestaOK();document.querySelectorAll('[data-cmd=siesta],[data-cmd=siestaall]').forEach(b=>{if(b._ok===ok)return;b._ok=ok;b.disabled=!ok;b.classList.toggle('locked',!ok);
-  b.title=ok?'':'Chỉ ngủ trưa được khi giờ thật là ban ngày và đang chọn ☀️ Ban ngày';const t=b.firstChild;if(t&&t.nodeType===3)t.textContent=(ok?'🛏️':'🔒')+' Ngủ trưa';});}
+function siestaOK(){let rt=true,ph='day',td='day';try{rt=RT.tod;}catch(e){}try{ph=realPhase(nowMin());}catch(e){}try{td=todName;}catch(e){}return rt?ph==='day':td==='day';}   // theo giờ thật: phải là ban ngày · không theo giờ thật: phải chọn ☀️ Ban ngày
+const DAY_ONLY={siesta:['🛏️','Ngủ trưa'],siestaall:['🛏️','Ngủ trưa'],lunch:['🍱','Ăn trưa']};
+function siestaLock(){const ok=siestaOK();Object.keys(DAY_ONLY).forEach(k=>document.querySelectorAll(`[data-cmd=${k}]`).forEach(b=>{if(b._ok===ok)return;b._ok=ok;b.disabled=!ok;b.classList.toggle('locked',!ok);
+  b.title=ok?'':'Chỉ mở vào ban ngày: theo giờ thật thì phải là ban ngày, không theo giờ thật thì chọn ☀️ Ban ngày';const t=b.firstChild;if(t&&t.nodeType===3)t.textContent=(ok?DAY_ONLY[k][0]:'🔒')+' '+DAY_ONLY[k][1];}));}
 setInterval(siestaLock,1000);setTimeout(siestaLock,300);
-document.querySelectorAll('[data-tod]').forEach(b=>b.addEventListener('click',()=>setTimeout(siestaLock,50)));
+document.querySelectorAll('[data-tod]').forEach(b=>b.addEventListener('click',()=>setTimeout(siestaLock,50)));{const ck=document.querySelector('#clk');if(ck)ck.addEventListener('click',()=>setTimeout(siestaLock,50));}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
