@@ -10,6 +10,7 @@ Văn phòng 3D phong cách pastel, nhân vật chibi, chơi ngay trên trình du
 - Mèo Mochi: cho ăn, cho uống, dọn cát, vuốt ve.
 - KPI, cấp bậc, nhiệm vụ hằng ngày, bằng khen và thông báo chúc mừng thăng chức, ngày lương cuối tháng.
 - 💐 Cắm hoa ở góc thư giãn, góc ăn trưa, phòng sếp (5 loại hoa, hoa héo dần), 🥤 đặt trà sữa cả team, 💥 sự cố ngẫu nhiên (mất điện, kẹt giấy, Mochi đổ cà phê), 👔 sếp tổng ghé kiểm tra, 🎊 tiệc tất niên (karaoke, bốc thăm), 🎮 minigame đố vui cả phòng.
+- 👥 Nhiều người chơi cùng lúc: nhân vật của ai người đó điều khiển; hoạt động cả nhóm có lời mời Tham gia / Không; nhân vật trống hiện 🎮 ai đang điều khiển, không chọn trùng; mọi người thấy cùng một văn phòng.
 - 💬 Chat nhiều người theo mã phòng, gửi ảnh, 📎 giao file Word / Excel / PowerPoint và mở đọc ngay trong trang.
 - 🎵 Nhạc nền và nhạc xả stress, nghe chung cả phòng.
 
