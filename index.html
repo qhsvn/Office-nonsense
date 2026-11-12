@@ -4455,7 +4455,7 @@ function negLetter(c,n,why,d){const mon=new Date().getMonth()+1,mg=MGR?MGR.name:
   $('#mlIcon').textContent='📄';$('#mlTitle').textContent=`⚠️ Thư nhắc nhở (lần ${n}/${NEG_MAX})`;
   $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} bạn đã bị trừ KPI ${n} lần (lần gần nhất: ${why||'vi phạm'} ${d} KPI).\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu bị trừ KPI thêm lần nữa trong tháng, công ty sẽ chấm dứt hợp đồng và tuyển nhân viên mới thay thế.':'Mong bạn chú ý hơn: tắt màn hình khi rời bàn, giữ bàn gọn gàng, không lười khi sếp tổng ghé. Bị trừ quá '+NEG_MAX+' lần trong tháng sẽ bị sa thải.'}\n\n— Quản lý ${mg} 🎖️`;
   setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(false);},900);}
-function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;if(why&&KPI_WHY.bossdirty&&String(why).startsWith(KPI_WHY.bossdirty))return;   // phạt chung cả team không tính
+function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;
   const o=negStore();const n=(o.n[c.id]||0)+1;o.n[c.id]=n;negSave(o);
   const me=ME.id&&byId(ME.id);
   if(n<=NEG_MAX){if(c.id===ME.id)negLetter(c,n,why,d);else if(me&&me.manager)setStatus(`📄 ${c.name} nhận thư nhắc nhở lần ${n}/${NEG_MAX} vì bị trừ KPI (${why||''}).`);}
