@@ -4902,15 +4902,16 @@ function openWelcome(){
 }
 let rulesShown=false;
 function openRules(){
-  const c=ME.id&&byId(ME.id),box=$('#rLv');box.textContent='';
+  const c=ME.id&&byId(ME.id),box=$('#rLv');box.textContent='';{const rn=document.querySelector('.rnote');if(rn)rn.innerHTML='Đủ KPI là sếp tự đến bàn <b>trao bằng khen 🎓, cúp 🏆 và hoa 💐</b> rồi thăng cấp. Cấp càng cao lương càng cao.';}
   const pay=['5xx triệu','1,x tỷ','1,5x tỷ','1,8x tỷ'];
   LEVELS.forEach((L,i)=>{const r=document.createElement('div');r.className='lv'+(c&&!c.manager&&c.lv===i?' on':'');
     const e=document.createElement('span');e.className='e';e.textContent=L.e;const n=document.createElement('b');n.textContent=`Cấp ${i+1} · ${L.n}`;
     const sm=document.createElement('small');sm.textContent=(i?`từ ${L.need} KPI`:'khởi đầu')+` · lương ${pay[i]||''}`;r.append(e,n,sm);box.appendChild(r);});
   const me=$('#rMe');
   if(!c)me.textContent='🎭 Chọn nhân vật để bắt đầu tích KPI và lên cấp!';
-  else if(c.manager){const sl=slip(c);me.textContent=`⭐ Bạn là Quản lý (${c.name}) · ${c.kpi||0} KPI · 💰 lương dự kiến tháng này ${vnd(sl.tot)} (lương sếp ${vnd(payBase(c))} + phụ cấp ${vnd(MGR_ALLOW)} + thưởng team & KPI) — chỉ bạn thấy 🔒. Có KPI riêng: làm việc, chủ trì họp, nhiệm vụ ngày, team được sếp tổng khen thì cộng; team phạm lỗi thì quản lý bị trừ.`;
-    {const r=document.createElement('div');r.className='lv on';const e=document.createElement('span');e.className='e';e.textContent='⭐';const n=document.createElement('b');n.textContent='Quản lý (bạn)';const sm=document.createElement('small');sm.textContent=`lương ${vnd(payBase(c))} + phụ cấp ${vnd(MGR_ALLOW)} · chỉ bạn thấy 🔒`;r.append(e,n,sm);box.appendChild(r);}}
+  else if(c.manager){const sl=slip(c);me.textContent=`⭐ Bạn là Quản lý (${c.name}) · ${c.kpi||0} KPI — giao việc, chủ trì họp, giữ team gọn gàng để được sếp tổng khen.`;if(0){(`: làm việc, chủ trì họp, nhiệm vụ ngày, team được sếp tổng khen thì cộng; team phạm lỗi thì quản lý bị trừ.`);}
+    {const rn=document.querySelector('.rnote');if(rn)rn.innerHTML='Đủ KPI bạn sẽ đến bàn nhân viên <b>trao bằng khen 🎓, cúp 🏆 và hoa 💐</b> rồi thăng cấp. Cấp càng cao lương càng cao.';}
+    {const r=document.createElement('div');r.className='lv on';const e=document.createElement('span');e.className='e';e.textContent='⭐';const n=document.createElement('b');n.textContent='Quản lý (bạn)';const sm=document.createElement('small');sm.textContent=`lương ${Math.floor(payBase(c)/1e9)},x tỷ + phụ cấp · Chỉ bạn thấy 🔒`;r.append(e,n,sm);box.appendChild(r);}}
   else{const nx=LEVELS[c.lv+1];me.textContent=`🙋 ${c.name}: bạn đang là ${LEVELS[c.lv].e} ${LEVELS[c.lv].n} (cấp ${c.lv+1}) với ${c.kpi} KPI.`+(nx?` Cần thêm ${Math.max(0,nx.need-c.kpi)} KPI để lên ${nx.e} ${nx.n}.`:' Bạn đã ở cấp cao nhất! 👑');}
   $('#rulesModal').classList.add('show');}
 let customNext=false;
