@@ -490,6 +490,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .hrpop.no .prtop{background:linear-gradient(135deg,#ff6f7f,#ffa36b)}.hrpop.no .prin{box-shadow:0 18px 50px rgba(230,90,90,.35),0 0 0 4px #ffc2c2}
 .lvdates{display:flex;gap:8px;margin-top:6px}.lvdates label{flex:1;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--muted);text-align:left}
 .lvdates input{font:inherit;font-size:14px;font-weight:600;color:var(--ink);border:2px solid #e3e9f4;background:#f8fbff;border-radius:12px;padding:7px 8px}
+.hrpop .prlv{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
 </style>
 </head>
 <body>
@@ -4554,7 +4555,7 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
   try{
     while(c.busy&&!c.away)await wait(1);
     begin(c,'📦 Ôm thùng đồ nghỉ việc');holdBox(c,true);
-    hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',`KPI tháng ${c.kpiMonth||0} · ${mgrLabel()} đã duyệt`,'Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”');
+    hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',`KPI tháng ${c.kpiMonth||0}`,`${mgrLabel()} đã duyệt. Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”`);
     setStatus(`📦 ${c.name} bị sa thải (KPI tháng ${c.kpiMonth||0}, đã nhận 2 thư nhắc nhở). ${mgrLabel()} đã ký đơn — phòng nhân sự đang tuyển người mới…`);
     if(wasMe){$('#mlIcon').textContent='📦';$('#mlTitle').textContent='Quyết định thôi việc';
       $('#mlBody').textContent=`Kính gửi ${c.name},\n\nKPI tháng của bạn xuống ${c.kpiMonth||0} KPI dù đã nhận đủ 2 thư nhắc nhở. ${mgrLabel()} đã ký quyết định chấm dứt hợp đồng.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi tiếp nhé! 💪`;
@@ -4571,7 +4572,7 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
     // tuyển nhân viên NPC mới: ngoại hình mới, KPI, cấp bậc, số lần nhắc nhở tính lại từ đầu
     c.kpi=0;c.kpiMonth=0;c.otMonth=0;c.lv=0;c.certs=0;c.log=[];c.promoPending=false;const o=negStore();o.n[c.id]=0;negSave(o);try{kpiSave();}catch(e){}
     if(!isHuman(c))newHireLook(c);
-    hrPop('new',c,'🙋 CHÀO MỪNG NHÂN VIÊN MỚI!',`Vị trí ${c.slot||c.name} · KPI bắt đầu từ 0`,human?'Người chơi cũ đã nghỉ — một nhân viên NPC mới vừa nhận việc. Cả nhà giúp đỡ bạn mới nhé! 👏':'Phòng nhân sự vừa tuyển nhân viên NPC mới. Cả nhà giúp đỡ bạn mới nhé! 👏');
+    hrPop('new',c,'🙋 CHÀO MỪNG NHÂN VIÊN MỚI!','KPI bắt đầu từ 0',(`Vị trí ${c.slot||c.name}. `)+(human?'Người chơi cũ đã nghỉ — một nhân viên NPC mới vừa nhận việc. Cả nhà giúp đỡ bạn mới nhé! 👏':'Phòng nhân sự vừa tuyển nhân viên NPC mới. Cả nhà giúp đỡ bạn mới nhé! 👏'));
     await comeBack(c);await c.say('Chào cả nhà, em là nhân viên mới! Mong mọi người giúp đỡ ạ 🙋',2.6);
     if(!MGR.away&&MGR!==c)MGR.say('Chào mừng em! Cố gắng làm việc thật tốt nha 👏',2.2);
     setStatus(`🙋 Nhân viên mới đã nhận việc ở vị trí ${c.slot||c.name} — KPI bắt đầu từ 0.`);
@@ -4624,7 +4625,7 @@ function tearTick(){CHARS.forEach(c=>{if(!c.crying||!c.tears)return;const t=simT
 
 function negWarn(v){const [id,nS,dS,why,kmS]=String(v||'').split('|');const c=byId(id);if(!c)return false;const n=+nS||1;clearTimeout(c._negFb);
   negHist(c.id,{n,km:+kmS||0,why:why||'',t:Date.now()});
-  hrPop('warn',c,`⚠️ NHẮC NHỞ LẦN ${n}/${NEG_MAX}`,`KPI tháng ${kmS}${why?' · '+why:''}`,n>=NEG_MAX?'Nhắc nhở cuối cùng — KPI dưới -20 sẽ bị quản lý xem xét sa thải. Cố gắng lên nhé! 💪':'KPI dưới -10 sẽ nhận nhắc nhở lần 2. Cố gắng kéo KPI lên nhé! 💪');
+  hrPop('warn',c,`⚠️ NHẮC NHỞ LẦN ${n}/${NEG_MAX}`,`KPI tháng ${kmS}`,(why?`Lý do: ${why}. `:'')+(n>=NEG_MAX?'Nhắc nhở cuối cùng — KPI dưới -20 sẽ bị quản lý xem xét sa thải. Cố gắng lên nhé! 💪':'KPI dưới -10 sẽ nhận nhắc nhở lần 2. Cố gắng kéo KPI lên nhé! 💪'));
   if(!CAT_HOST){const o=negStore();o.n[id]=Math.max(o.n[id]||0,n);negSave(o);}
   const me=ME.id&&byId(ME.id);c.think('📄',2);
   if(c.id===ME.id)negLetter(c,n,why,+dS||0);
@@ -4739,6 +4740,8 @@ function runDayoff(c,v){if(!c||c.away||c.leavingNow)return false;if(c.busy){setS
 
 /* ===== đơn nghỉ phép chờ quản lý duyệt ===== */
 const LEAVE_WAIT=30000;let LEAVE_PEND={},lvaTimer=0,lvaId='';
+const lvShort=P=>{const R=LEAVE_R[P.ri]||LEAVE_R[0];return `${R.e} ${R.n} · ${P.d} ngày`;};
+const lvRange=P=>P.f?`Nghỉ ${P.f===todayK()?'từ hôm nay':'từ '+kFmt(P.f)}${P.t!==P.f?' đến '+kFmt(P.t):''}`:'Nghỉ hôm nay';
 const lvTxt=(ri,P)=>{const R=LEAVE_R[ri]||LEAVE_R[0];if(P&&P.f)return `${R.e} ${R.n} · ${P.f===todayK()?'từ hôm nay':'từ '+kFmt(P.f)}${P.t!==P.f?' đến '+kFmt(P.t):''} (${P.d} ngày)`;const d=+P||1;return `${R.e} ${R.n} · ${d>1?d+' ngày':'hôm nay'}`;};
 function leaveReq(c,v){if(!c||c.leavingNow||LEAVE_PEND[c.id])return false;const [riS,a,b]=String(v||'0.1').split('.');const ri=(+riS||0)%LEAVE_R.length;
   let f,t;if(b&&a.length===8){f=a;t=b;}else{f=todayK();const n=Math.max(1,+a||1);const dt=kDate(f);dt.setDate(dt.getDate()+n-1);t=keyOf(isoOf(dt));}
@@ -4762,11 +4765,11 @@ function leaveDec(v){const [id,k,auto]=String(v||'').split(':');const c=byId(id)
   if(lvaId===id){$('#leaveAsk').classList.remove('show');clearInterval(lvaTimer);}
   if(c.id===ME.id&&evBanT.textContent==='Đã gửi đơn nghỉ phép')bannerOff();
   if(k==='1'){setStatus(`✅ ${MGR.away?'Hệ thống':'Quản lý'} đã duyệt đơn nghỉ phép của ${c.name}${auto?' (tự duyệt vì quá giờ)':''}.`);
-    if(c.id===ME.id||!isHuman(c))hrPop('ok',c,'✅ ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT',lvTxt(P.ri,P),`${MGR.away?'Hệ thống':mgrLabel()} đã duyệt${auto?' (tự duyệt vì quá giờ)':''}. Nghỉ ngơi vui vẻ nhé! 🎉`);
+    if(c.id===ME.id||!isHuman(c))hrPop('ok',c,'✅ ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT',lvShort(P),`${lvRange(P)}. ${MGR.away?'Hệ thống':mgrLabel()} đã duyệt${auto?' (tự duyệt vì quá giờ)':''}. Nghỉ ngơi vui vẻ nhé! 🎉`);
     leaveGo(c,P);}
   else{setStatus(`❌ Quản lý chưa duyệt đơn nghỉ phép của ${c.name} — ở lại làm việc nhé.`);if(!MGR.away)MGR.say(`${c.name} ơi, hôm nay team đang bận, em cố ở lại nhé!`,2.4);
     wait(1).then(()=>c.say(pick(['Dạ vâng ạ… 😢','Dạ em hiểu rồi ạ 😅']),2));
-    if(c.id===ME.id||!isHuman(c))hrPop('no',c,'❌ ĐƠN NGHỈ PHÉP CHƯA ĐƯỢC DUYỆT',lvTxt(P.ri,P),`${mgrLabel()} chưa duyệt vì team đang bận. Ở lại làm việc, gửi lại đơn sau nhé!`);}
+    if(c.id===ME.id||!isHuman(c))hrPop('no',c,'❌ ĐƠN NGHỈ PHÉP CHƯA ĐƯỢC DUYỆT',lvShort(P),`${lvRange(P)}. ${mgrLabel()} chưa duyệt vì team đang bận. Ở lại làm việc, gửi lại đơn sau nhé!`);}
   return true;}
 
 /* ===== quản lý: tách mục duyệt đơn nhân viên và tự đăng ký nghỉ ===== */
