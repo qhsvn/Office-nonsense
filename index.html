@@ -488,6 +488,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .kmis.ok{text-decoration:none!important;font-weight:600;border-color:#bfe8d2}
 .hrpop.ok .prtop{background:linear-gradient(135deg,#3fbf8f,#7ad3ff)}.hrpop.ok .prin{box-shadow:0 18px 50px rgba(60,170,140,.4),0 0 0 4px #a8ecd0}
 .hrpop.no .prtop{background:linear-gradient(135deg,#ff6f7f,#ffa36b)}.hrpop.no .prin{box-shadow:0 18px 50px rgba(230,90,90,.35),0 0 0 4px #ffc2c2}
+.lvdates{display:flex;gap:8px;margin-top:6px}.lvdates label{flex:1;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--muted);text-align:left}
+.lvdates input{font:inherit;font-size:14px;font-weight:600;color:var(--ink);border:2px solid #e3e9f4;background:#f8fbff;border-radius:12px;padding:7px 8px}
 </style>
 </head>
 <body>
@@ -820,7 +822,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="crow"><button type="button" id="wbClose">Đóng</button></div></div></div>
 <div id="leaveModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="lvTitle"><div class="wcard mcardm">
   <div class="wlogo">📝</div><h2 id="lvTitle">Đăng ký nghỉ phép</h2><p class="wsub">Chọn lý do và thời gian nghỉ rồi gửi đơn. Quản lý duyệt xong nhân vật mới thu dọn ra về. Ngày nghỉ không được tính lương.</p>
-  <div class="fltypes" id="lvWhy"></div><div class="kmt" style="margin-top:12px;font-weight:700">⏱️ Thời gian nghỉ</div><div class="fltypes" id="lvDays" style="margin-top:6px"></div>
+  <div class="fltypes" id="lvWhy"></div><div class="kmt" style="margin-top:12px;font-weight:700">📅 Chọn ngày nghỉ</div><div class="lvdates"><label>Từ ngày<input type="date" id="lvFrom"></label><label>Đến ngày<input type="date" id="lvTo"></label></div><div class="bpleft" id="lvN"></div>
   <div class="crow"><button type="button" id="lvCancel" class="cghost">Hủy</button><button type="button" id="lvGo">Gửi đơn 📨</button></div></div></div>
 <div id="leaveAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="laTitle"><div class="wcard mcardm">
   <div class="wlogo">📝</div><h2 id="laTitle"></h2><p class="wsub" id="laSub"></p><div class="bpleft" id="laLeft"></div>
@@ -4713,37 +4715,45 @@ window.LEAVE_R=[
  {e:'🏥',n:'Đi khám bệnh',ask:'Mình có lịch hẹn khám bệnh…',ok:'Ừ, đi khám đi em, sức khỏe là trên hết!',bye:'Mình đi khám đây nha 🏥',reply:'Khám xong báo mọi người nha!'},
  {e:'📚',n:'Đi thi / đi học',ask:'Hôm nay mình có lịch thi 📚',ok:'Duyệt! Thi tốt nha em 💪',bye:'Đi thi đây, chúc mình may mắn! 📚',reply:'Thi tốt nha! 🍀'}];
 let lvR=0,lvD=1;const lvEl=$('#leaveModal');
-function openLeave(){const c=selected;if(!c){setStatus('📝 Chọn một nhân vật trước rồi đăng ký nghỉ phép nhé.');return;}
+function openLeave(keep){const c=selected;if(!c){setStatus('📝 Chọn một nhân vật trước rồi đăng ký nghỉ phép nhé.');return;}
   if(c.away){setStatus(`📝 ${c.name} đang không ở văn phòng.`);return;}
   $('#lvTitle').textContent=`Đăng ký nghỉ phép · ${c.name}`;
-  const box=$('#lvWhy');box.textContent='';LEAVE_R.forEach((r,i)=>{const b=document.createElement('button');b.type='button';b.className=i===lvR?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=r.e;const t=document.createElement('span');t.textContent=r.n;b.append(e,t);b.onclick=()=>{lvR=i;openLeave();};box.appendChild(b);});
-  const dd=$('#lvDays');dd.textContent='';[[1,'Nghỉ hôm nay'],[2,'Nghỉ hôm nay + ngày mai']].forEach(([d,n])=>{const b=document.createElement('button');b.type='button';b.className=d===lvD?'on':'';b.textContent=n;b.onclick=()=>{lvD=d;openLeave();};dd.appendChild(b);});
+  const box=$('#lvWhy');box.textContent='';LEAVE_R.forEach((r,i)=>{const b=document.createElement('button');b.type='button';b.className=i===lvR?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=r.e;const t=document.createElement('span');t.textContent=r.n;b.append(e,t);b.onclick=()=>{lvR=i;openLeave(true);};box.appendChild(b);});
+  {const fi=$('#lvFrom'),ti=$('#lvTo'),t0=isoOf(new Date());if(!keep){fi.value=t0;ti.value=t0;}fi.min=t0;ti.min=fi.value&&fi.value>t0?fi.value:t0;if(!fi.value||fi.value<t0)fi.value=t0;if(!ti.value||ti.value<fi.value)ti.value=fi.value;lvCount();}
   lvEl.classList.add('show');}
 $('#lvCancel').onclick=()=>lvEl.classList.remove('show');
-$('#lvGo').onclick=()=>{lvEl.classList.remove('show');if(selected)run('leavereq',selected,{v:lvR+'.'+lvD});};
+const isoOf=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const keyOf=iso=>String(iso||'').replace(/-/g,'');const todayK=()=>keyOf(isoOf(new Date()));
+const kDate=k=>new Date(+k.slice(0,4),+k.slice(4,6)-1,+k.slice(6,8));const kDiff=(a,b)=>Math.round((kDate(b)-kDate(a))/864e5);
+const kFmt=k=>`${+k.slice(6,8)}/${+k.slice(4,6)}`;
+function lvCount(){const f=keyOf($('#lvFrom').value),t=keyOf($('#lvTo').value);const ok=f&&t&&t>=f;$('#lvN').textContent=ok?`📅 ${kFmt(f)}${t!==f?' → '+kFmt(t):''} · ${kDiff(f,t)+1} ngày${f===todayK()?' (nghỉ luôn hôm nay)':''}`:'⚠️ Ngày kết thúc phải sau ngày bắt đầu';$('#lvGo').disabled=!ok;}
+$('#lvFrom').addEventListener('change',()=>{const fi=$('#lvFrom'),ti=$('#lvTo');ti.min=fi.value;if(ti.value<fi.value)ti.value=fi.value;lvCount();});$('#lvTo').addEventListener('change',lvCount);
+$('#lvGo').onclick=()=>{const f=keyOf($('#lvFrom').value),t=keyOf($('#lvTo').value);if(!f||!t||t<f||f<todayK())return;lvEl.classList.remove('show');if(selected)run('leavereq',selected,{v:`${lvR}.${f}.${t}`});};
 async function actDayoff(c,ri,days){const R=LEAVE_R[ri]||LEAVE_R[0];c.offReason=ri;begin(c,`${R.e} Đăng ký nghỉ phép`);c.homeAfter=null;c.think(R.e,1.8);
   await c.say(R.ask,2.2);
-  if(!MGR.away&&c!==MGR){MGR.lookAt=c;c.lookAt=MGR;await c.say(`${MGR.name} ơi, em xin nghỉ phép ${days>1?'2 ngày':'hôm nay'} vì ${R.n.toLowerCase()} ạ 📝`,2.4);await MGR.say(R.ok,2.4);MGR.lookAt=null;c.lookAt=null;}
-  setStatus(`📝 ${c.name} đăng ký nghỉ phép (${R.n}) — ${days>1?'nghỉ hôm nay và ngày mai':'nghỉ hôm nay'}. Đơn đã được duyệt ✅`);
-  leaveAdd(c,days);await actGoHome(c,true);c.sick=days>1?1:0;}
+  if(!MGR.away&&c!==MGR){MGR.lookAt=c;c.lookAt=MGR;await c.say(`${MGR.name} ơi, em xin nghỉ phép ${days>1?days+' ngày':'hôm nay'} vì ${R.n.toLowerCase()} ạ 📝`,2.4);await MGR.say(R.ok,2.4);MGR.lookAt=null;c.lookAt=null;}
+  setStatus(`📝 ${c.name} nghỉ phép (${R.n}) — ${days>1?days+' ngày, từ hôm nay':'hôm nay'}. Đơn đã được duyệt ✅`);
+  await actGoHome(c,true);c.sick=Math.max(0,days-1);}
 function runDayoff(c,v){if(!c||c.away||c.leavingNow)return false;if(c.busy){setStatus(`⏳ ${c.name} đang bận, làm xong rồi đăng ký nghỉ phép nhé.`);return false;}
   const [ri,d]=String(v||'0.1').split('.');guard(()=>actDayoff(c,(+ri||0)%LEAVE_R.length,+d===2?2:1),[c]);return true;}
 
 /* ===== đơn nghỉ phép chờ quản lý duyệt ===== */
 const LEAVE_WAIT=30000;let LEAVE_PEND={},lvaTimer=0,lvaId='';
-const lvTxt=(ri,d)=>{const R=LEAVE_R[ri]||LEAVE_R[0];return `${R.e} ${R.n} · ${d>1?'hôm nay + ngày mai':'hôm nay'}`;};
-function leaveReq(c,v){if(!c||c.away||c.leavingNow||LEAVE_PEND[c.id])return false;const [riS,dS]=String(v||'0.1').split('.');const ri=(+riS||0)%LEAVE_R.length,d=+dS===2?2:1;
-  if(c.manager){guard(()=>actDayoff(c,ri,d),[c]);return true;}            // quản lý xin nghỉ: sếp tổng duyệt luôn
-  LEAVE_PEND[c.id]={ri,d,at:Date.now()};c.think('📨',2);
-  setStatus(`📨 ${c.name} gửi đơn nghỉ phép (${lvTxt(ri,d)}) — chờ quản lý duyệt…`);
-  if(c.id===ME.id)banner('📨','Đã gửi đơn nghỉ phép',`${lvTxt(ri,d)} — chờ quản lý duyệt…`,null,'boba');
+const lvTxt=(ri,P)=>{const R=LEAVE_R[ri]||LEAVE_R[0];if(P&&P.f)return `${R.e} ${R.n} · ${P.f===todayK()?'từ hôm nay':'từ '+kFmt(P.f)}${P.t!==P.f?' đến '+kFmt(P.t):''} (${P.d} ngày)`;const d=+P||1;return `${R.e} ${R.n} · ${d>1?d+' ngày':'hôm nay'}`;};
+function leaveReq(c,v){if(!c||c.leavingNow||LEAVE_PEND[c.id])return false;const [riS,a,b]=String(v||'0.1').split('.');const ri=(+riS||0)%LEAVE_R.length;
+  let f,t;if(b&&a.length===8){f=a;t=b;}else{f=todayK();const n=Math.max(1,+a||1);const dt=kDate(f);dt.setDate(dt.getDate()+n-1);t=keyOf(isoOf(dt));}
+  const d=kDiff(f,t)+1;if(c.away&&f===todayK())return false;
+  if(c.manager){leaveGo(c,{ri,f,t,d});return true;}            // quản lý xin nghỉ: sếp tổng duyệt luôn
+  const P0=LEAVE_PEND[c.id]={ri,f,t,d,at:Date.now()};c.think('📨',2);
+  setStatus(`📨 ${c.name} gửi đơn nghỉ phép (${lvTxt(ri,P0)}) — chờ quản lý duyệt…`);
+  if(c.id===ME.id)banner('📨','Đã gửi đơn nghỉ phép',`${lvTxt(ri,P0)} — chờ quản lý duyệt…`,null,'boba');
   const mgrHuman=isHuman(MGR)&&!MGR.away;
   if(mgrHuman&&MGR.id===ME.id)openLeaveAsk(c);
   if(CAT_HOST){if(!mgrHuman)setTimeout(()=>{if(LEAVE_PEND[c.id])run('leavedec',null,{v:c.id+':'+(MGR.away?1:(srand(hashStr(c.id+Date.now()))()<.85?1:0))});},3500);   // quản lý NPC tự duyệt
     else setTimeout(()=>{if(LEAVE_PEND[c.id])run('leavedec',null,{v:c.id+':1:auto'});},LEAVE_WAIT+4000);}
   return true;}
 function openLeaveAsk(c){const P=LEAVE_PEND[c.id];if(!P)return;lvaId=c.id;const end=Date.now()+LEAVE_WAIT;
-  $('#laTitle').textContent=`Đơn nghỉ phép của ${c.name}`;$('#laSub').textContent=`Lý do: ${lvTxt(P.ri,P.d)}${isHuman(c)?' · người chơi 👤':' · NPC 🤖'}`;
+  $('#laTitle').textContent=`Đơn nghỉ phép của ${c.name}`;$('#laSub').textContent=`Lý do: ${lvTxt(P.ri,P)}${isHuman(c)?' · người chơi 👤':' · NPC 🤖'}`;
   $('#leaveAsk').classList.add('show');beep(true);clearInterval(lvaTimer);
   const tk=()=>{const l=Math.max(0,Math.ceil((end-Date.now())/1000));$('#laLeft').textContent=`⏳ Còn ${l} giây — không trả lời sẽ tự duyệt`;if(!l||!LEAVE_PEND[c.id]){clearInterval(lvaTimer);if(!l&&LEAVE_PEND[c.id])laAns(true);}};tk();lvaTimer=setInterval(tk,250);}
 function laAns(ok){$('#leaveAsk').classList.remove('show');clearInterval(lvaTimer);if(lvaId&&LEAVE_PEND[lvaId])run('leavedec',null,{v:lvaId+':'+(ok?1:0)});}
@@ -4752,11 +4762,11 @@ function leaveDec(v){const [id,k,auto]=String(v||'').split(':');const c=byId(id)
   if(lvaId===id){$('#leaveAsk').classList.remove('show');clearInterval(lvaTimer);}
   if(c.id===ME.id&&evBanT.textContent==='Đã gửi đơn nghỉ phép')bannerOff();
   if(k==='1'){setStatus(`✅ ${MGR.away?'Hệ thống':'Quản lý'} đã duyệt đơn nghỉ phép của ${c.name}${auto?' (tự duyệt vì quá giờ)':''}.`);
-    if(c.id===ME.id||!isHuman(c))hrPop('ok',c,'✅ ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT',lvTxt(P.ri,P.d),`${MGR.away?'Hệ thống':mgrLabel()} đã duyệt${auto?' (tự duyệt vì quá giờ)':''}. Nghỉ ngơi vui vẻ nhé! 🎉`);
-    if(c.busy){const t=setInterval(()=>{if(!c.busy||c.away){clearInterval(t);if(!c.away)guard(()=>actDayoff(c,P.ri,P.d),[c]);}},1000);}else guard(()=>actDayoff(c,P.ri,P.d),[c]);}
+    if(c.id===ME.id||!isHuman(c))hrPop('ok',c,'✅ ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT',lvTxt(P.ri,P),`${MGR.away?'Hệ thống':mgrLabel()} đã duyệt${auto?' (tự duyệt vì quá giờ)':''}. Nghỉ ngơi vui vẻ nhé! 🎉`);
+    leaveGo(c,P);}
   else{setStatus(`❌ Quản lý chưa duyệt đơn nghỉ phép của ${c.name} — ở lại làm việc nhé.`);if(!MGR.away)MGR.say(`${c.name} ơi, hôm nay team đang bận, em cố ở lại nhé!`,2.4);
     wait(1).then(()=>c.say(pick(['Dạ vâng ạ… 😢','Dạ em hiểu rồi ạ 😅']),2));
-    if(c.id===ME.id||!isHuman(c))hrPop('no',c,'❌ ĐƠN NGHỈ PHÉP CHƯA ĐƯỢC DUYỆT',lvTxt(P.ri,P.d),`${mgrLabel()} chưa duyệt vì team đang bận. Ở lại làm việc, gửi lại đơn sau nhé!`);}
+    if(c.id===ME.id||!isHuman(c))hrPop('no',c,'❌ ĐƠN NGHỈ PHÉP CHƯA ĐƯỢC DUYỆT',lvTxt(P.ri,P),`${mgrLabel()} chưa duyệt vì team đang bận. Ở lại làm việc, gửi lại đơn sau nhé!`);}
   return true;}
 
 /* ===== quản lý: tách mục duyệt đơn nhân viên và tự đăng ký nghỉ ===== */
@@ -4764,7 +4774,7 @@ const isMyMgr=c=>c&&c.manager&&(c.id===ME.id||!isHuman(c));
 function openLeaveHub(){const box=$('#lhList');box.textContent='';const ids=Object.keys(LEAVE_PEND);
   $('#lhCount').textContent=ids.length?`${ids.length} đơn đang chờ duyệt`:'Chưa có đơn nào chờ duyệt';
   ids.forEach(id=>{const c=byId(id),P=LEAVE_PEND[id];if(!c||!P)return;const r=document.createElement('div');r.className='wbrow n1';
-    const top=document.createElement('div');top.className='wbtop';const av=document.createElement('span');av.className='av3';setAvatar(av,c);const t=document.createElement('div');const b=document.createElement('b');b.textContent=c.name+(isHuman(c)?' 👤':' 🤖');const sm=document.createElement('small');sm.textContent=lvTxt(P.ri,P.d);t.append(b,sm);top.append(av,t);r.appendChild(top);
+    const top=document.createElement('div');top.className='wbtop';const av=document.createElement('span');av.className='av3';setAvatar(av,c);const t=document.createElement('div');const b=document.createElement('b');b.textContent=c.name+(isHuman(c)?' 👤':' 🤖');const sm=document.createElement('small');sm.textContent=lvTxt(P.ri,P);t.append(b,sm);top.append(av,t);r.appendChild(top);
     const row=document.createElement('div');row.className='crow';const no=document.createElement('button');no.type='button';no.className='cghost';no.textContent='❌ Không duyệt';const ok=document.createElement('button');ok.type='button';ok.textContent='✅ Duyệt';
     no.onclick=()=>{run('leavedec',null,{v:id+':0'});setTimeout(openLeaveHub,200);};ok.onclick=()=>{run('leavedec',null,{v:id+':1'});setTimeout(openLeaveHub,200);};row.append(no,ok);r.appendChild(row);box.appendChild(r);});
   $('#leaveHub').classList.add('show');}
@@ -4776,7 +4786,7 @@ setInterval(()=>{try{refreshCards();}catch(e){}},3000);
 
 /* ===== ngày nghỉ phép không tính lương ===== */
 function leaveStore(){const mk=new Date().getFullYear()+'-'+(new Date().getMonth()+1);let o=null;try{o=JSON.parse(localStorage.getItem('office_leave')||'null');}catch(e){}if(!o||o.mon!==mk)o={mon:mk,n:{}};return o;}
-function leaveAdd(c,d){const o=leaveStore();o.n[c.id]=(o.n[c.id]||0)+d;try{localStorage.setItem('office_leave',JSON.stringify(o));}catch(e){}refreshCards();}
+function leaveAdd(c,d){if(!d)return;const o=leaveStore();o.n[c.id]=(o.n[c.id]||0)+d;try{localStorage.setItem('office_leave',JSON.stringify(o));}catch(e){}refreshCards();}
 window.leaveDaysOf=c=>leaveStore().n[c.id]||0;
 window.leaveReset=()=>{try{localStorage.removeItem('office_leave');}catch(e){}};
 
@@ -4790,6 +4800,19 @@ function spillSelf(I){const w=I.who;if(!w)return;I.selfEnd=Date.now()+SPILL_WAIT
     addKpi(w,-3,'Làm đổ đồ uống không tự lau');w.think('😳',1.8);
     setStatus(`🥤 ${w.name} làm đổ đồ uống mà không tự lau trong 15 giây — bị trừ 3 KPI!`);
     if(w.id===ME.id&&evBanT.textContent==='Bạn làm đổ đồ uống!')bannerOff();},SPILL_WAIT+200);}
+
+/* ===== nghỉ phép theo ngày đã chọn ===== */
+function leaveDaysInMonth(f,t){const now=new Date(),y=now.getFullYear(),m=now.getMonth();let n=0;const a=kDate(f),b=kDate(t);for(const d=new Date(a);d<=b;d.setDate(d.getDate()+1))if(d.getFullYear()===y&&d.getMonth()===m)n++;return n;}
+function schedStore(){let o=null;try{o=JSON.parse(localStorage.getItem('office_leave_sched')||'null');}catch(e){}return o&&typeof o==='object'?o:{};}
+function schedSave(o){try{localStorage.setItem('office_leave_sched',JSON.stringify(o));}catch(e){}}
+function leaveGo(c,P){leaveAdd(c,leaveDaysInMonth(P.f,P.t));
+  if(P.f===todayK()){const go=()=>guard(()=>actDayoff(c,P.ri,P.d),[c]);if(c.busy){const iv=setInterval(()=>{if(!c.busy||c.away){clearInterval(iv);if(!c.away)go();}},1000);}else if(!c.away)go();}
+  else{const o=schedStore();o[c.id]={ri:P.ri,f:P.f,t:P.t};schedSave(o);setStatus(`📅 ${c.name} được duyệt nghỉ phép từ ${kFmt(P.f)}${P.t!==P.f?' đến '+kFmt(P.t):''} — tới ngày đó sẽ vắng mặt.`);}}
+// tới ngày nghỉ đã đăng ký: nhân vật không ở văn phòng
+setInterval(()=>{const o=schedStore(),k=todayK();let ch=false;
+  for(const id in o){const e=o[id],c=byId(id);if(!c||e.t<k){delete o[id];ch=true;continue;}
+    if(e.f<=k&&!c.away&&!c.leavingNow&&!c.busy&&!c.coming&&c._schedDay!==k){c._schedDay=k;const left=kDiff(k,e.t)+1;guard(()=>actDayoff(c,e.ri,left),[c]);}}
+  if(ch)schedSave(o);},5000);
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
