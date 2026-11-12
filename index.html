@@ -635,6 +635,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b mint" data-cmd="inbox">📂 Hộp tài liệu</button>
           <button class="b mint" data-cmd="fix">🛠️ Xử lý sự cố</button>
           <button class="b mint" data-cmd="scroff">🖥️ Tắt màn hình</button>
+          <button class="b pink" data-cmd="argue">😤 Cãi sếp</button>
         </div>
       </div>
       <div class="box">
@@ -761,6 +762,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>🍱 Ăn trưa, ngủ trưa ngoài giờ</b> 12:00–12:59 (theo giờ thật).</li>
       <li><b>🖥️ Rời bàn không tắt màn hình.</b></li>
       <li><b>🥤 Làm đổ đồ uống</b> mà không tự lau trong 15 giây.</li>
+      <li><b>😤 Cãi sếp</b> — lần 3 trong ngày bị trừ KPI và cảnh cáo, lần 4 bị sa thải ngay.</li>
       <li><b>👨‍💼 Sếp tổng bắt gặp</b> đang lười, uống trà sữa, bàn bừa bộn hoặc văn phòng còn rác.</li>
       <li><b>📄 KPI tháng âm</b> — nhắc nhở lần 1, lần 2, sau đó quản lý duyệt sa thải hoặc cho cơ hội.</li>
       <li><b>📉 KPI âm</b> thì lương bị trừ.</li>
@@ -4243,6 +4245,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='fire')return runFire(v);
   if(n==='negwarn')return negWarn(v);
   if(n==='dayoff')return runDayoff(c,v);
+  if(n==='argue')return runArgue(c);
   if(n==='leavereq')return leaveReq(c,v);
   if(n==='leavedec')return leaveDec(v);
   if(n==='thankmgr')return thankMgr(c);
@@ -4264,7 +4267,7 @@ function lunchLate(n,c){if(!rtOn()||lunchHour())return;
     who.forEach(x=>{addKpi(x,-2,`${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ (12:00–12:59)`);x.think('⏰',1.6);});
     setStatus(`⏰ ${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ nghỉ trưa (12:00–12:59): ${who.map(x=>x.name).join(', ')} bị trừ 2 KPI.`);},2200);}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),sick:()=>{if(isMyMgr(selected)){openLeaveHub();return;}openLeave();},scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),argue:()=>{if(!selected){setStatus('😤 Chọn nhân vật trước nhé.');return;}run('argue',selected);},sick:()=>{if(isMyMgr(selected)){openLeaveHub();return;}openLeave();},scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
@@ -4555,10 +4558,10 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
   try{
     while(c.busy&&!c.away)await wait(1);
     begin(c,'📦 Ôm thùng đồ nghỉ việc');holdBox(c,true);
-    hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',`KPI tháng ${c.kpiMonth||0}`,`${mgrLabel()} đã duyệt. Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”`);
-    setStatus(`📦 ${c.name} bị sa thải (KPI tháng ${c.kpiMonth||0}, đã nhận 2 thư nhắc nhở). ${mgrLabel()} đã ký đơn — phòng nhân sự đang tuyển người mới…`);
+    const FW=c._fireWhy;hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',FW?FW:`KPI tháng ${c.kpiMonth||0}`,`${FW?mgrLabel()+' cho nghỉ việc ngay':mgrLabel()+' đã duyệt'}. Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”`);
+    setStatus(FW?`📦 ${c.name} bị sa thải vì ${FW.toLowerCase()} — phòng nhân sự đang tuyển người mới…`:`📦 ${c.name} bị sa thải (KPI tháng ${c.kpiMonth||0}, đã nhận 2 thư nhắc nhở). ${mgrLabel()} đã ký đơn — phòng nhân sự đang tuyển người mới…`);
     if(wasMe){$('#mlIcon').textContent='📦';$('#mlTitle').textContent='Quyết định thôi việc';
-      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nKPI tháng của bạn xuống ${c.kpiMonth||0} KPI dù đã nhận đủ 2 thư nhắc nhở. ${mgrLabel()} đã ký quyết định chấm dứt hợp đồng.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi tiếp nhé! 💪`;
+      $('#mlBody').textContent=FW?`Kính gửi ${c.name},\n\nBạn đã ${FW.toLowerCase()} dù đã bị cảnh cáo. ${mgrLabel()} quyết định cho bạn nghỉ việc ngay.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi lại từ đầu nhé! 💪`:`Kính gửi ${c.name},\n\nKPI tháng của bạn xuống ${c.kpiMonth||0} KPI dù đã nhận đủ 2 thư nhắc nhở. ${mgrLabel()} đã ký quyết định chấm dứt hợp đồng.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi tiếp nhé! 💪`;
       $('#mgrLetter').classList.add('show');beep(false);}
     if(!MGR.away&&MGR!==c)MGR.say(`${c.name} ơi, rất tiếc… công ty phải cho em nghỉ việc. 😔`,2.6);
     CHARS.filter(o=>o!==c&&!o.away&&!o.manager).forEach((o,i)=>wait(.6+i*.4).then(()=>{o.lookAt=c;o.think(pick(['😢','🥺','😟']),1.8);}));
@@ -4577,7 +4580,7 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
     if(!MGR.away&&MGR!==c)MGR.say('Chào mừng em! Cố gắng làm việc thật tốt nha 👏',2.2);
     setStatus(`🙋 Nhân viên mới đã nhận việc ở vị trí ${c.slot||c.name} — KPI bắt đầu từ 0.`);
     setAct(c,'🚶 Về chỗ ngồi');await c.goSit(c.home);end(c,'working');
-  }finally{c._firing=false;holdBox(c,false);if(c.outside){c.root.visible=true;c.outside=false;c.awaySp.visible=false;c.pack.visible=false;screensOn(c,true);}refreshCards();}}
+  }finally{c._firing=false;c._fireWhy=null;holdBox(c,false);if(c.outside){c.root.visible=true;c.outside=false;c.awaySp.visible=false;c.pack.visible=false;screensOn(c,true);}refreshCards();}}
 function runFire(v){const c=byId(v);if(!c||c.manager||c._firing)return false;guard(()=>actFire(c),[c]);return true;}
 
 
@@ -4817,6 +4820,30 @@ setInterval(()=>{const o=schedStore(),k=todayK();let ch=false;
     if(e.f<=k&&!c.away&&!c.leavingNow&&!c.busy&&!c.coming&&c._schedDay!==k){c._schedDay=k;const left=kDiff(k,e.t)+1;guard(()=>actDayoff(c,e.ri,left),[c]);}}
   if(ch)schedSave(o);},5000);
 
+/* ===== nhân viên cãi sếp: lần 3 trừ 20 KPI + cảnh cáo, lần 4 trong ngày bị sa thải ngay ===== */
+function argStore(){const k=todayK();let o=null;try{o=JSON.parse(localStorage.getItem('office_argue')||'null');}catch(e){}if(!o||o.d!==k)o={d:k,n:{}};return o;}
+function argSave(o){try{localStorage.setItem('office_argue',JSON.stringify(o));}catch(e){}}
+const ARG_LINES=['Em làm đúng mà sao chị cứ bắt bẻ hoài vậy?! 😤','Deadline gì mà gấp vậy, ai làm kịp?! 😠','Em không đồng ý! Ý tưởng của em hay hơn mà! 😤','Sao lúc nào cũng là em chịu trận vậy chị?! 😡'];
+async function actArgue(c,n){const m=MGR;begin(c,'😤 Cãi sếp');c.think('😤',2);
+  if(m&&!m.away){const a=Math.atan2(c.root.position.x-m.root.position.x,c.root.position.z-m.root.position.z);await c.walkTo(m.root.position.x+Math.sin(a)*1.05,m.root.position.z+Math.cos(a)*1.05);c.lookAt=m;m.lookAt=c;}
+  await c.say(ARG_LINES[(n-1)%ARG_LINES.length],2.6);if(m&&!m.away){m.think('😠',2);
+    await m.say(n===1?'Em bình tĩnh lại, có gì từ từ nói!':n===2?'Lần thứ 2 rồi đó! Chị không muốn nghe nữa đâu 😠':n===3?'Lần thứ 3 rồi! Trừ 20 KPI và đây là cảnh cáo cuối cùng! 😡':'Đủ rồi! Em không cần làm ở đây nữa! 😡',2.8);m.lookAt=null;}
+  c.lookAt=null;
+  CHARS.filter(o=>o!==c&&o!==m&&!o.away).forEach((o,i)=>wait(.3+i*.3).then(()=>o.think(pick(['😱','😬','🙊']),1.6)));
+  }
+function runArgue(c){if(!c)return false;if(c.manager){setStatus('🎖️ Quản lý không cãi chính mình được 😅');return false;}
+  if(!MGR||MGR.away){setStatus(`😤 ${mgrLabel()} không có ở văn phòng — muốn cãi cũng không có ai nghe!`);return false;}
+  if(c.away||c.busy){setStatus(`⏳ ${c.name} đang bận.`);return false;}
+  const o=argStore(),n=(o.n[c.id]||0)+1;o.n[c.id]=n;argSave(o);
+  setStatus(`😤 ${c.name} cãi sếp lần ${n} trong hôm nay!${n===2?' Thêm lần nữa sẽ bị trừ KPI và cảnh cáo.':''}`);
+  guard(async()=>{await actArgue(c,n);
+    if(n===3){addKpi(c,-20,'Cãi sếp lần 3 trong ngày');
+      hrPop('warn',c,'⚠️ CẢNH CÁO ĐUỔI VIỆC','Cãi sếp 3 lần hôm nay','Bị trừ 20 KPI. Cãi sếp thêm lần nữa trong hôm nay sẽ bị sa thải ngay!');
+      if(c.id===ME.id){$('#mlIcon').textContent='⚠️';$('#mlTitle').textContent='Cảnh cáo đuổi việc';$('#mlBody').textContent=`Kính gửi ${c.name},\n\nHôm nay bạn đã cãi sếp 3 lần và bị trừ 20 KPI.\n\nĐây là cảnh cáo cuối cùng: nếu tiếp tục cãi sếp trong hôm nay, bạn sẽ bị sa thải ngay lập tức.\n\n— ${mgrLabel()} 🎖️`;$('#mgrLetter').classList.add('show');beep(false);}}
+    if(n>=4){addKpi(c,-20,'Cãi sếp quá 3 lần trong ngày');o.n[c.id]=0;argSave(o);setStatus(`📦 ${c.name} cãi sếp quá 3 lần hôm nay — bị sa thải ngay!`);end(c,'standing');await wait(.8);c._fireWhy='Cãi sếp quá 3 lần hôm nay';runFire(c.id);}
+    else{setAct(c,'🚶 Quay về chỗ');await c.goSit(c.home);end(c,'working');}},[c]);
+  return true;}
+
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
 const CAN_DL=(()=>{try{return window.top===window;}catch(e){return false;}})();   // trang Claude (khung nhúng) chặn tải file
@@ -5004,7 +5031,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
