@@ -475,6 +475,16 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .hrpop.sad .av3{filter:saturate(.7)}
 @keyframes hrSob{50%{transform:translateY(3px) rotate(-6deg)}}
 .b.locked,.b:disabled.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.6)}
+.hrpop.warn .prtop{background:linear-gradient(135deg,#ff9a3d,#ffcf4d)}
+.hrpop.warn .prin{box-shadow:0 18px 50px rgba(230,140,40,.4),0 0 0 4px #ffd89a}
+.wblist{display:flex;flex-direction:column;gap:7px;max-height:46vh;overflow-y:auto;margin-top:8px;text-align:left}
+.wbrow{border:2px solid #e3e9f4;background:#f8fbff;border-radius:14px;padding:8px 10px}
+.wbrow.n1{border-color:#ffe2a8;background:#fffaf0}.wbrow.n2{border-color:#ffc58a;background:#fff4e8}.wbrow.pend{border-color:#ff9aa8;background:#fff0f2}
+.wbtop{display:flex;align-items:center;gap:8px}.wbtop .av3{width:34px;height:34px;flex:none}.wbtop>div{flex:1;min-width:0}
+.wbtop b{display:block;font-size:13.5px}.wbtop small{font-size:11.5px;color:var(--muted)}.wbchip{font-size:13px;font-weight:700;white-space:nowrap}
+.wbhist{white-space:pre-line;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45;border-top:1px dashed #e3e9f4;padding-top:4px}
+.wbrow .crow{margin-top:7px}
+.wbbtn{display:block;width:100%;margin-top:8px;font:inherit;font-size:12.5px;font-weight:700;border:2px solid #ffd2a8;background:#fff6ec;color:#a0561a;border-radius:12px;padding:7px 9px;cursor:pointer;text-align:left}
 </style>
 </head>
 <body>
@@ -743,6 +753,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>😴 Ngủ gật trong giờ làm</b> — sếp bắt gặp trừ <b>10 KPI</b>. Muốn nghỉ thì dùng <b>🛏️ Ngủ trưa</b> (không bị trừ).</li>
       <li><b>😜 Khều, trêu đồng nghiệp trong giờ làm</b> — có thể bị trừ <b>3 KPI</b>. Được trêu thoải mái lúc <b>12:00–12:59</b> và <b>sau 17:30</b>.</li>
       <li><b>👨‍💼 Sếp tổng ghé kiểm tra</b> — đang lười trừ <b>8 KPI</b>, bàn bừa bộn trừ <b>5 KPI</b>, văn phòng còn rác (giấy vụn, khay cát Mochi, vũng cà phê) cả team trừ <b>3 KPI</b>.</li>
+      <li><b>🍱 Giờ nghỉ trưa</b> — theo giờ thật chỉ ăn trưa, ngủ trưa trong <b>12:00–12:59</b>, ngoài giờ trừ <b>2 KPI</b>. Chọn ☀️ Ban ngày (không theo giờ thật) thì chỉ bị trừ khi sếp tổng bắt gặp. Sếp tổng ghé mà đang uống trà sữa cũng bị trừ.</li>
       <li><b>📄 KPI tháng âm</b> — âm đến -10: nhắc nhở lần 1 · dưới -10 đến -20: nhắc nhở lần 2 · <b>dưới -20 sau 2 lần nhắc</b>: quản lý duyệt sa thải hoặc cho cơ hội (áp dụng cả NPC và người chơi).</li>
       <li><b>🖥️ Rời bàn phải tắt màn hình</b> — tránh lộ thông tin công việc. Quên tắt quá 15 giây sẽ bị hệ thống bảo mật phát hiện, trừ <b>3 KPI</b> (cả quản lý).</li>
       <li><b>📉 KPI âm</b> thì ngày lương bị trừ tiền theo số điểm âm.</li>
@@ -796,8 +807,12 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="wlogo" id="mlIcon">📄</div><h2 id="mlTitle"></h2><div class="mlbody" id="mlBody"></div>
   <div class="crow"><button type="button" id="mlOk">Đã hiểu 💪</button></div></div></div>
 <div id="fireAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="frTitle"><div class="wcard mcardm">
-  <div class="wlogo">📋</div><h2 id="frTitle"></h2><p class="wsub" id="frSub"></p><div class="bpleft" id="frLeft"></div>
+  <div class="wlogo">📋</div><h2 id="frTitle"></h2><p class="wsub" id="frSub"></p><div class="bpleft" id="frLeft"></div><div class="wblist" id="frList"></div>
   <div class="crow"><button type="button" id="frKeep" class="cghost">🙏 Xem xét cho cơ hội</button><button type="button" id="frFire">✍️ Duyệt sa thải</button></div></div></div>
+<div id="warnBoard" class="welcome" role="dialog" aria-modal="true" aria-labelledby="wbTitle"><div class="wcard mcardm">
+  <div class="wlogo">📋</div><h2 id="wbTitle">Theo dõi nhắc nhở</h2><p class="wsub">Số lần nhắc nhở của từng nhân viên (người chơi 👤 và NPC 🤖) trong tháng. Ai KPI dưới -20 sau 2 lần nhắc sẽ chờ bạn quyết định.</p>
+  <div class="wblist" id="wbList"></div>
+  <div class="crow"><button type="button" id="wbClose">Đóng</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -3764,7 +3779,11 @@ function incTick(){const I=EV.inc;if(!I)return;
     if(c){I.deadline=simTime+999;if(runFix(c))shareAct('fix',c,null);}else I.deadline=simTime+4;}}
 
 /* ================= 3. Sếp tổng ghé thăm ================= */
-const lazyOf=c=>c.eyesShut||c.danceOn||c.mode==='sofa'||!!c.sofaAct||/Ngủ gật|trêu|Khều|khều|sofa|Nhảy|nhảy/.test(c.activity||'');
+const rtOn=()=>{try{return !!RT.tod;}catch(e){return true;}};
+const lunchHour=()=>rtOn()&&nowMin()>=720&&nowMin()<780;               // giờ thật 12:00–12:59 là giờ nghỉ trưa hợp lệ
+const lunchy=c=>/Đi ăn trưa|Ăn trưa|🍱|Ngủ trưa|🛏️/.test(c.activity||'');
+const bobaOn=c=>!!(c.boba&&c.boba.visible);
+const lazyOf=c=>bobaOn(c)||(lunchy(c)&&!lunchHour())||(c.eyesShut&&!(lunchy(c)&&lunchHour()))||c.danceOn||c.mode==='sofa'||!!c.sofaAct||/Ngủ gật|trêu|Khều|khều|sofa|Nhảy|nhảy/.test(c.activity||'');
 async function actBoss(){
   EV.boss=true;EV.lastBoss=simTime;
   try{
@@ -3799,7 +3818,7 @@ async function actBoss(){
       const spot=lazyOf(e)&&!e.atHome()?{x:e.pos.x+.7,z:e.pos.z+.5}:{x:e.home.x-Math.sign(e.home.x)*.9,z:e.home.z+(e.home.face===0?-.55:.55)};
       await B.goStand(spot);B.faceTo(e);B.lookAt=e;e.lookAt=B;
       if(lazyOf(e)){bad++;B.gesture('think',1.6);
-        const why=e.eyesShut?'Giờ làm mà ngủ gật à? 😠':e.danceOn?'Đang giờ làm mà nhảy nhót à? 😤':(e.mode==='sofa'||e.sofaAct)?'Sofa êm quá nhỉ? Về bàn làm việc đi em! 😤':'Trêu nhau trong giờ làm à? 🤨';
+        const why=bobaOn(e)?'Giờ làm mà ngồi uống trà sữa à? 🥤😤':lunchy(e)?(/Ngủ trưa|🛏️/.test(e.activity||'')?'Hết giờ nghỉ trưa rồi mà còn ngủ à? 😠':'Giờ này mà còn ăn trưa à? 🍱😤'):e.eyesShut?'Giờ làm mà ngủ gật à? 😠':e.danceOn?'Đang giờ làm mà nhảy nhót à? 😤':(e.mode==='sofa'||e.sofaAct)?'Sofa êm quá nhỉ? Về bàn làm việc đi em! 😤':'Trêu nhau trong giờ làm à? 🤨';
         await B.say(`${e.name}! ${why} Trừ ${-KPI_PTS.bossbad} KPI!`,2.8);
         if(e.eyesShut){e.eyesShut=false;e.gest=null;}e.think('😳',1.6);addKpi(e,KPI_PTS.bossbad,KPI_WHY.bossbad);
         await e.say(pick(['Dạ em xin lỗi sếp tổng ạ 😭','Em hứa không dám nữa ạ 🙇','Dạ em làm việc ngay đây ạ! 😰']),2);}
@@ -4211,7 +4230,12 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
     if(!EMP.some(e=>!e.away)){setStatus('👨‍💼 Văn phòng không có ai, sếp tổng không ghé nữa.');return false;}guard(actBoss,[]);return true;}
   if(n==='yep'){if(EV.yep){setStatus('🎊 Tiệc tất niên đang diễn ra rồi!');return false;}if(danceRunning||EV.boss){setStatus('⏳ Đợi xong hoạt động hiện tại rồi mở tiệc nhé!');return false;}
     if(freeEmp().length<3){setStatus('⏳ Cần ít nhất 3 người rảnh để mở tiệc tất niên.');return false;}if(!v)return false;guard(()=>actYep(v),[]);return true;}
-  return o(n,c,a);};}
+  const ret=o(n,c,a);if(ret&&(n==='lunch'||n==='siesta'||n==='siestaall'))lunchLate(n,c);return ret;};}
+// theo giờ thật: ăn trưa / ngủ trưa ngoài 12:00–12:59 bị trừ 2 KPI (chọn ☀️ Ban ngày không theo giờ thật thì chỉ bị trừ khi sếp tổng bắt gặp)
+function lunchLate(n,c){if(!rtOn()||lunchHour())return;
+  setTimeout(()=>{const who=n==='siesta'?(c?[c]:[]):CHARS.filter(x=>!x.away&&lunchy(x));if(!who.length)return;
+    who.forEach(x=>{addKpi(x,-2,`${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ (12:00–12:59)`);x.think('⏰',1.6);});
+    setStatus(`⏰ ${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ nghỉ trưa (12:00–12:59): ${who.map(x=>x.name).join(', ')} bị trừ 2 KPI.`);},2200);}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
   quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
@@ -4490,7 +4514,7 @@ function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;const 
   if(!c._firePend&&!FIRE_PEND[c.id]){c._firePend=true;setTimeout(()=>{c._firePend=false;run('firereq',null,{v:c.id});},2000);}}   // gửi hồ sơ cho quản lý xem xét
 {const o=addKpi;addKpi=(c,d,why)=>{const r=o(c,d,why);try{negHit(c,d,why);}catch(e){}return r;};}
 const hrEl=$('#hrPop');let hrT=0;
-function hrPop(kind,c,top,lv,sub){hrEl.className='promopop hrpop '+kind;setAvatar($('#hrAv'),c);$('#hrTop').textContent=top;$('#hrName').textContent=c.name;$('#hrLv').textContent=lv;$('#hrSub').textContent=sub;
+function hrPop(kind,c,top,lv,sub){hrEl.className='promopop hrpop '+kind;hrEl.querySelector('.hrbox').textContent=kind==='warn'?'📄':'📦';hrEl.querySelector('.hrtear').textContent=kind==='warn'?'😰':'😭';setAvatar($('#hrAv'),c);$('#hrTop').textContent=top;$('#hrName').textContent=c.name;$('#hrLv').textContent=lv;$('#hrSub').textContent=sub;
   void hrEl.offsetWidth;hrEl.classList.add('show');stage.classList.add('pop-on');beep(kind==='new');clearTimeout(hrT);hrT=setTimeout(hrHide,8000);}
 function hrHide(){hrEl.classList.remove('show');if(!prEl.classList.contains('show'))stage.classList.remove('pop-on');}
 hrEl.onclick=hrHide;
@@ -4533,7 +4557,7 @@ function runFire(v){const c=byId(v);if(!c||c.manager||c._firing)return false;gua
   const n=negCount(c),r=document.createElement('div');r.className='kmis'+(n?'':' ok');r.textContent=`${n?'⚠️':'✅'} Thư nhắc nhở tháng này: ${n}/${NEG_MAX} · KPI âm → lần 1, dưới -10 → lần 2, dưới -20 → xem xét sa thải`;mis.appendChild(r);};}
 
 /* ===== quản lý xem xét: cho ở lại ngoại lệ hoặc ký đơn thôi việc ===== */
-const FIRE_WAIT=20000;let FIRE_PEND={},fireTimer=0;
+const FIRE_WAIT=30000;let FIRE_PEND={},fireTimer=0;
 function fireReq(v){const c=byId(v);if(!c||c.manager||c._firing||FIRE_PEND[c.id])return false;
   FIRE_PEND[c.id]={at:Date.now()};const me=ME.id&&byId(ME.id),mgrHuman=isHuman(MGR)&&!MGR.away;
   setStatus(`📋 ${c.name} có KPI tháng ${c.kpiMonth||0} (dưới -20) sau 2 lần nhắc nhở — ${MGR.name} đang xem xét: cho ở lại hay ký đơn thôi việc…`);
@@ -4575,6 +4599,8 @@ function tearTick(){CHARS.forEach(c=>{if(!c.crying||!c.tears)return;const t=simT
   try{const p=o(c);const chk=setInterval(()=>{if(c.outside){setCry(c,false);clearInterval(chk);clearInterval(iv);}},300);await p;clearInterval(chk);}finally{clearInterval(iv);setCry(c,false);}return;}return o(c);};}
 
 function negWarn(v){const [id,nS,dS,why,kmS]=String(v||'').split('|');const c=byId(id);if(!c)return false;const n=+nS||1;clearTimeout(c._negFb);
+  negHist(c.id,{n,km:+kmS||0,why:why||'',t:Date.now()});
+  hrPop('warn',c,`⚠️ NHẮC NHỞ LẦN ${n}/${NEG_MAX}`,`KPI tháng ${kmS}${why?' · '+why:''}`,n>=NEG_MAX?'Nhắc nhở cuối cùng — KPI dưới -20 sẽ bị quản lý xem xét sa thải. Cố gắng lên nhé! 💪':'KPI dưới -10 sẽ nhận nhắc nhở lần 2. Cố gắng kéo KPI lên nhé! 💪');
   if(!CAT_HOST){const o=negStore();o.n[id]=Math.max(o.n[id]||0,n);negSave(o);}
   const me=ME.id&&byId(ME.id);c.think('📄',2);
   if(c.id===ME.id)negLetter(c,n,why,+dS||0);
@@ -4631,6 +4657,30 @@ function siestaLock(){const ok=siestaOK();Object.keys(DAY_ONLY).forEach(k=>docum
   b.title=ok?'':'Chỉ mở vào ban ngày: theo giờ thật thì phải là ban ngày, không theo giờ thật thì chọn ☀️ Ban ngày';const t=b.firstChild;if(t&&t.nodeType===3)t.textContent=(ok?DAY_ONLY[k][0]:'🔒')+' '+DAY_ONLY[k][1];}));}
 setInterval(siestaLock,1000);setTimeout(siestaLock,300);
 document.querySelectorAll('[data-tod]').forEach(b=>b.addEventListener('click',()=>setTimeout(siestaLock,50)));{const ck=document.querySelector('#clk');if(ck)ck.addEventListener('click',()=>setTimeout(siestaLock,50));}
+
+/* ===== bảng theo dõi nhắc nhở (quản lý) ===== */
+function negHist(id,e){const o=negStore();o.h=o.h||{};const L=o.h[id]=(o.h[id]||[]);L.push(e);if(L.length>8)L.shift();negSave(o);}
+function renderWarnRows(box,withBtns){box.textContent='';const o=negStore(),H=o.h||{};
+  const list=CHARS.filter(c=>!c.manager).map(c=>({c,n:o.n[c.id]||0,h:H[c.id]||[],pend:!!FIRE_PEND[c.id]})).sort((a,b)=>(b.pend-a.pend)||(b.n-a.n)||((a.c.kpiMonth||0)-(b.c.kpiMonth||0)));
+  list.forEach(({c,n,h,pend})=>{const r=document.createElement('div');r.className='wbrow'+(pend?' pend':n>=2?' n2':n?' n1':'');
+    const top=document.createElement('div');top.className='wbtop';const av=document.createElement('span');av.className='av3';setAvatar(av,c);
+    const t=document.createElement('div');const b=document.createElement('b');b.textContent=c.name+(isHuman(c)?' 👤':' 🤖');const sm=document.createElement('small');
+    sm.textContent=`KPI tháng ${c.kpiMonth||0} · Nhắc nhở ${n}/${NEG_MAX}`+(pend?' · ⏳ chờ quyết định':'');t.append(b,sm);
+    const chip=document.createElement('span');chip.className='wbchip';chip.textContent=pend?'⚠️ Dưới -20':n>=2?'📄📄':n?'📄':'✅';top.append(av,t,chip);r.appendChild(top);
+    if(h.length){const hl=document.createElement('div');hl.className='wbhist';hl.textContent=h.slice(-3).map(e=>`${typeof e.n==='number'?'📄 Lần '+e.n:e.n} · KPI ${e.km}${e.why?' · '+e.why:''} · ${new Date(e.t).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})}`).join('\n');r.appendChild(hl);}
+    if(pend&&withBtns){const row=document.createElement('div');row.className='crow';const k=document.createElement('button');k.type='button';k.className='cghost';k.textContent='🙏 Cho cơ hội';
+      const f=document.createElement('button');f.type='button';f.textContent='✍️ Duyệt sa thải';k.onclick=()=>{run('firedec',null,{v:c.id+':1'});setTimeout(()=>renderWarnRows(box,withBtns),300);};
+      f.onclick=()=>{run('firedec',null,{v:c.id+':0'});setTimeout(()=>renderWarnRows(box,withBtns),300);};row.append(k,f);r.appendChild(row);}
+    box.appendChild(r);});}
+function openWarnBoard(){const me=ME.id&&byId(ME.id);if(!me||!me.manager){setStatus('📋 Bảng theo dõi nhắc nhở chỉ dành cho quản lý.');return;}
+  renderWarnRows($('#wbList'),true);$('#warnBoard').classList.add('show');}
+$('#wbClose').onclick=()=>$('#warnBoard').classList.remove('show');
+setInterval(()=>{if($('#warnBoard').classList.contains('show'))renderWarnRows($('#wbList'),true);if($('#fireAsk').classList.contains('show'))renderWarnRows($('#frList'),false);},2000);
+{const o=openFireAsk;openFireAsk=c=>{o(c);renderWarnRows($('#frList'),false);};}
+{const o=fireDec;fireDec=v=>{const [id,k]=String(v||'').split(':');const had=!!FIRE_PEND[id];const r=o(v);if(had&&r){if(k==='1')negHist(id,{n:'🙏 Được cho cơ hội',km:(byId(id)||{}).kpiMonth||0,why:'',t:Date.now()});else{const q=negStore();q.h=q.h||{};q.h[id]=[];negSave(q);}}return r;};}
+{const o=updateKpiBox;updateKpiBox=()=>{o();const c=selected;if(!c||!c.manager||c.id!==ME.id)return;const mis=$('#kMis');if(!mis)return;const q=negStore(),n=CHARS.filter(x=>!x.manager&&(q.n[x.id]||0)>0).length,p=Object.keys(FIRE_PEND).length;
+  const b=document.createElement('button');b.type='button';b.className='wbbtn';b.textContent=`📋 Theo dõi nhắc nhở · ${n} nhân viên${p?` · ⚠️ ${p} chờ quyết định`:''}`;b.onclick=openWarnBoard;mis.appendChild(b);};}
+window.openWarnBoard=openWarnBoard;
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
