@@ -696,7 +696,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li>💐 Cắm hoa <b>+3</b> · 🧽 Dọn bàn <b>+4</b> · 🌱 Tưới cây, 🐟 chăm Mochi, 🧺 dọn cát <b>+3</b></li>
       <li>🎯 Mỗi ngày có <b>3 nhiệm vụ</b> (tab Cá nhân): xong mỗi cái <b>+20</b>, xong cả 3 mở <b>🎁 hộp quà KPI ngẫu nhiên (+15 đến +50)</b>.</li>
     </ul>
-    <div class="rsec">💡 Ghi nhớ</div>
+    <div class="rsec">📌 Ghi nhớ</div>
     <ul class="rlist">
       <li>📅 Có lời mời họp thì bấm <b>Tham gia</b> hoặc <b>Không tham gia</b> (ghi lý do).</li>
       <li>🙂 Vào làm và tan ca đều <b>check-in / check-out Face ID</b> ở máy cạnh cửa.</li>
@@ -732,7 +732,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
 <div id="flowerModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="flTitle"><div class="wcard mcardm">
-  <div class="wlogo">💐</div><h2 id="flTitle">Cắm hoa cho văn phòng</h2><p class="wsub">Hoa tươi khoảng 9 phút rồi héo dần. Cắm hoa mới được +3 KPI.</p><div class="flwho" id="flWho"></div>
+  <div class="wlogo">💐</div><h2 id="flTitle">Cắm hoa cho văn phòng</h2><p class="wsub">3 bình hoa ở góc thư giãn, góc ăn trưa và phòng sếp. Hoa tươi khoảng 9 phút rồi héo dần, cắm hoa mới được +3 KPI.</p><div class="flwho" id="flWho"></div>
   <div class="wstep">1 · Cắm ở đâu</div><div class="flspots" id="flSpots"></div>
   <div class="wstep">2 · Chọn hoa</div><div class="fltypes" id="flTypes"></div>
   <div class="crow"><button type="button" id="flCancel" class="cghost">Hủy</button><button type="button" id="flGo">Đi cắm hoa 💐</button></div></div></div>
@@ -3982,10 +3982,8 @@ function evTick(dt){
 /* ================= 8. Cắm hoa cho văn phòng ================= */
 const FL_TYPES=[{k:'rose',n:'Hoa hồng',e:'🌹'},{k:'sun',n:'Hướng dương',e:'🌻'},{k:'tulip',n:'Tulip',e:'🌷'},{k:'daisy',n:'Cúc họa mi',e:'🌼'},{k:'lav',n:'Oải hương',e:'💜'}];
 const FL_SPOTS=[
-  {k:'sanh',n:'Sảnh ra vào',x:11.55,z:.55,st:{x:10.85,z:.55,face:PI/2},vc:'#ffd6e4'},
-  {k:'lam',n:'Khu làm việc',x:4.4,z:4.3,st:{x:3.75,z:4.3,face:PI/2},vc:'#cfe8f7'},
+  {k:'thugian',n:'Góc thư giãn',x:-10.45,z:7.45,st:{x:-9.8,z:7.45,face:-PI/2},vc:'#ffd6e4'},
   {k:'an',n:'Góc ăn trưa',x:3.6,z:-3.0,st:{x:3.6,z:-2.35,face:PI},vc:'#fff0c9'},
-  {k:'hop',n:'Phòng họp',x:11.3,z:-3.0,st:{x:10.6,z:-3.0,face:PI/2},vc:'#e3d6ff'},
   {k:'sep',n:'Phòng sếp',x:-11.3,z:-3.0,st:{x:-10.6,z:-3.0,face:-PI/2},vc:'#c8f2e1'}];
 const FL_BUCKET={x:4.0,z:-7.3,st:{x:4.0,z:-6.65,face:PI}};
 const FL_RATE=.65/540;        // ~9 phút (giờ mô phỏng) thì hoa bắt đầu héo
@@ -4025,7 +4023,7 @@ FL_SPOTS.forEach((sp,i)=>{const g=group(sp.x,sp.z,0,office,'bình hoa');const vm
   const tg=canvasTex(256,80,(x,w,h)=>{x.fillStyle='#fff';rr(x,4,4,w-8,h-8,30);x.fill();x.fillStyle='#d0457a';x.font=`700 34px ${FONT}`;x.textAlign='center';x.textBaseline='middle';x.fillText('💐 Hoa tươi',w/2,h/2+2);});
   const sg=new THREE.Sprite(new THREE.SpriteMaterial({map:tg,transparent:true,depthWrite:false}));sg.scale.set(.62,.19,1);sg.position.set(FL_BUCKET.x,1.15,FL_BUCKET.z);scene.add(sg);}
 // hoa có sẵn lúc mở văn phòng
-[['sanh','rose',.95],['an','sun',.55],['sep','tulip',.3]].forEach(([k,t,f])=>{const sp=FL_SPOTS.find(s=>s.k===k);sp.fresh=f;fillVase(sp,t);});
+[['thugian','rose',.95],['an','sun',.55],['sep','tulip',.3]].forEach(([k,t,f])=>{const sp=FL_SPOTS.find(s=>s.k===k);sp.fresh=f;fillVase(sp,t);});
 const flState=sp=>!sp.type?{t:'Trống',e:'⚪'}:sp.fresh>=.45?{t:'Tươi',e:'🌸'}:sp.fresh>=.2?{t:'Sắp héo',e:'🥀'}:{t:'Héo',e:'🥀'};
 function flowerNeed(){return FL_SPOTS.some(sp=>!sp.busy&&(!sp.type||sp.fresh<.45));}
 let flT=0;function flowerTick(dt){flT+=dt;if(flT<1)return;const d=flT;flT=0;
