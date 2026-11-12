@@ -3062,8 +3062,8 @@ async function actPayday(preview){
       if(free){c.phone.visible=false;c.arms='idle';end(c,c.mode||'working');}}));
     if(here.length)confetti(0,1.8,2,70);
     payData=snap;if(!preview){try{const o={};CHARS.forEach((c,i)=>o[c.id]=snap[i]);localStorage.setItem('office_lastpay',JSON.stringify({mon:monKey(d),slips:o}));}catch(e){}LASTPAY={mon:monKey(d),snap};}
-    openPhone();
-    if(!preview){try{mgrTargetLetter();}catch(e){}CHARS.forEach(c=>{c.kpiMonth=0;c.otMonth=0;});kpiSave();refreshCards();
+    openPhone();try{mgrTargetLetter(preview);}catch(e){}
+    if(!preview){CHARS.forEach(c=>{c.kpiMonth=0;c.otMonth=0;});kpiSave();refreshCards();
       setStatus('💰 Đã nhận lương tháng này! KPI tháng được tính lại từ đầu để chuẩn bị cho tháng sau.');}
     else setStatus(`👀 Đây là bản xem thử. Ngày lương thật: ${payDay()}/${d.getMonth()+1} — KPI tháng này vẫn giữ nguyên.`);
   }finally{payRunning=false;}
@@ -4442,12 +4442,14 @@ function scrTick(){const now=Date.now();
   if(c){if(!run('scrfine',null,{v:c.id}))c.scrFined=true;}}
 
 /* ================= target KPI tháng của quản lý: đạt thì thưởng, dưới thì thư nhắc nhở (chỉ quản lý thấy) ================= */
-function mgrTargetLetter(){const m=MGR;if(!m||m.id!==ME.id||!window.__pay)return;const MGR_TARGET=__pay.T,MGR_TARGET_BONUS=__pay.B,vnd=__pay.vnd;const k=m.kpiMonth||0,ok=k>=MGR_TARGET,mon=new Date().getMonth()+1;
-  $('#mlIcon').textContent=ok?'🏆':'📄';$('#mlTitle').textContent=ok?'Chúc mừng đạt target tháng!':'⚠️ Thư nhắc nhở';
+function mgrTargetLetter(preview){const m=MGR;if(!m||m.id!==ME.id||!window.__pay)return;const MGR_TARGET=__pay.T,MGR_TARGET_BONUS=__pay.B,vnd=__pay.vnd;const k=m.kpiMonth||0,ok=k>=MGR_TARGET,mon=new Date().getMonth()+1;
+  $('#mlIcon').textContent=ok?'🏆':'📄';$('#mlTitle').textContent=(ok?'Chúc mừng đạt target tháng!':'⚠️ Thư nhắc nhở')+(preview?' (xem thử)':'');
   $('#mlBody').textContent=ok
     ?`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI — vượt chỉ tiêu tối thiểu của quản lý. Công ty thưởng thêm ${vnd(MGR_TARGET_BONUS)} vào lương tháng này. Cảm ơn bạn đã dẫn dắt team thật tốt! 🎉\n\n— Sếp tổng 👨‍💼`
     :`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI, còn thiếu ${MGR_TARGET-k} KPI so với chỉ tiêu tối thiểu của quản lý.\n\nBan giám đốc ghi nhận nỗ lực của bạn và mong tháng tới bạn cố gắng hơn: chủ trì họp, hoàn thành nhiệm vụ ngày, giữ văn phòng gọn gàng để được sếp tổng khen. Chúng tôi tin bạn làm được! 💪\n\n— Sếp tổng 👨‍💼`;
-  setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(ok);},2500);}
+  if(preview)$('#mlBody').textContent=`📌 Bản xem thử — tính theo KPI hiện tại, thư thật gửi vào ngày lương.\n\n`+$('#mlBody').textContent;
+  // đợi đóng phiếu lương rồi mới hiện thư cho khỏi bị che
+  const t0=Date.now(),iv=setInterval(()=>{const pe=$('#payModal');if((!pe||!pe.classList.contains('show'))||Date.now()-t0>120000){clearInterval(iv);setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(ok);},400);}},300);}
 $('#mlOk').onclick=()=>$('#mgrLetter').classList.remove('show');
 window.mgrTargetLetter=mgrTargetLetter;
 
