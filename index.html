@@ -731,7 +731,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>😴 Ngủ gật trong giờ làm</b> — sếp bắt gặp trừ <b>10 KPI</b>. Muốn nghỉ thì dùng <b>🛏️ Ngủ trưa</b> (không bị trừ).</li>
       <li><b>😜 Khều, trêu đồng nghiệp trong giờ làm</b> — có thể bị trừ <b>3 KPI</b>. Được trêu thoải mái lúc <b>12:00–12:59</b> và <b>sau 17:30</b>.</li>
       <li><b>👨‍💼 Sếp tổng ghé kiểm tra</b> — đang lười trừ <b>8 KPI</b>, bàn bừa bộn trừ <b>5 KPI</b>, văn phòng còn rác (giấy vụn, khay cát Mochi, vũng cà phê) cả team trừ <b>3 KPI</b>.</li>
-      <li><b>📄 Bị trừ KPI</b> — 2 lần đầu trong tháng nhận thư nhắc nhở, <b>quá 2 lần bị sa thải</b> và công ty tuyển nhân viên mới (KPI tính lại từ 0).</li>
+      <li><b>📄 KPI tháng bị âm</b> — 2 lần đầu trong tháng nhận thư nhắc nhở, <b>bị âm quá 2 lần thì sa thải</b> và công ty tuyển nhân viên mới (KPI tính lại từ 0).</li>
       <li><b>🖥️ Rời bàn phải tắt màn hình</b> — tránh lộ thông tin công việc. Quên tắt quá 15 giây sẽ bị hệ thống bảo mật phát hiện, trừ <b>3 KPI</b> (cả quản lý).</li>
       <li><b>📉 KPI âm</b> thì ngày lương bị trừ tiền theo số điểm âm.</li>
     </ul>
@@ -4453,23 +4453,23 @@ function negSave(o){try{localStorage.setItem('office_neg',JSON.stringify(o));}ca
 const negCount=c=>negStore().n[c.id]||0;
 function negLetter(c,n,why,d){const mon=new Date().getMonth()+1,mg=MGR?MGR.name:'Quản lý';
   $('#mlIcon').textContent='📄';$('#mlTitle').textContent=`⚠️ Thư nhắc nhở (lần ${n}/${NEG_MAX})`;
-  $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} bạn đã bị trừ KPI ${n} lần (lần gần nhất: ${why||'vi phạm'} ${d} KPI).\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu bị trừ KPI thêm lần nữa trong tháng, công ty sẽ chấm dứt hợp đồng và tuyển nhân viên mới thay thế.':'Mong bạn chú ý hơn: tắt màn hình khi rời bàn, giữ bàn gọn gàng, không lười khi sếp tổng ghé. Bị trừ quá '+NEG_MAX+' lần trong tháng sẽ bị sa thải.'}\n\n— Quản lý ${mg} 🎖️`;
+  $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} KPI của bạn đã bị âm ${n} lần (hiện còn ${c.kpiMonth} KPI, lần gần nhất do: ${why||'vi phạm'} ${d} KPI).\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu KPI tháng bị âm thêm lần nữa, công ty sẽ chấm dứt hợp đồng và tuyển nhân viên mới thay thế.':'Mong bạn chú ý hơn: tắt màn hình khi rời bàn, giữ bàn gọn gàng, không lười khi sếp tổng ghé. Hãy kéo KPI lên lại trên 0 — bị âm quá '+NEG_MAX+' lần trong tháng sẽ bị sa thải.'}\n\n— Quản lý ${mg} 🎖️`;
   setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(false);},900);}
-function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;
+function negHit(c,d,why,before){if(!c||c.manager||d>=0||c.away||c._firing)return;if(!(before>=0&&(c.kpiMonth||0)<0))return;   // chỉ tính khi KPI tháng chuyển từ không âm sang âm
   const o=negStore();const n=(o.n[c.id]||0)+1;o.n[c.id]=n;negSave(o);
   const me=ME.id&&byId(ME.id);
-  if(n<=NEG_MAX){if(c.id===ME.id)negLetter(c,n,why,d);else if(me&&me.manager)setStatus(`📄 ${c.name} nhận thư nhắc nhở lần ${n}/${NEG_MAX} vì bị trừ KPI (${why||''}).`);}
+  if(n<=NEG_MAX){if(c.id===ME.id)negLetter(c,n,why,d);else if(me&&me.manager)setStatus(`📄 ${c.name} bị âm KPI tháng (${c.kpiMonth} KPI) — nhận thư nhắc nhở lần ${n}/${NEG_MAX}.`);}
   else if(CAT_HOST&&!c._firePend){c._firePend=true;setTimeout(()=>{c._firePend=false;run('fire',null,{v:c.id});},2500);}}   // máy chủ phòng quyết định sa thải rồi gửi cho cả phòng
-{const o=addKpi;addKpi=(c,d,why)=>{const r=o(c,d,why);try{negHit(c,d,why);}catch(e){}return r;};}
+{const o=addKpi;addKpi=(c,d,why)=>{const b=c?(c.kpiMonth||0):0;const r=o(c,d,why);try{negHit(c,d,why,b);}catch(e){}return r;};}
 async function actFire(c){if(!c||c._firing)return;c._firing=true;
   try{
     while(c.busy&&!c.away)await wait(1);
     begin(c,'📦 Thu dọn đồ nghỉ việc');
     const mon=new Date().getMonth()+1;
-    banner('📦',`${c.name} bị sa thải`,`Bị trừ KPI quá ${NEG_MAX} lần trong tháng ${mon} — công ty sẽ tuyển nhân viên mới thay thế`,null,'inc');
-    setStatus(`📦 ${c.name} bị trừ KPI quá ${NEG_MAX} lần trong tháng nên bị sa thải. Phòng nhân sự đang tuyển người mới…`);
+    banner('📦',`${c.name} bị sa thải`,`KPI bị âm quá ${NEG_MAX} lần trong tháng ${mon} — công ty sẽ tuyển nhân viên mới thay thế`,null,'inc');
+    setStatus(`📦 ${c.name} bị âm KPI quá ${NEG_MAX} lần trong tháng nên bị sa thải. Phòng nhân sự đang tuyển người mới…`);
     if(c.id===ME.id){$('#mlIcon').textContent='📦';$('#mlTitle').textContent='Quyết định thôi việc';
-      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} bạn đã bị trừ KPI quá ${NEG_MAX} lần dù đã nhận đủ thư nhắc nhở. Công ty quyết định chấm dứt hợp đồng với bạn.\n\nVị trí của bạn sẽ được tuyển nhân viên mới — bạn tiếp tục chơi với vai nhân viên mới: KPI, cấp bậc và số lần vi phạm tính lại từ đầu. Cố lên nhé! 💪\n\n— Quản lý ${MGR?MGR.name:''} 🎖️`;
+      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} KPI của bạn đã bị âm quá ${NEG_MAX} lần dù đã nhận đủ thư nhắc nhở. Công ty quyết định chấm dứt hợp đồng với bạn.\n\nVị trí của bạn sẽ được tuyển nhân viên mới — bạn tiếp tục chơi với vai nhân viên mới: KPI, cấp bậc và số lần bị âm tính lại từ đầu. Cố lên nhé! 💪\n\n— Quản lý ${MGR?MGR.name:''} 🎖️`;
       $('#mgrLetter').classList.add('show');beep(false);}
     if(!MGR.away&&MGR!==c)MGR.say(`${c.name} ơi, rất tiếc… công ty phải cho em nghỉ việc. 😔`,2.6);
     c.arms='idle';await c.say('Tạm biệt mọi người… mình đi đây 😢',2.2);
@@ -4486,7 +4486,7 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;
 function runFire(v){const c=byId(v);if(!c||c.manager||c._firing)return false;guard(()=>actFire(c),[c]);return true;}
 // hồ sơ KPI của chính mình: số lần bị trừ trong tháng
 {const o=updateKpiBox;updateKpiBox=()=>{o();const c=selected;if(!c||c.manager||c.id!==ME.id)return;const mis=$('#kMis');if(!mis)return;
-  const n=negCount(c),r=document.createElement('div');r.className='kmis'+(n?'':' ok');r.textContent=`${n?'⚠️':'✅'} Bị trừ KPI tháng này: ${n} lần · ${NEG_MAX} lần đầu nhận thư nhắc nhở, quá ${NEG_MAX} lần bị sa thải`;mis.appendChild(r);};}
+  const n=negCount(c),r=document.createElement('div');r.className='kmis'+(n?'':' ok');r.textContent=`${n?'⚠️':'✅'} KPI tháng bị âm: ${n} lần · ${NEG_MAX} lần đầu nhận thư nhắc nhở, quá ${NEG_MAX} lần bị sa thải`;mis.appendChild(r);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
