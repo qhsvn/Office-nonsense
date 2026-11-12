@@ -3962,15 +3962,15 @@ const QN=5,QT=12000,QR=3500,QLEAD=4500;
 const qzEl=$('#quizBox');
 function qzShow(){qzEl.classList.add('show');stage.classList.add('quiz-on');}   // bảng minigame hiện thì ẩn tên/bong bóng thoại cho khỏi chồng
 function qzHide(){qzEl.classList.remove('show');stage.classList.remove('quiz-on');}
-function makeQuiz(){const idx=shuffle(QBANK.map((_,i)=>i)).slice(0,QN),lead=present().some(c=>isHuman(c)&&c.id!==ME.id)?14000:QLEAD;return `${Date.now()+lead}|${idx.join('.')}|${Math.floor(Math.random()*1e9)}|${ME.id||''}`;}
+function makeQuiz(){const idx=shuffle(QBANK.map((_,i)=>i)).slice(0,QN),lead=CHARS.some(c=>c.claimName&&c.id!==ME.id)?14000:QLEAD;return `${Date.now()+lead}|${idx.join('.')}|${Math.floor(Math.random()*1e9)}|${ME.id||''}`;}
 const QUIZ_NO=['📊 Đang chạy deadline','📞 Đang nghe điện thoại khách','🤯 Hôm nay hơi mệt','🙈 Ngại thua lắm','🍜 Đang ăn dở'];
 // người chơi khác được hỏi có tham gia minigame không (nhân vật trống mặc định tham gia)
 function quizAsk(Q,by){const me=ME.id&&byId(ME.id);if(!me||!Q.players.includes(me)||me.id===by)return;
-  const bc=byId(by);GRP_ASKED={quiz:Q.start,until:Q.start,n:'quiz'};$('#gaWhy').style.display='none';$('#gaWhy').textContent='';$('#gaNo').style.display='';
+  const bc=byId(by),until=Math.max(Q.start,Date.now()+12000);GRP_ASKED={quiz:Q.start,until,n:'quiz'};$('#gaWhy').style.display='none';$('#gaWhy').textContent='';$('#gaNo').style.display='';
   $('#gaIcon').textContent='🎮';$('#gaTitle').textContent=`${bc?bc.name:'Một người chơi'} mời cả nhóm: 🎮 Minigame đố vui`;
   $('#gaSub').textContent='Tham gia để giành KPI (top 3: +20/+10/+5). Không tham gia thì chọn lý do — cả phòng sẽ thấy.';
   gaEl.classList.add('show');clearInterval(gaTimer);
-  const tk=()=>{const left=Math.max(0,Math.ceil((Q.start-Date.now())/1000));$('#gaLeft').textContent=`Còn ${left} giây — không trả lời thì vẫn được tính là tham gia`;if(left<=0||EV.quiz!==Q){clearInterval(gaTimer);if(GRP_ASKED&&GRP_ASKED.quiz===Q.start){gaEl.classList.remove('show');GRP_ASKED=null;}}};tk();gaTimer=setInterval(tk,500);beep(true);}
+  const tk=()=>{const left=Math.max(0,Math.ceil((until-Date.now())/1000));$('#gaLeft').textContent=`Còn ${left} giây — không trả lời thì vẫn được tính là tham gia`;if(left<=0||EV.quiz!==Q){clearInterval(gaTimer);if(GRP_ASKED&&GRP_ASKED.quiz===Q.start){gaEl.classList.remove('show');GRP_ASKED=null;}}};tk();gaTimer=setInterval(tk,500);beep(true);}
 function quizJoin(c,v){const [st,y,ri]=String(v||'').split(':');const Q=EV.quiz;if(!c)return false;
   if(y==='1'){c.think('🙋',1.6);return true;}
   c.say(`Mình xin phép không chơi minigame: ${QUIZ_NO[(+ri||0)%QUIZ_NO.length]} 🙏`,3);
@@ -4612,30 +4612,31 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 
 /* ===== đồng bộ hành động giữa người chơi cùng phòng =====
    Lệnh bạn ra cho nhân vật của mình (và lệnh cả nhóm bạn bấm) được gửi kèm presence; máy người khác chạy lại đúng lệnh đó. */
-let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null;
+let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
 ['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
-  MY_ACT={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
+  {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
   if(ok&&!REMOTE_EXEC&&(!AUTO_EXEC||CAT_HOST)){if(c&&(c.id===ME.id||!c.claimName)&&SYNC_SOLO.has(n))shareAct(n,c,a);else if(SYNC_GROUP.has(n)&&(!c||n==='birthday'))shareAct(n,n==='birthday'?c:null,a);}
   return ok;};}
 {const o=autoTick;autoTick=()=>{AUTO_EXEC=true;try{o();}finally{AUTO_EXEC=false;}};}
 const peerActSeen={};const actQueue=[];
-function peerAct(key,act){if(!act||typeof act!=='object'||typeof act.at!=='number'||typeof act.n!=='string')return;
-  const id=act.k+act.at;if(peerActSeen[key]===id)return;const first=!(key in peerActSeen);peerActSeen[key]=id;
-  if(first&&Date.now()-act.at>8000)return;              // vừa vào phòng: bỏ qua lệnh cũ
-  if(Date.now()-act.at>60000)return;
-  if(!SYNC_SOLO.has(act.n)&&!SYNC_GROUP.has(act.n))return;
-  actQueue.push({act,tries:0,next:0});}
+function peerAct(key,act){if(!act||typeof act!=='object')return;const S=peerActSeen[key]||(peerActSeen[key]={ids:new Set(),first:true});const first=S.first;S.first=false;
+  (Array.isArray(act.q)?act.q.slice(-8):[]).concat([act]).forEach(a=>{if(!a||typeof a!=='object'||typeof a.at!=='number'||typeof a.n!=='string')return;
+    const id=a.k+a.at;if(S.ids.has(id))return;S.ids.add(id);if(S.ids.size>80)S.ids=new Set([...S.ids].slice(-40));
+    if(first&&Date.now()-a.at>8000)return;              // vừa vào phòng: bỏ qua lệnh cũ
+    if(Date.now()-a.at>60000)return;
+    if(!SYNC_SOLO.has(a.n)&&!SYNC_GROUP.has(a.n))return;
+    actQueue.push({act:a,tries:0,next:0});});}
 let actAt=0;function actTick(){if(simTime<actAt||!actQueue.length)return;actAt=simTime+.5;
-  for(let i=actQueue.length-1;i>=0;i--){const q=actQueue[i];if(simTime<q.next)continue;const a=q.act;
-    const c=a.c?byId(a.c):null;if(a.c&&(!c||c.id===ME.id)){actQueue.splice(i,1);continue;}
+  for(let i=0;i<actQueue.length;i++){const q=actQueue[i];if(simTime<q.next)continue;const a=q.act;
+    const c=a.c?byId(a.c):null;if(a.c&&(!c||c.id===ME.id)){actQueue.splice(i--,1);continue;}
     let arg;if(a.a&&a.a.id)arg=byId(a.a.id);else if(a.a&&typeof a.a.x==='number')arg={x:a.a.x,z:a.a.z};else if(a.a&&typeof a.a.v==='string')arg={v:a.a.v.slice(0,400)};
     if(c&&c.busy&&a.n!=='quizans'&&a.n!=='bobapick'&&a.n!=='grpans'&&a.n!=='mgrsorry'&&q.tries<40){q.tries++;q.next=simTime+1;continue;}    // nhân vật đang dở việc trên máy này: đợi xong rồi làm
     REMOTE_EXEC=true;try{run(a.n,c,arg);}catch(e){}finally{REMOTE_EXEC=false;}
-    actQueue.splice(i,1);}}
+    actQueue.splice(i--,1);}}
 setTimeout(()=>{if(window.OFFICE){OFFICE.peerAct=peerAct;OFFICE.myAct=()=>MY_ACT;}},0);
 
 /* ===== Mochi đồng nhất: một máy làm "chủ" (máy vào phòng có mã tab nhỏ nhất), các máy khác đi theo ===== */
