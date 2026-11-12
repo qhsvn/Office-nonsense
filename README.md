@@ -1,5 +1,7 @@
 # 🏢 Office Nonsense (Công sở Zô Tri)
 
+[![Office Nonsense (Công sở Zô Tri)](banner.jpg)](https://qhsvn.github.io/Office-nonsense/)
+
 Văn phòng 3D phong cách pastel, nhân vật chibi, chơi ngay trên trình duyệt (máy tính và điện thoại).
 
 **▶️ Chơi ngay:** https://qhsvn.github.io/Office-nonsense/
