@@ -4446,7 +4446,7 @@ function mgrTargetLetter(preview){const m=MGR;if(!m||m.id!==ME.id||!window.__pay
   $('#mlIcon').textContent=ok?'🏆':'📄';$('#mlTitle').textContent=(ok?'Chúc mừng đạt target tháng!':'⚠️ Thư nhắc nhở')+(preview?' (xem thử)':'');
   $('#mlBody').textContent=ok
     ?`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI — vượt chỉ tiêu tối thiểu của quản lý. Công ty thưởng thêm ${vnd(MGR_TARGET_BONUS)} vào lương tháng này. Cảm ơn bạn đã dẫn dắt team thật tốt! 🎉\n\n— Sếp tổng 👨‍💼`
-    :`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI, còn thiếu ${MGR_TARGET-k} KPI so với chỉ tiêu tối thiểu của quản lý.\n\nBan giám đốc ghi nhận nỗ lực của bạn và mong tháng tới bạn cố gắng hơn: chủ trì họp, hoàn thành nhiệm vụ ngày, giữ văn phòng gọn gàng để được sếp tổng khen. Chúng tôi tin bạn làm được! 💪\n\n— Sếp tổng 👨‍💼`;
+    :`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI, còn thiếu ${MGR_TARGET-k} KPI so với chỉ tiêu tối thiểu của quản lý.\n\nBan giám đốc ghi nhận nỗ lực của bạn và mong tháng tới bạn cố gắng hơn. Chúng tôi tin bạn làm được! 💪\n\n— Sếp tổng 👨‍💼`;
   if(preview)$('#mlBody').textContent=`📌 Bản xem thử — tính theo KPI hiện tại, thư thật gửi vào ngày lương.\n\n`+$('#mlBody').textContent;
   // đợi đóng phiếu lương rồi mới hiện thư cho khỏi bị che
   const t0=Date.now(),iv=setInterval(()=>{const pe=$('#payModal');if((!pe||!pe.classList.contains('show'))||Date.now()-t0>120000){clearInterval(iv);setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(ok);},400);}},300);}
