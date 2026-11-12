@@ -9,7 +9,7 @@ Văn phòng 3D phong cách pastel, nhân vật chibi, chơi ngay trên trình du
 - Làm việc, báo cáo sếp, in tài liệu, gọi điện, họp nhóm, mời họp (trực tiếp hoặc online), ăn trưa, sinh nhật, ngủ trưa, đi WC, tan làm, tăng ca, nghỉ ốm.
 - Mèo Mochi: cho ăn, cho uống, dọn cát, vuốt ve.
 - KPI, cấp bậc, nhiệm vụ hằng ngày, bằng khen và thông báo chúc mừng thăng chức, ngày lương cuối tháng.
-- 🧋 Đặt trà sữa cả team, 💥 sự cố ngẫu nhiên (mất điện, kẹt giấy, Mochi đổ cà phê), 👔 sếp tổng ghé kiểm tra, 🎊 tiệc tất niên (karaoke, bốc thăm), 🎮 minigame đố vui cả phòng.
+- 💐 Cắm hoa cho văn phòng (5 bình hoa, 5 loại hoa, hoa héo dần), 🥤 đặt trà sữa cả team, 💥 sự cố ngẫu nhiên (mất điện, kẹt giấy, Mochi đổ cà phê), 👔 sếp tổng ghé kiểm tra, 🎊 tiệc tất niên (karaoke, bốc thăm), 🎮 minigame đố vui cả phòng.
 - 💬 Chat nhiều người theo mã phòng, gửi ảnh, 📎 giao file Word / Excel / PowerPoint và mở đọc ngay trong trang.
 - 🎵 Nhạc nền và nhạc xả stress, nghe chung cả phòng.
 

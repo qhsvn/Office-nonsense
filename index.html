@@ -417,6 +417,14 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .bpleft{font-size:12px;color:var(--muted);margin-top:8px}
 #gaYes{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff;box-shadow:0 6px 16px rgba(143,208,255,.4)}
 #bobaPick .crow,#grpAsk .crow{margin-top:12px}
+.flspots{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.flspots button,.fltypes button{font:inherit;text-align:left;border:2px solid #e3e9f4;background:#f8fbff;color:var(--ink);border-radius:14px;padding:8px 10px;cursor:pointer}
+.flspots button b{display:block;font-size:13px}.flspots button small{display:block;font-size:11.5px;color:var(--muted)}
+.flspots button.on,.fltypes button.on{border-color:#ff8fb8;background:#fff0f6}.flspots button.dis{opacity:.5;cursor:not-allowed}
+.fltypes{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px}
+.fltypes button{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}.fltypes .fle{font-size:22px}
+.flwho{font-size:12.5px;font-weight:600;color:#3f8ec9;background:#eef6ff;border-radius:10px;padding:6px 10px;margin-top:6px}
+#flGo{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff;box-shadow:0 6px 16px rgba(143,208,255,.4)}
 </style>
 </head>
 <body>
@@ -565,6 +573,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b" data-cmd="sofa">🛋️ Ra sofa</button>
           <button class="b pink" data-cmd="dancesolo">💃 Nhảy xả stress</button>
           <button class="b" data-cmd="water">🌱 Tưới cây</button>
+          <button class="b" data-cmd="flowers">💐 Cắm hoa</button>
           <button class="b" data-cmd="nap">😴 Ngủ gật</button>
           <button class="b" data-cmd="siesta">🛏️ Ngủ trưa</button>
           <button class="b" data-cmd="wc">🚻 Đi WC</button>
@@ -684,7 +693,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
       <li>🖨️ In tài liệu <b>+6</b> · 📞 Gọi khách <b>+6</b> · 💬 Trao đổi <b>+5</b> · 🧹 Quét văn phòng <b>+5</b></li>
       <li>🛠️ Xử lý sự cố <b>+8</b> · 👔 Sếp tổng khen <b>+5</b> (bắt lười <b>−8</b>) · 🎮 Minigame top 3 <b>+20/+10/+5</b></li>
-      <li>🧽 Dọn bàn <b>+4</b> · 🌱 Tưới cây, 🐟 chăm Mochi, 🧺 dọn cát <b>+3</b></li>
+      <li>💐 Cắm hoa <b>+3</b> · 🧽 Dọn bàn <b>+4</b> · 🌱 Tưới cây, 🐟 chăm Mochi, 🧺 dọn cát <b>+3</b></li>
       <li>🎯 Mỗi ngày có <b>3 nhiệm vụ</b> (tab Cá nhân): xong mỗi cái <b>+20</b>, xong cả 3 mở <b>🎁 hộp quà KPI ngẫu nhiên (+15 đến +50)</b>.</li>
     </ul>
     <div class="rsec">💡 Ghi nhớ</div>
@@ -722,6 +731,11 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
+<div id="flowerModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="flTitle"><div class="wcard mcardm">
+  <div class="wlogo">💐</div><h2 id="flTitle">Cắm hoa cho văn phòng</h2><p class="wsub">Hoa tươi khoảng 9 phút rồi héo dần. Cắm hoa mới được +3 KPI.</p><div class="flwho" id="flWho"></div>
+  <div class="wstep">1 · Cắm ở đâu</div><div class="flspots" id="flSpots"></div>
+  <div class="wstep">2 · Chọn hoa</div><div class="fltypes" id="flTypes"></div>
+  <div class="crow"><button type="button" id="flCancel" class="cghost">Hủy</button><button type="button" id="flGo">Đi cắm hoa 💐</button></div></div></div>
 <div id="fileSend" class="welcome" role="dialog" aria-modal="true" aria-labelledby="fsTitle"><div class="wcard mcardm">
   <div class="wlogo">📎</div><h2 id="fsTitle">Giao file cho sếp / đồng nghiệp</h2><p class="wsub">Nhân vật của bạn mang tài liệu đi giao. Người nhận bấm “📖 Mở” để đọc ngay trong trang.</p>
   <div class="wstep">1 · Chọn file</div><label class="fspick"><span id="fsPick">📂 Chọn file Word / Excel / PowerPoint</span><input type="file" id="fsFile" accept=".docx,.xlsx,.pptx,.csv,.txt,.md" hidden></label><div class="fsinfo" id="fsInfo"></div>
@@ -3942,6 +3956,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
   if(c&&AUTO_EXEC&&isHuman(c))return false;      // chế độ Tự động không điều khiển nhân vật có người chơi
   if(n==='quizans'){if(!c||!v)return false;const [qi,op,t]=v.split(':').map(Number);quizAnswer(c.id,qi,op,t);return true;}
   if(n==='fix')return runFix(c);
+  if(n==='flowers')return runFlowers(c,v);
   if(n==='quiz'){if(!v)return false;return quizStart(v);}
   if(n==='incident'){if(!v)return false;return incStart(v);}
   if(n==='boba'){if(EV.boba){setStatus('🥤 Trà sữa đang được giao rồi!');return false;}if(!v)return false;guard(()=>actBoba(v),[]);return true;}
@@ -3951,7 +3966,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
     if(freeEmp().length<3){setStatus('⏳ Cần ít nhất 3 người rảnh để mở tiệc tất niên.');return false;}if(!v)return false;guard(()=>actYep(v),[]);return true;}
   return o(n,c,a);};}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzEl.classList.add('show');return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox()};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzEl.classList.add('show');return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),flowers:()=>openFlowers()};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
@@ -3961,8 +3976,103 @@ function evTick(dt){
   VISITORS.forEach(v=>{if(v.root.visible)v.update(dt);});
   CHARS.forEach(c=>{if(c.boba&&c.boba.visible)c.boba.rotation.copy(c.cupG.rotation);});
   if(YEPD.g.visible){const t=simTime;YEPD.parts.forEach(b=>{b.position.y+=Math.sin(t*1.6+b.userData.bob)*.0015;});YEPD.bulbs.forEach((b,i)=>{b.visible=(Math.floor(t*3)+i)%3!==0;});}
-  incTick();quizTick();evRandTick();
+  incTick();quizTick();evRandTick();flowerTick(dt);
 }
+
+/* ================= 8. Cắm hoa cho văn phòng ================= */
+const FL_TYPES=[{k:'rose',n:'Hoa hồng',e:'🌹'},{k:'sun',n:'Hướng dương',e:'🌻'},{k:'tulip',n:'Tulip',e:'🌷'},{k:'daisy',n:'Cúc họa mi',e:'🌼'},{k:'lav',n:'Oải hương',e:'💜'}];
+const FL_SPOTS=[
+  {k:'sanh',n:'Sảnh ra vào',x:11.55,z:.55,st:{x:10.85,z:.55,face:PI/2},vc:'#ffd6e4'},
+  {k:'lam',n:'Khu làm việc',x:4.4,z:4.3,st:{x:3.75,z:4.3,face:PI/2},vc:'#cfe8f7'},
+  {k:'an',n:'Góc ăn trưa',x:3.6,z:-3.0,st:{x:3.6,z:-2.35,face:PI},vc:'#fff0c9'},
+  {k:'hop',n:'Phòng họp',x:11.3,z:-3.0,st:{x:10.6,z:-3.0,face:PI/2},vc:'#e3d6ff'},
+  {k:'sep',n:'Phòng sếp',x:-11.3,z:-3.0,st:{x:-10.6,z:-3.0,face:-PI/2},vc:'#c8f2e1'}];
+const FL_BUCKET={x:4.0,z:-7.3,st:{x:4.0,z:-6.65,face:PI}};
+const FL_RATE=.65/540;        // ~9 phút (giờ mô phỏng) thì hoa bắt đầu héo
+const STEM_M=mat('#5aa86b',{roughness:.7}),LEAF_M=mat('#7cc58a',{roughness:.7}),WILT_C=new THREE.Color('#8a6a4a');
+KPI_PTS.flower=3;KPI_WHY.flower='Cắm hoa';MISSIONS.push({k:'flower',n:1,t:'Cắm hoa cho văn phòng',e:'💐'});
+function flHead(type,g,i){const hm=[];const M=c=>{const m=new THREE.MeshStandardMaterial({color:c,roughness:.55});m.userData.base=new THREE.Color(c);return m;};
+  if(type==='rose'){const m=M(['#e0445a','#ff6f9f','#ff8fb8'][i%3]);const h=sph(.045,m,0,0,0,g,12,10);h.scale.set(1,.85,1);hm.push(h);const c=sph(.022,m,0,.03,0,g,8,6);hm.push(c);}
+  else if(type==='sun'){const m=M('#ffcc33'),m2=M('#6b4226');const d=cyl(.065,.065,.014,m,0,0,0,g,16);d.rotation.x=PI/2-.35;hm.push(d);const c=cyl(.03,.03,.02,m2,0,0,.006,g,12);c.rotation.x=PI/2-.35;hm.push(c);}
+  else if(type==='tulip'){const m=M(['#ff6f6f','#ffd45e','#ff9fd0','#c9a8ff'][i%4]);const h=sph(.04,m,0,.01,0,g,12,10);h.scale.set(1,1.45,1);hm.push(h);}
+  else if(type==='daisy'){const m=M('#ffffff'),m2=M('#ffd45e');const h=sph(.038,m,0,0,0,g,12,8);h.scale.set(1,.35,1);hm.push(h);hm.push(sph(.016,m2,0,.012,0,g,8,6));}
+  else{const m=M(['#a78bdb','#9a7fd1','#b79ce6'][i%3]);for(let k=0;k<5;k++){const b=sph(.016,m,0,-.04+k*.022,0,g,6,5);b.scale.set(1,1.4,1);hm.push(b);}}
+  hm.forEach(h=>h.castShadow=false);return hm;}
+function fillVase(sp,type){
+  while(sp.fl.children.length)sp.fl.remove(sp.fl.children[0]);sp.heads=[];sp.stems=[];sp.type=type;if(!type)return;
+  const n=type==='daisy'?9:type==='lav'?8:type==='sun'?5:7;
+  for(let i=0;i<n;i++){const o=new THREE.Group();o.rotation.y=i/n*TAU+rand(-.3,.3);sp.fl.add(o);
+    const s=new THREE.Group();const tilt=i===0?.05:rand(.18,.38);s.rotation.x=tilt;o.add(s);s.userData.tilt=tilt;sp.stems.push(s);
+    const h=rand(.36,.5);const st=cyl(.006,.006,h,STEM_M,0,h/2,0,s,5);st.castShadow=false;
+    const hg=new THREE.Group();hg.position.y=h;s.add(hg);sp.heads.push(...flHead(type,hg,i));
+    if(i%2===0){const lf=sph(.03,LEAF_M,.025,h*.45,0,s,6,4);lf.scale.set(1.6,.35,.8);lf.rotation.z=.6;lf.castShadow=false;}}
+  sp.lastW=-1;applyWilt(sp);}
+function applyWilt(sp){const w=sp.type?clamp((.45-sp.fresh)/.45,0,1):0;if(Math.abs(w-sp.lastW)<.02)return;sp.lastW=w;
+  sp.stems.forEach(s=>{s.rotation.x=s.userData.tilt+w*1.0;});
+  sp.heads.forEach(h=>{const m=h.material;if(m.userData.base)m.color.copy(m.userData.base).lerp(WILT_C,w*.8);});}
+FL_SPOTS.forEach((sp,i)=>{const g=group(sp.x,sp.z,0,office,'bình hoa');const vm=soft(sp.vc,{roughness:.35});
+  sph(.16,vm,0,.19,0,g,18,14).scale.set(1,1.2,1);cyl(.075,.11,.17,vm,0,.42,0,g,16);
+  const rim=mk(new THREE.TorusGeometry(.078,.014,8,20),vm,0,.505,0,g);rim.rotation.x=PI/2;
+  cyl(.12,.12,.012,mat('#ffffff',{roughness:.5}),0,.006,0,g,18).castShadow=false;
+  sp.fl=new THREE.Group();sp.fl.position.y=.48;g.add(sp.fl);sp.heads=[];sp.stems=[];sp.fresh=-1;sp.type=null;
+  addObstacle(sp.x-.2,sp.x+.2,sp.z-.2,sp.z+.2);});
+// xô hoa để lấy hoa
+{const g=group(FL_BUCKET.x,FL_BUCKET.z,0,office,'xô hoa');cyl(.2,.16,.34,soft('#9fc3e8',{roughness:.4}),0,.17,0,g,18);
+  const r=mk(new THREE.TorusGeometry(.2,.015,8,22),mat('#7fa8d6'),0,.34,0,g);r.rotation.x=PI/2;
+  const fake={fl:new THREE.Group(),heads:[],stems:[],fresh:1};fake.fl.position.y=.3;g.add(fake.fl);
+  FL_TYPES.forEach((t,i)=>{const s={fl:new THREE.Group(),heads:[],stems:[],fresh:1};s.fl.position.set(Math.cos(i*1.26)*.08,0,Math.sin(i*1.26)*.08);s.fl.scale.setScalar(.75);fake.fl.add(s.fl);fillVase(s,t.k);});
+  addObstacle(FL_BUCKET.x-.24,FL_BUCKET.x+.24,FL_BUCKET.z-.24,FL_BUCKET.z+.24);
+  const tg=canvasTex(256,80,(x,w,h)=>{x.fillStyle='#fff';rr(x,4,4,w-8,h-8,30);x.fill();x.fillStyle='#d0457a';x.font=`700 34px ${FONT}`;x.textAlign='center';x.textBaseline='middle';x.fillText('💐 Hoa tươi',w/2,h/2+2);});
+  const sg=new THREE.Sprite(new THREE.SpriteMaterial({map:tg,transparent:true,depthWrite:false}));sg.scale.set(.62,.19,1);sg.position.set(FL_BUCKET.x,1.15,FL_BUCKET.z);scene.add(sg);}
+// hoa có sẵn lúc mở văn phòng
+[['sanh','rose',.95],['an','sun',.55],['sep','tulip',.3]].forEach(([k,t,f])=>{const sp=FL_SPOTS.find(s=>s.k===k);sp.fresh=f;fillVase(sp,t);});
+const flState=sp=>!sp.type?{t:'Trống',e:'⚪'}:sp.fresh>=.45?{t:'Tươi',e:'🌸'}:sp.fresh>=.2?{t:'Sắp héo',e:'🥀'}:{t:'Héo',e:'🥀'};
+function flowerNeed(){return FL_SPOTS.some(sp=>!sp.busy&&(!sp.type||sp.fresh<.45));}
+let flT=0;function flowerTick(dt){flT+=dt;if(flT<1)return;const d=flT;flT=0;
+  FL_SPOTS.forEach(sp=>{if(!sp.type)return;const was=flState(sp).t;sp.fresh=Math.max(0,sp.fresh-FL_RATE*d);applyWilt(sp);
+    if(was!==flState(sp).t&&flState(sp).t==='Héo')setStatus(`🥀 Hoa ở ${sp.n} héo rồi — ai rảnh thì “💐 Cắm hoa” mới nhé!`);});}
+async function actFlowers(c,sp,tk){
+  const T=FL_TYPES.find(t=>t.k===tk)||FL_TYPES[0];sp.busy=c;
+  try{
+    begin(c,'💐 Đi lấy hoa');setStatus(`💐 ${c.name} ra xô hoa chọn ${T.n} để cắm ở ${sp.n}.`);c.standUp();
+    await c.goStand(FL_BUCKET.st);c.yaw=FL_BUCKET.st.face;c.arms='water';c.think(T.e,1.6);await wait(1.3);
+    const bq=new THREE.Group();bq.position.set(0,-.02,.06);c.armR.hand.add(bq);const tmp={fl:bq,heads:[],stems:[],fresh:1};fillVase(tmp,T.k);bq.scale.setScalar(.55);
+    c.arms='hold';setAct(c,`💐 Mang ${T.n} tới ${sp.n}`);
+    await c.goStand(sp.st);c.yaw=sp.st.face;
+    if(sp.type){c.think(sp.fresh<.45?'🥀':'🌸',1.4);setAct(c,'🧺 Bỏ hoa cũ');await tween(.6,p=>sp.fl.scale.setScalar(Math.max(.01,1-p)));fillVase(sp,null);await wait(.3);}
+    c.arms='water';setAct(c,`💐 Cắm ${T.n}`);c.armR.hand.remove(bq);
+    fillVase(sp,T.k);sp.fresh=1;sp.lastW=-1;applyWilt(sp);sp.fl.scale.setScalar(.01);
+    await tween(1.2,p=>sp.fl.scale.setScalar(Math.max(.01,p*(2-p))));c.think('🌸',1.6);confetti(sp.x,1.1,sp.z,24);
+    c.arms='idle';c.gesture('heart',1.6);
+    setStatus(`💐 ${c.name} đã cắm bình ${T.n} tươi rói ở ${sp.n} — +${KPI_PTS.flower} KPI!`);
+    await c.say(pick([`${T.e} Hoa tươi rồi, văn phòng thơm ghê!`,'Cắm xong rồi, xinh chưa nè? 💐','Có hoa tươi làm việc vui hơn hẳn! 🌸',`${T.n} là loại mình thích nhất đó ${T.e}`]),2.2);
+    const o=present().filter(x=>x!==c&&!x.busy&&Math.hypot(x.pos.x-c.pos.x,x.pos.z-c.pos.z)<7);if(o.length){const r=pick(o);r.lookAt=c;r.say(pick(['Đẹp quá trời! 😍','Thơm ghê á 🌸','Khéo tay quá nha! 👏']),1.8).then(()=>{if(r.lookAt===c)r.lookAt=null;});}
+    kpiEvent(c,'flower');
+  }finally{sp.busy=null;}
+  setAct(c,'🚶 Quay về chỗ');await c.goSit(c.home);end(c,'working');}
+function runFlowers(c,v){
+  if(!c){setStatus('👆 Chọn một người (hoặc nhân vật của bạn) để đi cắm hoa nhé.');return false;}
+  if(c.away){setStatus(awayMsg(c));return false;}if(c.busy){busyMsg(c);return false;}
+  let [k,t]=String(v||'').split(':');let sp=FL_SPOTS.find(s=>s.k===k);
+  if(!sp){const free=FL_SPOTS.filter(s=>!s.busy);if(!free.length){setStatus('💐 Bình nào cũng đang có người cắm rồi!');return false;}sp=free.slice().sort((a,b)=>(a.type?a.fresh:-1)-(b.type?b.fresh:-1))[0];}
+  if(sp.busy){setStatus(`💐 ${sp.busy.name} đang cắm hoa ở ${sp.n} rồi, chọn chỗ khác nhé!`);return false;}
+  if(!FL_TYPES.some(x=>x.k===t))t=pick(FL_TYPES).k;
+  guard(()=>actFlowers(c,sp,t),[c]);return true;}
+const flEl=$('#flowerModal');let flPick={s:null,t:null};
+function openFlowers(){const c=selected||(ME.id?byId(ME.id):null);
+  if(!c){setStatus('👆 Chọn một người (hoặc nhân vật của bạn) trước rồi mới đi cắm hoa được nhé.');return;}
+  if(isHuman(c)&&c.id!==ME.id){setStatus(`🔒 ${c.name} là nhân vật của người chơi khác — bạn chỉ ra lệnh được cho nhân vật của mình.`);return;}
+  if(c.away){setStatus(awayMsg(c));return;}
+  flEl.dataset.c=c.id;$('#flWho').textContent=`Người cắm: ${c.name}${c.busy?' (đang bận — làm xong sẽ đi)':''}`;
+  const worst=FL_SPOTS.filter(s=>!s.busy).sort((a,b)=>(a.type?a.fresh:-1)-(b.type?b.fresh:-1))[0];flPick={s:worst?worst.k:null,t:flPick.t||'rose'};renderFl();flEl.classList.add('show');}
+function renderFl(){const S=$('#flSpots'),T=$('#flTypes');S.textContent='';T.textContent='';
+  FL_SPOTS.forEach(sp=>{const st=flState(sp),b=document.createElement('button');b.type='button';b.className=(flPick.s===sp.k?'on ':'')+(sp.busy?'dis':'');
+    b.innerHTML='';const a=document.createElement('b');a.textContent=sp.n;const s=document.createElement('small');s.textContent=sp.busy?`💐 ${sp.busy.name} đang cắm`:`${st.e} ${st.t}${sp.type?' · '+FL_TYPES.find(x=>x.k===sp.type).n:''}`;b.append(a,s);
+    b.onclick=()=>{if(sp.busy)return;flPick.s=sp.k;renderFl();};S.appendChild(b);});
+  FL_TYPES.forEach(t=>{const b=document.createElement('button');b.type='button';b.className=flPick.t===t.k?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=t.e;const n=document.createElement('span');n.textContent=t.n;b.append(e,n);b.onclick=()=>{flPick.t=t.k;renderFl();};T.appendChild(b);});
+  $('#flGo').disabled=!flPick.s;}
+$('#flCancel').onclick=()=>flEl.classList.remove('show');
+$('#flGo').onclick=()=>{const c=byId(flEl.dataset.c);if(!c||!flPick.s)return;flEl.classList.remove('show');run('flowers',c,{v:flPick.s+':'+flPick.t});};
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -4151,7 +4261,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null;
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   MY_ACT={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
@@ -4279,7 +4389,7 @@ function autoTick(){
   if(!c.manager&&!MGR.busy)opts.push(['report',2]);
   const mates=idle.filter(o=>o!==c&&!o.manager);if(mates.length)opts.push(['exchange',2.5]);
   {if(LITTER.dirty>=2)opts.push(['litter',LITTER.dirty*.4]);const ms=MESS[c.id];if(ms&&ms.lv>=2)opts.push(['clean',ms.lv*.5]);if(DUST.some(d=>d.on))opts.push(['sweep',.6]);}
-  opts.push(['wc',.6],['coffee',1.2],['print',1.5],['phone',1.6],['sofa',.5],['water',.8],['dancesolo',.35]);
+  if(flowerNeed())opts.push(['flowers',.9]);opts.push(['wc',.6],['coffee',1.2],['print',1.5],['phone',1.6],['sofa',.5],['water',.8],['dancesolo',.35]);
   if(!CAT.hold)opts.push(['pet',.7]);
   if(BOWLS.food<.4)opts.push(['feedcat',CAT.hunger>.6?3:.6]);if(BOWLS.water<.4)opts.push(['watercat',CAT.thirst>.6?3:.6]);
   if(!c.manager)opts.push(['nap',.45]);
