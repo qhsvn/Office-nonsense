@@ -3141,9 +3141,10 @@ $('#maLater').onclick=closeMeetAsk;
 const meetDay=o=>o.day===dayKey()?'hôm nay':`ngày ${+o.day.slice(6)}/${+o.day.slice(4,6)}`;
 const meetMine=o=>o.by==='me-local'||(meetUid&&o.by===meetUid);
 const meetLive=o=>o.day===dayKey()&&nowMin()>=o.start&&nowMin()<o.end&&!o.ended;
-function meetEnd(o){if(!o||o.ended)return;o.ended=true;
-  if(window.OFFICE&&OFFICE.sendChat)OFFICE.sendChat(`⏹ Kết thúc cuộc họp “${o.topic}” — cảm ơn mọi người! [mtge:${o.id}]`);
-  setStatus(`⏹ Bạn đã kết thúc cuộc họp “${o.topic}”, cả nhóm ra về chỗ.`);updateMeetInfo();}
+const meetNames=o=>o&&o.who&&o.who.length?o.who.map(i=>{const x=byId(i);return x?x.name:i;}).join(', '):'';
+function meetEnd(o){if(!o||o.ended)return;o.ended=true;const WN=meetNames(o);
+  if(window.OFFICE&&OFFICE.sendChat)OFFICE.sendChat(`⏹ Kết thúc cuộc họp “${o.topic}” — cảm ơn ${WN||'mọi người'}! [mtge:${o.id}]`);
+  setStatus(`⏹ Bạn đã kết thúc cuộc họp “${o.topic}”, ${WN||'cả nhóm'} ra về chỗ.`);updateMeetInfo();}
 function meetRespond(o,y,why){if(!(window.OFFICE&&OFFICE.sendChat)){setStatus('💬 Chat chưa kết nối nên chưa trả lời được.');return;}
   if(!ME.id){openWelcome();setStatus('🎭 Chọn nhân vật trước rồi trả lời lời mời họp nhé.');return;}
   why=String(why||'').replace(/[\[\]“”]/g,'').slice(0,60);
@@ -3230,7 +3231,7 @@ async function actMeetOnline(o){
     const joining=new Set(want),addLate=()=>{for(const c of meetAttendees(o))if(!joining.has(c)){joining.add(c);join(c);}};
     await Promise.race([Promise.all(want.map(join)),wait(12)]);
     const ideas=shuffle(L.ideas);let k=0;
-    const GL=[`Chào cả team, mọi người nghe rõ không ạ? 👋`,`Hôm nay mình bàn về “${o.topic}” nhé.`,'Tiến độ bên mình đang ổn, cảm ơn team!','Slide này rất rõ ràng 👍','Mình sẽ gửi tài liệu qua mail sau nha 📧','Có ai còn câu hỏi gì không ạ?'];
+    const GL=[meetNames(o)?`Chào ${meetNames(o)}, nghe rõ không ạ? 👋`:`Chào cả team, mọi người nghe rõ không ạ? 👋`,`Hôm nay mình bàn về “${o.topic}” nhé.`,`Tiến độ bên mình đang ổn, cảm ơn ${meetNames(o)||'team'}!`,'Slide này rất rõ ràng 👍','Mình sẽ gửi tài liệu qua mail sau nha 📧','Có ai còn câu hỏi gì không ạ?'];
     while(nowMin()<o.end&&!o.ended){addLate();const here=go.filter(c=>c.busy&&!c.away);
       if(k%2===0){const line=GL[(k/2)%GL.length];CALL.talk=simTime+3;$('#callCap').textContent='💬 '+CALL.g.n.split(' · ')[0]+': '+line;setStatus(`💻 ${CALL.g.n}: “${line}”`);for(let w=3.2;w>0&&!o.ended;w-=.4)await wait(.4);}
       else if(here.length){const sp=here[Math.floor(k/2)%here.length];await sp.say(sp.manager?pick(['Cảm ơn anh/chị, bên em ghi nhận ạ 📝','Team em sẽ hoàn thành đúng hạn ạ!']):`Em xin đề xuất: ${ideas[k%ideas.length]}.`,3);}
@@ -3255,7 +3256,7 @@ async function actMeetSched(o){
     while(nowMin()<o.end&&!o.ended){addLate();const here=go.filter(c=>c.seat===c.meet);
       if(here.length){const sp=here[k%here.length];here.forEach(x=>x.lookAt=x===sp?null:sp);
         const idea=ideas[k%ideas.length];
-        await sp.say(sp.manager?pick([`Họp “${o.topic}” nhé, ${o.who&&o.who.length?here.filter(x=>x!==sp).map(x=>x.name).join(', ')||'mọi người':'mọi người'} cho ý kiến!`,'Ý này hay, ghi lại nha 📝','Tiến độ tuần này ổn chứ cả nhà?']):`Em đề xuất: ${idea}.`,3);
+        await sp.say(sp.manager?pick([`Họp “${o.topic}” nhé, ${o.who&&o.who.length?here.filter(x=>x!==sp).map(x=>x.name).join(', ')||'mọi người':'mọi người'} cho ý kiến!`,'Ý này hay, ghi lại nha 📝',`Tiến độ tuần này ổn chứ ${meetNames(o)||'cả nhà'}?`]):`Em đề xuất: ${idea}.`,3);
         if(!sp.manager&&board.notes.length<6){board.notes.push({who:sp.name,text:idea,color:NOTE_COLORS[sp.id]||'#ffffff',rot:rand(-.05,.05)});drawBoard();}
         k++;}
       for(let w=rand(3,6);w>0&&!o.ended;w-=.5)await wait(.5);}
