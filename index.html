@@ -604,6 +604,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b mint" data-cmd="filesend">📎 Giao file</button>
           <button class="b mint" data-cmd="inbox">📂 Hộp tài liệu</button>
           <button class="b mint" data-cmd="fix">🛠️ Xử lý sự cố</button>
+          <button class="b mint" data-cmd="scroff">🖥️ Tắt màn hình</button>
         </div>
       </div>
       <div class="box">
@@ -728,6 +729,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>😴 Ngủ gật trong giờ làm</b> — sếp bắt gặp trừ <b>10 KPI</b>. Muốn nghỉ thì dùng <b>🛏️ Ngủ trưa</b> (không bị trừ).</li>
       <li><b>😜 Khều, trêu đồng nghiệp trong giờ làm</b> — có thể bị trừ <b>3 KPI</b>. Được trêu thoải mái lúc <b>12:00–12:59</b> và <b>sau 17:30</b>.</li>
       <li><b>👨‍💼 Sếp tổng ghé kiểm tra</b> — đang lười trừ <b>8 KPI</b>, bàn bừa bộn trừ <b>5 KPI</b>, văn phòng còn rác (giấy vụn, khay cát Mochi, vũng cà phê) cả team trừ <b>3 KPI</b>.</li>
+      <li><b>🖥️ Rời bàn phải tắt màn hình</b> — tránh lộ thông tin công việc. Quên tắt quá 15 giây sẽ bị hệ thống bảo mật phát hiện, trừ <b>3 KPI</b> (cả quản lý).</li>
       <li><b>📉 KPI âm</b> thì ngày lương bị trừ tiền theo số điểm âm.</li>
     </ul>
     <div class="rsec">✅ Cách cộng KPI</div>
@@ -773,15 +775,20 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="bpgrid" id="bpGrid"></div><div class="bpleft" id="bpLeft"></div>
   <div class="crow"><button type="button" id="bpSkip" class="cghost">🙅 Không uống lần này</button></div></div></div>
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
-  <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div>
+  <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div><div class="soopts" id="gaWhy" style="display:none"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
+<div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
+  <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Chọn nhân viên phải lên phòng quản lý báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
+  <div class="flspots" id="rqWho"></div>
+  <div class="crow"><button type="button" id="rqCancel" class="cghost">Hủy</button><button type="button" id="rqGo">Gửi yêu cầu 📨</button></div></div></div>
 <div id="tripModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="trTitle"><div class="wcard mcardm">
-  <div class="wlogo">🚌</div><h2 id="trTitle">Đi team building</h2><p class="wsub">Chọn điểm đến. Cả team rời văn phòng đi chơi rồi về, mỗi người +10 KPI tinh thần đồng đội.</p>
+  <div class="wlogo">🚌</div><h2 id="trTitle">Đi team building</h2><p class="wsub">Chọn điểm đến. Cả team rời văn phòng đi chơi rồi về, ai đi được +10 KPI tinh thần đồng đội.</p>
   <div class="fltypes" id="trDest"></div>
+  <div class="kmt" id="trModeT" style="margin-top:12px;font-weight:700">⭐ Hình thức (chỉ quản lý)</div><div class="fltypes" id="trMode" style="margin-top:6px"></div>
   <div class="crow"><button type="button" id="trCancel" class="cghost">Hủy</button><button type="button" id="trGo">Lên đường 🚌</button></div></div></div>
 <div id="sorryModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="soTitle"><div class="wcard mcardm">
-  <div class="wlogo">🙇‍♀️</div><h2 id="soTitle">Sếp tổng đang chờ bạn xin lỗi!</h2><p class="wsub">Văn phòng chưa dọn hoặc nhân viên phạm lỗi. Là quản lý, bạn phải xin lỗi sếp tổng thay cả team (25 giây).</p>
-  <div class="soopts" id="soOpts"></div></div></div>
+  <div class="wlogo">🙇‍♀️</div><h2 id="soTitle">Sếp tổng đang chờ bạn xin lỗi!</h2><p class="wsub">Văn phòng chưa dọn hoặc nhân viên phạm lỗi. Là quản lý, bạn phải xin lỗi sếp tổng thay cả team.</p>
+  <div class="bpleft" id="soLeft"></div><div class="soopts" id="soOpts"></div></div></div>
 <div id="flowerModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="flTitle"><div class="wcard mcardm">
   <div class="wlogo">💐</div><h2 id="flTitle">Cắm hoa cho văn phòng</h2><p class="wsub">3 bình hoa ở góc thư giãn, góc ăn trưa và phòng sếp. Hoa tươi khoảng 9 phút rồi héo dần, cắm hoa mới được +3 KPI.</p><div class="flwho" id="flWho"></div>
   <div class="wstep">1 · Cắm ở đâu</div><div class="flspots" id="flSpots"></div>
@@ -2806,7 +2813,7 @@ const lvName=c=>c.manager?'⭐ Quản lý':LEVELS[c.lv].e+' '+LEVELS[c.lv].n;
 function updateLvTag(c){if(!c.lvEl){c.lvEl=document.createElement('div');c.lvEl.className='lvt';c.tagEl.insertBefore(c.lvEl,c.bdgEl);
     c.popEl=document.createElement('div');c.popEl.className='kpop';c.tagEl.appendChild(c.popEl);}
   c.lvEl.textContent=c.manager?'':LEVELS[c.lv].e+' '+LEVELS[c.lv].n;c.lvEl.style.display=c.manager?'none':'';}
-function kpiPop(c,d){const e=c.popEl;if(!e)return;e.textContent=(d>0?'+':'')+d+' KPI';e.className='kpop '+(d>0?'plus':'minus');void e.offsetWidth;e.classList.add('go');}
+function kpiPop(c,d){const e=c.popEl;if(!e||(c.manager&&c.id!==ME.id))return;e.textContent=(d>0?'+':'')+d+' KPI';e.className='kpop '+(d>0?'plus':'minus');void e.offsetWidth;e.classList.add('go');}
 function addKpi(c,d,why){
   if(!d)return;c.kpi=(c.kpi||0)+d;c.kpiMonth=(c.kpiMonth||0)+d;kpiPop(c,d);
   c.log.unshift({d,why,at:fmt(nowMin())});if(c.log.length>5)c.log.pop();
@@ -2909,6 +2916,10 @@ async function actPromote(c){
 function updateKpiBox(){
   const box=$('#kpiBox');if(!box)return;const c=selected;box.style.display=c?'':'none';if(!c)return;
   const lv=$('#kLv'),pts=$('#kPts'),bar=$('#kBar'),mis=$('#kMis'),log=$('#kLog');
+  if(c.manager&&c.id!==ME.id){lv.textContent='⭐ Quản lý';pts.textContent='🔒 KPI và lương của quản lý là thông tin riêng';bar.parentNode.style.display='none';
+    mis.textContent='';{const h=document.createElement('div');h.className='kmt';h.textContent='👥 KPI nhân viên';mis.appendChild(h);}
+    CHARS.filter(o=>!o.manager).slice().sort((a,b)=>b.kpi-a.kpi).forEach((o,i)=>{const r=document.createElement('div');r.className='krank';r.textContent=`${['🥇','🥈','🥉','4.'][i]||'•'} ${o.name} · ${LEVELS[o.lv].e} ${LEVELS[o.lv].n} · ${o.kpi} KPI`;mis.appendChild(r);});
+    log.textContent='';return;}
   if(c.manager){lv.textContent='⭐ Quản lý';pts.textContent=`${c.kpi||0} KPI · tháng này ${(c.kpiMonth||0)>0?'+':''}${c.kpiMonth||0}`;bar.parentNode.style.display='none';
     mis.textContent='';ensureDaily(c);{const done=c.ms.filter(x=>x.p>=x.n).length;const h=document.createElement('div');h.className='kmt';h.textContent=`🎯 Nhiệm vụ quản lý hôm nay (${done}/3) · mỗi cái +${MISSION_BONUS}`;mis.appendChild(h);
       c.ms.forEach(x=>{const d=misDef(x.k),r=document.createElement('div');r.className='kmis'+(x.p>=x.n?' ok':'');r.textContent=`${x.p>=x.n?'✅':'⬜'} ${d.e} ${d.t} (${Math.min(x.p,x.n)}/${x.n})`;mis.appendChild(r);});}
@@ -3753,7 +3764,7 @@ async function actBoss(){
       if(isHuman(MGR)){   // sếp quản lý do người chơi điều khiển: chính người đó phải bấm xin lỗi
         const opts=[line,'Dạ em nhận lỗi ạ, lần sau team em sẽ không tái phạm! 🙇‍♀️','Dạ là lỗi của em, em sẽ họp team rút kinh nghiệm ngay ạ 🙏'];
         banner('🙇‍♀️','Sếp tổng đang chờ sếp quản lý xin lỗi',`${MGR.name} cần xin lỗi thay cả team…`,null,'boss');
-        const r=await new Promise(res=>{SORRY={res};if(MGR.id===ME.id)openSorry(opts);setTimeout(()=>{if(SORRY&&SORRY.res===res){SORRY=null;closeSorry();res(-1);}},25000);});
+        const r=await new Promise(res=>{SORRY={res};if(MGR.id===ME.id)openSorry(opts,10);setTimeout(()=>{if(SORRY&&SORRY.res===res){SORRY=null;closeSorry();res(-1);}},10000);});
         banner('👨‍💼','Sếp tổng đang đi kiểm tra','Làm việc chăm được khen · lười, bàn bừa bộn, văn phòng còn rác bị trừ KPI!',null,'boss');
         text=r>=0?opts[r%opts.length]:null;}
       if(text){setStatus(`🙇‍♀️ ${MGR.name} cúi đầu xin lỗi sếp tổng thay cả team.`);await MGR.say(text,2.8);MGR.gesture('bow',1.8);await wait(1.2);
@@ -3807,9 +3818,10 @@ let NH_AT=0;
 {const o=setAuto;setAuto=v=>{o(v);if(v&&!CAT_HOST)setTimeout(()=>setStatus('🤖 Phòng đang có nhiều người: máy chủ phòng điều khiển các nhân vật trống, mọi người đều thấy giống nhau.'),60);};}
 
 let SORRY=null;const soEl=$('#sorryModal');
-function openSorry(opts){const g=$('#soOpts');g.textContent='';opts.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>{const c=byId(ME.id);closeSorry();if(c)run('mgrsorry',c,{v:String(i)});};g.appendChild(b);});
+let soTimer=0;
+function openSorry(opts,sec){const end=Date.now()+(sec||10)*1000;clearInterval(soTimer);const tk=()=>{const l=Math.max(0,Math.ceil((end-Date.now())/1000));$('#soLeft').textContent=`⏳ Còn ${l} giây — không xin lỗi sẽ bị trừ ${-KPI_PTS.mgrnosorry} KPI!`;if(!l)clearInterval(soTimer);};tk();soTimer=setInterval(tk,250);const g=$('#soOpts');g.textContent='';opts.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>{const c=byId(ME.id);closeSorry();if(c)run('mgrsorry',c,{v:String(i)});};g.appendChild(b);});
   soEl.classList.add('show');beep(false);}
-function closeSorry(){soEl.classList.remove('show');}
+function closeSorry(){soEl.classList.remove('show');clearInterval(soTimer);}
 function mgrSorryAns(c,v){if(SORRY&&c===MGR){const r=SORRY.res;SORRY=null;closeSorry();r(Math.max(0,parseInt(v,10)||0));}return true;}
 
 /* ================= 4. Tiệc tất niên ================= */
@@ -4032,7 +4044,7 @@ function grpStart(n,c,a){
   const others=present().filter(x=>isHuman(x)&&x.id!==ME.id&&!x.busy);
   const gid=Math.random().toString(36).slice(2,8),until=Date.now()+GRP_WAIT,origV=a&&typeof a.v==='string'?a.v:'',star=c?c.id:'';
   GRP_REQ={gid,n,origV,star,ask:new Set(others.map(x=>x.id)),yes:new Set(),until};
-  run('grpask',null,{v:[gid,n,ME.id||'-',others.map(x=>x.id).join('.'),until,star].join('|')});
+  run('grpask',null,{v:[gid,n,ME.id||'-',others.map(x=>x.id).join('.'),until,star,n==='trip'?origV.split('|')[0]:''].join('|')});
   GRP_REQ.iv=setInterval(grpTick,500);grpTick();
   setStatus(`📨 Đã gửi lời mời ${CONSENT[n]} — chờ ${others.map(x=>x.name).join(', ')} trả lời…`);return false;}
 function grpTick(){const R=GRP_REQ;if(!R)return;const left=Math.max(0,Math.ceil((R.until-Date.now())/1000));
@@ -4041,24 +4053,31 @@ function grpTick(){const R=GRP_REQ;if(!R)return;const left=Math.max(0,Math.ceil(
   banner('📨',`Lời mời: ${CONSENT[R.n]}`,`Chờ ${pend.map(c=>c.name).join(', ')} trả lời… còn ${left} giây`,{t:'▶️ Bắt đầu luôn',f:()=>grpFinish()},'boba');}
 function grpFinish(){const R=GRP_REQ;if(!R)return;GRP_REQ=null;clearInterval(R.iv);bannerOff();
   const skip=[...R.ask].filter(id=>!R.yes.has(id));
-  if(skip.length)setTimeout(()=>{const nm=skip.map(byId).filter(Boolean).map(c=>c.name).join(', ');if(nm)setStatus(`🙅 ${nm} không tham gia ${CONSENT[R.n]} — nhân vật ở lại làm việc.`);},2600);
+  if(R.n==='trip'){const p=R.origV.split('|');while(p.length<3)p.push('');const w=p[2].split('.').filter(Boolean);skip.forEach(id=>w.push(id+'~'+(R.why&&R.why[id]!=null?R.why[id]:'x')));p[2]=w.join('.');R.origV=p.join('|');}
+  if(skip.length&&R.n!=='trip')setTimeout(()=>{const nm=skip.map(byId).filter(Boolean).map(c=>c.name).join(', ');if(nm)setStatus(`🙅 ${nm} không tham gia ${CONSENT[R.n]} — nhân vật ở lại làm việc.`);},2600);
   run('grpgo',null,{v:[R.n,skip.join('.'),R.star,R.origV].join('|')});}
-function grpAsk(v){const [gid,n,by,askS,untilS,star]=String(v||'').split('|');const ask=(askS||'').split('.'),until=+untilS||Date.now()+GRP_WAIT;
+function grpAsk(v){const [gid,n,by,askS,untilS,star,dS]=String(v||'').split('|');const ask=(askS||'').split('.'),until=+untilS||Date.now()+GRP_WAIT;
   if(GRP_REQ&&GRP_REQ.gid===gid)return true;
   const bc=byId(by),byName=bc?bc.name:'Một người chơi',lbl=CONSENT[n]||n;
-  if(ME.id&&ask.includes(ME.id)){GRP_ASKED={gid,until};
-    $('#gaIcon').textContent=lbl.split(' ')[0];$('#gaTitle').textContent=`${byName} mời cả nhóm: ${lbl}`;
+  if(ME.id&&ask.includes(ME.id)){GRP_ASKED={gid,until,n};$('#gaWhy').style.display='none';$('#gaWhy').textContent='';$('#gaNo').style.display='';
+    const dd=n==='trip'&&dS!==''&&typeof TRIP_DEST!=='undefined'?TRIP_DEST[(+dS||0)%TRIP_DEST.length]:null;
+    $('#gaIcon').textContent=lbl.split(' ')[0];$('#gaTitle').textContent=`${byName} mời cả nhóm: ${lbl}${dd?` · ${dd.n} ${dd.e}`:''}`;
     $('#gaSub').textContent=n==='birthday'&&star===ME.id?'Tiệc sinh nhật là dành cho bạn đó! 🎉 Nhân vật của bạn sẽ ra bàn ăn cùng mọi người.':'Nếu đồng ý, nhân vật của bạn sẽ cùng tham gia. Không đồng ý thì nhân vật ở lại làm việc như bình thường.';
     gaEl.classList.add('show');clearInterval(gaTimer);
     const tk=()=>{const left=Math.max(0,Math.ceil((until-Date.now())/1000));$('#gaLeft').textContent=`Còn ${left} giây để trả lời`;if(left<=0){clearInterval(gaTimer);gaEl.classList.remove('show');GRP_ASKED=null;}};tk();gaTimer=setInterval(tk,500);beep(true);}
   else banner('📨',`Lời mời: ${lbl}`,`${byName} đang chờ mọi người trả lời…`,null,'boba');
   setTimeout(()=>{if(evBanT.textContent===`Lời mời: ${lbl}`)bannerOff();},until-Date.now()+6000);
   return true;}
-function grpAnswer(yes){const A=GRP_ASKED;GRP_ASKED=null;clearInterval(gaTimer);gaEl.classList.remove('show');const c=ME.id&&byId(ME.id);
-  if(!A||!c)return;run('grpans',c,{v:A.gid+':'+(yes?1:0)});setStatus(yes?'✅ Bạn đã đồng ý tham gia!':'🙅 Bạn không tham gia lần này — nhân vật ở lại làm việc.');}
-$('#gaYes').onclick=()=>grpAnswer(true);$('#gaNo').onclick=()=>grpAnswer(false);
-function grpAns(c,v){const [gid,y]=String(v||'').split(':');const R=GRP_REQ;
-  if(R&&R.gid===gid&&c&&R.ask.has(c.id)){if(y==='1'){R.yes.add(c.id);c.think('🙋',1.8);}else{(R.no=R.no||new Set()).add(c.id);c.think('🙅',1.8);}setTimeout(grpTick,0);}
+function grpAnswer(yes,ri){const A=GRP_ASKED;GRP_ASKED=null;clearInterval(gaTimer);gaEl.classList.remove('show');const c=ME.id&&byId(ME.id);
+  if(!A||!c)return;run('grpans',c,{v:A.gid+':'+(yes?1:0)+(ri!=null?':'+ri:'')});setStatus(yes?'✅ Bạn đã đồng ý tham gia!':'🙅 Bạn không tham gia lần này — nhân vật ở lại làm việc.');}
+$('#gaYes').onclick=()=>grpAnswer(true);
+$('#gaNo').onclick=()=>{const A=GRP_ASKED;if(!A||A.n!=='trip'){grpAnswer(false);return;}   // team building tự nguyện: chọn lý do từ chối, cả phòng đều thấy
+  const box=$('#gaWhy');box.textContent='';const h=document.createElement('div');h.className='bpleft';h.textContent='Chọn lý do không tham gia:';box.appendChild(h);
+  TRIP_NO.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>grpAnswer(false,i);box.appendChild(b);});
+  box.style.display='';$('#gaNo').style.display='none';};
+function grpAns(c,v){const [gid,y,ri]=String(v||'').split(':');const R=GRP_REQ;
+  if(c&&y==='0'&&ri!=null&&typeof tripWhy==='function')c.say(`Mình xin phép không đi team building: ${tripWhy(ri)} 🙏`,3);
+  if(R&&R.gid===gid&&c&&R.ask.has(c.id)){if(y==='0'&&ri!=null)(R.why=R.why||{})[c.id]=ri;if(y==='1'){R.yes.add(c.id);c.think('🙋',1.8);}else{(R.no=R.no||new Set()).add(c.id);c.think('🙅',1.8);}setTimeout(grpTick,0);}
   return true;}
 function grpGo(v){const ps=String(v||'').split('|');const n=ps[0],skip=(ps[1]||'').split('.').filter(Boolean),star=ps[2],origV=ps.slice(3).join('|');
   if(!CONSENT[n])return false;
@@ -4090,6 +4109,26 @@ const RET_RE=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/;
   c.doc.visible=false;c.cupG.visible=false;c.canG.visible=false;c.bagG.visible=false;c.chopG.visible=false;if(c.boba)c.boba.visible=false;if(c.mic)c.mic.visible=false;c.arms='idle';}o(c,a);};}
 {const o=end;end=(c,mode)=>{if(c._skipEnds>0){c._skipEnds--;return;}o(c,mode);};}
 
+/* ================= quản lý yêu cầu báo cáo ================= */
+const rqEl=$('#reqModal');let rqPick='all',REPQ=[],REPQ_AT=0,REPQ_END=0;
+function openReqReport(){const m=selected&&selected.manager?selected:null;if(!m||(isHuman(m)&&m.id!==ME.id)){setStatus('📋 Chỉ quản lý mới yêu cầu nhân viên báo cáo được.');return;}
+  const box=$('#rqWho');box.textContent='';
+  [{id:'all',n:'👥 Tất cả nhân viên',s:`${EMP.filter(e=>!e.away).length} người đang ở văn phòng`}].concat(EMP.map(e=>({id:e.id,n:e.name,s:e.away?'Đang vắng':e.outside?'Đang ra ngoài':e.busy?'Đang bận (làm xong sẽ lên)':isHuman(e)?'Người chơi · sẽ nhận thông báo':'Sẵn sàng',dis:e.away}))).forEach(o=>{
+    const b=document.createElement('button');b.type='button';b.className=(rqPick===o.id?'on ':'')+(o.dis?'dis':'');const a=document.createElement('b');a.textContent=o.n;const sm=document.createElement('small');sm.textContent=o.s;b.append(a,sm);
+    b.onclick=()=>{if(o.dis)return;rqPick=o.id;openReqReport();};box.appendChild(b);});
+  rqEl.classList.add('show');}
+$('#rqCancel').onclick=()=>rqEl.classList.remove('show');
+$('#rqGo').onclick=()=>{const ids=rqPick==='all'?EMP.filter(e=>!e.away).map(e=>e.id):[rqPick];rqEl.classList.remove('show');if(ids.length)run('reqreport',null,{v:ids.join('.')});};
+function reqReport(v){const ts=String(v||'').split('.').map(byId).filter(c=>c&&!c.manager&&!c.away);if(!ts.length)return false;
+  setStatus(`📋 ${MGR.name} yêu cầu ${ts.length===EMP.filter(e=>!e.away).length?'cả team':ts.map(c=>c.name).join(', ')} lên báo cáo.`);
+  if(!MGR.away)MGR.say(ts.length>1?'Mọi người lần lượt lên báo cáo cho chị nhé! 📋':`${ts[0].name} lên báo cáo cho chị nhé! 📋`,2.4);
+  const me=ME.id&&byId(ME.id);
+  if(me&&ts.includes(me)){beep(true);banner('📋','Sếp yêu cầu bạn lên báo cáo','Bấm để mang báo cáo vào phòng quản lý',{t:'📄 Đi báo cáo',f:()=>{bannerOff();run('report',me);}},'boss');}
+  if(!REMOTE_EXEC){REPQ=ts.filter(c=>!isHuman(c)).map(c=>c.id);REPQ_END=simTime+180;REPQ_AT=simTime+2.5;}   // máy người yêu cầu điều phối nhân vật trống lần lượt lên báo cáo
+  ts.forEach((c,i)=>wait(.4+i*.3).then(()=>c.think('📋',1.6)));return true;}
+function reqTick(){if(!REPQ.length||simTime<REPQ_AT)return;REPQ_AT=simTime+1;const t=byId(REPQ[0]);
+  if(!t||t.away||simTime>REPQ_END){REPQ.shift();return;}if(MGR.busy||MGR.away||t.busy)return;REPQ.shift();run('report',t);}
+
 /* ================= lệnh & đồng bộ ================= */
 const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
 {const o=run;run=evRun=(n,c,a)=>{
@@ -4097,7 +4136,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='grpask')return v?grpAsk(v):false;
   if(n==='grpans')return grpAns(c,v);
   if(n==='grpgo')return grpGo(v);
-  if(CONSENT[n]&&!IN_GRPGO&&!REMOTE_EXEC){
+  if(CONSENT[n]&&!IN_GRPGO&&!REMOTE_EXEC&&!(n==='trip'&&v.split('|')[1]==='1')){    // team building bắt buộc: không hỏi, ai rảnh cũng đi
     if(AUTO_EXEC){const hs=CHARS.filter(isHuman).map(x=>x.id);
       if(hs.length&&CAT_HOST&&CHARS.some(x=>x.claimName&&x.id!==ME.id)){    // gửi cho cả phòng, người chơi thật không bị kéo vào
         AUTO_EXEC=false;try{run('grpgo',null,{v:[n,hs.join('.'),c?c.id:'',a&&typeof a.v==='string'?a.v:''].join('|')});}finally{AUTO_EXEC=true;}return false;}
@@ -4113,6 +4152,9 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='fix')return runFix(c);
   if(n==='flowers')return runFlowers(c,v);
   if(n==='partner')return runPartner(c,v);
+  if(n==='reqreport')return reqReport(v);
+  if(n==='scroff')return scrOffCmd(c);
+  if(n==='scrfine')return scrFine(v);
   if(n==='trip'){if(EV.trip){setStatus('🚌 Cả team đang đi team building rồi!');return false;}if(EV.yep||EV.boss||danceRunning){setStatus('⏳ Đợi xong hoạt động hiện tại rồi đi team building nhé!');return false;}
     if(!v)return false;guard(()=>actTrip(v),[]);return true;}
   if(n==='quiz'){if(!v)return false;return quizStart(v);}
@@ -4124,7 +4166,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
     if(freeEmp().length<3){setStatus('⏳ Cần ít nhất 3 người rảnh để mở tiệc tất niên.');return false;}if(!v)return false;guard(()=>actYep(v),[]);return true;}
   return o(n,c,a);};}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
@@ -4134,7 +4176,7 @@ function evTick(dt){
   VISITORS.forEach(v=>{if(v.root.visible)v.update(dt);});
   CHARS.forEach(c=>{if(c.boba&&c.boba.visible)c.boba.rotation.copy(c.cupG.rotation);});
   if(YEPD.g.visible){const t=simTime;YEPD.parts.forEach(b=>{b.position.y+=Math.sin(t*1.6+b.userData.bob)*.0015;});YEPD.bulbs.forEach((b,i)=>{b.visible=(Math.floor(t*3)+i)%3!==0;});}
-  incTick();quizTick();evRandTick();flowerTick(dt);
+  incTick();quizTick();evRandTick();flowerTick(dt);reqTick();scrTick();
 }
 
 /* ================= 8. Cắm hoa cho văn phòng ================= */
@@ -4232,9 +4274,9 @@ $('#flGo').onclick=()=>{const c=byId(flEl.dataset.c);if(!c||!flPick.s)return;flE
 
 /* ================= 9. Bảng KPI cả team (tab Mọi người) ================= */
 const kbEl=$('#kpiBoard');let kbKey='';
-function renderBoard(){if(!kbEl)return;const emp=CHARS.slice().sort((a,b)=>(b.kpi||0)-(a.kpi||0));
-  const key=emp.map(c=>c.id+(c.kpi||0)+(c.lv||0)+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
-  const tot=emp.reduce((s,c)=>s+(c.kpi||0),0);kbEl.textContent='';
+function renderBoard(){if(!kbEl)return;const emp=CHARS.slice().sort((a,b)=>(b.manager&&b.id!==ME.id?-1e9:(b.kpi||0))-(a.manager&&a.id!==ME.id?-1e9:(a.kpi||0)));
+  const key=(ME.id||'')+emp.map(c=>c.id+(c.kpi||0)+(c.lv||0)+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
+  const hideM=c=>c.manager&&c.id!==ME.id;const tot=emp.reduce((s,c)=>s+(hideM(c)?0:(c.kpi||0)),0);kbEl.textContent='';
   const h=document.createElement('div');h.className='kbh';const t=document.createElement('b');t.textContent='🏆 Bảng KPI cả team';const sm=document.createElement('span');sm.textContent=`Tổng: ${tot} KPI`;h.append(t,sm);kbEl.appendChild(h);
   const max=Math.max(1,...emp.map(c=>Math.abs(c.kpi||0)));
   emp.forEach((c,i)=>{const r=document.createElement('div');r.className='kbr'+(c.id===ME.id?' me':'');
@@ -4242,9 +4284,9 @@ function renderBoard(){if(!kbEl)return;const emp=CHARS.slice().sort((a,b)=>(b.kp
     const av=document.createElement('span');av.className='av3';setAvatar(av,c);
     const mid=document.createElement('div');mid.className='kbm';const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');const lv=document.createElement('small');lv.textContent=(c.manager?'⭐ Quản lý':LEVELS[c.lv].e+' '+LEVELS[c.lv].n)+(c.away?' · vắng':'');
     const bar=document.createElement('i');const fill=document.createElement('u');fill.style.width=Math.max(4,Math.abs(c.kpi||0)/max*100)+'%';if((c.kpi||0)<0)fill.className='neg';bar.appendChild(fill);mid.append(nm,lv,bar);
-    const v=document.createElement('span');v.className='kbv'+((c.kpi||0)<0?' neg':'');v.textContent=(c.kpi||0)+' KPI';
+    if(hideM(c))bar.style.visibility='hidden';const v=document.createElement('span');v.className='kbv'+((c.kpi||0)<0&&!hideM(c)?' neg':'');v.textContent=hideM(c)?'🔒':(c.kpi||0)+' KPI';
     r.append(rk,av,mid,v);r.onclick=()=>select(c);kbEl.appendChild(r);});}
-{const o=refreshCards;refreshCards=()=>{o();try{renderBoard();}catch(e){}};}
+{const o=refreshCards;refreshCards=()=>{o();try{renderBoard();const rb=document.querySelector('[data-cmd=report]');if(rb){const t=selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)?'📋 Yêu cầu báo cáo':'📄 Báo cáo sếp';if(rb.textContent!==t)rb.textContent=t;}}catch(e){}};}
 
 /* ================= 10. Ra ngoài văn phòng: gặp đối tác, team building ================= */
 KPI_PTS.partner=15;KPI_PTS.partnertry=6;KPI_PTS.trip=10;Object.assign(KPI_WHY,{partner:'Ký hợp đồng với đối tác',partnertry:'Đi gặp đối tác',trip:'Team building gắn kết'});
@@ -4291,29 +4333,77 @@ function tripRender(dest,i,line,ppl){$('#tcT').textContent=`${dest.e} Team build
   $('#tcQ').textContent=line||'';const P=$('#tcP');P.textContent='';if(i===6||i>=TRIP_STEPS.length){ppl.forEach(c=>{const a=document.createElement('span');a.className='av3';setAvatar(a,c);P.appendChild(a);});}
   tcEl.classList.add('show');stage.classList.add('card-on');}
 function tripOff(){tcEl.classList.remove('show');stage.classList.remove('card-on');}
+const TRIP_NO=['🤒 Hơi mệt trong người','👶 Bận việc gia đình','📊 Còn deadline gấp','🚗 Say xe lắm','💸 Cuối tháng cháy túi','🐶 Ở nhà trông thú cưng'];
+const tripWhy=r=>r==='x'?'⏰ Không trả lời lời mời':TRIP_NO[(+r||0)%TRIP_NO.length];
 async function actTrip(v){
-  const dest=TRIP_DEST[(parseInt(v,10)||0)%TRIP_DEST.length];
-  const ppl=present().filter(c=>!c.busy&&!c.outside);if(ppl.length<2){setStatus('🚌 Cần ít nhất 2 người rảnh để đi team building.');return;}
+  const [dS,mS,wS]=String(v).split('|'),mand=mS==='1',rng=srand(hashStr(String(v))),rp=a=>a[Math.floor(rng()*a.length)];
+  const dest=TRIP_DEST[(parseInt(dS,10)||0)%TRIP_DEST.length];
+  const why={};if(!mand)(wS||'').split('.').filter(Boolean).forEach(x=>{const [id,r]=x.split('~');if(byId(id))why[id]=r;});
+  const ppl=present().filter(c=>!c.busy&&!c.outside&&!(c.id in why));if(ppl.length<2){setStatus('🚌 Cần ít nhất 2 người rảnh để đi team building.');return;}
+  const no=Object.keys(why).map(byId).filter(c=>c&&!c.away);const noTxt=no.map(c=>`${c.name} (${tripWhy(why[c.id])})`).join(', ');
+  no.forEach((c,i)=>{if(!isHuman(c))wait(.5+i*.8).then(()=>c.say(`Lần này mình xin phép ở lại nha: ${tripWhy(why[c.id])} 🙏`,2.6));});
   EV.trip=true;TRIP_ON=true;ppl.forEach(c=>begin(c,`🚌 Đi team building ${dest.n}`));
   const host=ppl.includes(MGR)?MGR:ppl[0];
   try{
-    banner('🚌',`Team building · ${dest.n} ${dest.e}`,'Cả team xách balo lên đường!',null,'yep');setStatus(`🚌 Cả team đi team building ở ${dest.n}! Văn phòng tạm vắng, chỉ còn Mochi ở nhà.`);
-    ppl.forEach(c=>{c.pack.visible=true;});await host.say(`Xách balo lên, mình đi ${dest.n} thôi cả nhà! ${dest.e}`,2.4);
+    const me=ME.id&&byId(ME.id),meIn=me&&ppl.includes(me);
+    banner(mand?'📢':'🚌',`Team building${mand?' BẮT BUỘC':''} · ${dest.n} ${dest.e}`,(mand?'Quản lý yêu cầu cả team cùng đi — không ai được từ chối!':noTxt?`Không đi: ${noTxt}`:'Cả team xách balo lên đường!')+(me?meIn?' · Bạn đi cùng team 🎒':' · Bạn ở lại văn phòng':''),null,'yep');
+    setStatus(`🚌 ${mand?'Chuyến đi bắt buộc: c':'C'}ả team đi team building ở ${dest.n}!${noTxt?` 🙅 Ở lại: ${noTxt}.`:' Văn phòng tạm vắng, chỉ còn Mochi ở nhà.'}`);
+    if(mand&&!MGR.away&&ppl.includes(MGR))MGR.say('Chuyến này bắt buộc nha cả nhà, không ai được vắng! 📢',2.4);
+    ppl.forEach(c=>{c.pack.visible=true;c.scrOff=true;screensOn(c,false);});await host.say(`Xách balo lên, mình đi ${dest.n} thôi cả nhà! ${dest.e}`,2.4);
     await Promise.all(ppl.map((c,i)=>wait(i*.9).then(()=>goOut(c,`🚌 Team building · ${dest.n}`))));bannerOff();
     if(!CAT.hold){catSay('Meo… mọi người đi đâu hết vậy? 😿',2.4);}
-    for(let i=0;i<TRIP_STEPS.length;i++){const s=TRIP_STEPS[i],who=pick(ppl);tripRender(dest,i,`${who.name}: “${s[2].replace('{d}',dest.n)}”`,ppl);setStatus(`${s[0]} Team building ${dest.n}: ${s[1]}`);await wait(4.5);}
+    for(let i=0;i<TRIP_STEPS.length;i++){const s=TRIP_STEPS[i],who=rp(ppl);tripRender(dest,i,`${who.name}: “${s[2].replace('{d}',dest.n)}”`,ppl);setStatus(`${s[0]} Team building ${dest.n}: ${s[1]}`);await wait(4.5);}
     tripRender(dest,TRIP_STEPS.length,`📸 Ảnh kỷ niệm cả team tại ${dest.n} — mỗi người +${KPI_PTS.trip} KPI tinh thần đồng đội!`,ppl);await wait(3);tripOff();
-    await Promise.all(ppl.map((c,i)=>wait(i*.9).then(async()=>{await comeBack(c);c.say(pick(['Về rồi đây! 😆','Nhớ văn phòng ghê 🥰','Mệt mà vui quá! 😴']),1.8);addKpi(c,KPI_PTS.trip,`${KPI_WHY.trip} · ${dest.n}`);})));
+    await Promise.all(ppl.map((c,i)=>wait(i*.9).then(async()=>{await comeBack(c);c.say(rp(['Về rồi đây! 😆','Nhớ văn phòng ghê 🥰','Mệt mà vui quá! 😴']),1.8);addKpi(c,KPI_PTS.trip,`${KPI_WHY.trip} · ${dest.n}`);})));
     if(!CAT.hold){catGo(EXIT.in.x-1.2,EXIT.in.z+.3);catSay('Meo meo! Quà của Mochi đâu? 😻',2.4);}
     setStatus(`🎉 Cả team đi ${dest.n} về rồi! Ai cũng được +${KPI_PTS.trip} KPI, Mochi được cá khô 🐟`);
   }finally{EV.trip=false;TRIP_ON=false;tripOff();bannerOff();ppl.forEach(c=>{if(c.outside){c.root.visible=true;c.outside=false;c.awaySp.visible=false;c.pack.visible=false;screensOn(c,true);}});}
   ppl.forEach(c=>setAct(c,'🚶 Quay về chỗ'));await Promise.all(ppl.map(async c=>{await c.goSit(c.home);end(c,'working');}));}
-const trEl=$('#tripModal');let trPick=0;
+const trEl=$('#tripModal');let trPick=0,trMand=false;
 function openTrip(){if(EV.trip){setStatus('🚌 Cả team đang đi team building rồi!');return;}const box=$('#trDest');box.textContent='';
+  {const me=ME.id&&byId(ME.id),isM=me&&me.manager,mb=$('#trMode');mb.textContent='';
+   if(isM)[[false,'🙋','Tự nguyện','Nhân viên được từ chối, nói lý do'],[true,'📢','Bắt buộc','Không ai được từ chối']].forEach(([m,e,n,sm])=>{const b=document.createElement('button');b.type='button';b.className=trMand===m?'on':'';
+     const ee=document.createElement('span');ee.className='fle';ee.textContent=e;const t=document.createElement('span');const bb=document.createElement('b');bb.textContent=n;const s2=document.createElement('small');s2.textContent=sm;s2.style.display='block';s2.style.fontWeight='400';t.append(bb,s2);b.append(ee,t);b.onclick=()=>{trMand=m;openTrip();};mb.appendChild(b);});
+   else{const p=document.createElement('p');p.className='bpleft';p.textContent='🙋 Chuyến đi tự nguyện — ai bận có thể từ chối. (Chỉ quản lý mới tổ chức chuyến đi bắt buộc được.)';mb.appendChild(p);}
+   $('#trModeT').style.display=isM?'':'none';}
   TRIP_DEST.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className=i===trPick?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=d.e;const n=document.createElement('span');n.textContent=d.n;b.append(e,n);b.onclick=()=>{trPick=i;openTrip();};box.appendChild(b);});
   trEl.classList.add('show');}
 $('#trCancel').onclick=()=>trEl.classList.remove('show');
-$('#trGo').onclick=()=>{trEl.classList.remove('show');run('trip',null,{v:String(trPick)});};
+$('#trGo').onclick=()=>{trEl.classList.remove('show');const me=ME.id&&byId(ME.id),m=me&&me.manager&&trMand?1:0;let w='';
+  if(!m){const cand=present().filter(c=>!isHuman(c)&&!c.manager&&!c.busy&&!c.outside&&!PEERSEL[c.id]).sort(()=>Math.random()-.5);   // nhân vật trống có thể từ chối (máy người tổ chức quyết, gửi chung cho cả phòng)
+    w=cand.filter(()=>Math.random()<.3).slice(0,2).map(c=>c.id+'~'+Math.floor(Math.random()*TRIP_NO.length)).join('.');}
+  run('trip',null,{v:[trPick,m,w,Math.random().toString(36).slice(2,7)].join('|')});};
+
+/* ================= rời bàn phải tắt màn hình (bảo mật thông tin) ================= */
+KPI_PTS.scrfine=-3;KPI_WHY.scrfine='Rời bàn không tắt màn hình';
+const SCR_GRACE=15000;
+const powerOut=()=>!!(EV.inc&&EV.inc.k==='power');
+function scrSkip(c){return c.away||c.leavingNow||c.outside||!c.root.visible;}
+function scrLeave(c){c.leftAt=Date.now();c.scrOff=false;c.scrFined=false;if(scrSkip(c)||powerOut())return;
+  if(c.pack&&c.pack.visible){c.scrOff=true;screensOn(c,false);return;}   // xách balo ra ngoài (team building…) thì tắt máy luôn
+  if(isHuman(c)){if(c.id===ME.id){beep(false);const f={t:'🔒 Tắt màn hình',f:()=>{bannerOff();run('scroff',c);}};
+      if(!evBan.classList.contains('show'))banner('🖥️','Bạn vừa rời bàn mà chưa tắt màn hình!',`Tắt trong ${SCR_GRACE/1000} giây kẻo bị trừ ${-KPI_PTS.scrfine} KPI (nút “🖥️ Tắt màn hình”)`,f,'inc');
+      else setStatus(`🖥️ Bạn vừa rời bàn — bấm “🖥️ Tắt màn hình” trong ${SCR_GRACE/1000} giây kẻo bị trừ KPI!`);}return;}
+  const r=srand(hashStr(c.id+':'+Math.floor(Date.now()/15000)))();   // nhân vật trống: thỉnh thoảng quên tắt (mọi máy cùng kết quả)
+  if(r>=.12){c.scrOff=true;wait(.25).then(()=>{if(!c.atHome()){screensOn(c,false);c.think('🔒',1.1);}});}}
+function scrBack(c){const was=c.leftAt;c.leftAt=null;c.scrOff=false;c.scrFined=false;if(!powerOut()&&!c.away)screensOn(c,true);
+  if(was&&c.id===ME.id&&evBanT.textContent==='Bạn vừa rời bàn mà chưa tắt màn hình!')bannerOff();}
+function scrOffCmd(c){if(!c)return false;
+  if(c.atHome()){setStatus(`🖥️ ${c.name} đang ngồi ở bàn — khi rời bàn nhớ tắt màn hình nhé.`);return false;}
+  if(c.scrOff||scrSkip(c)){setStatus(`🔒 Màn hình của ${c.name} đã tắt rồi.`);return false;}
+  c.scrOff=true;screensOn(c,false);c.think('🔒',1.4);setStatus(`🔒 ${c.name} đã khóa màn hình máy tính${c.leftAt&&Date.now()-c.leftAt>1500?' từ xa bằng điện thoại 📱':''}.`);
+  if(c.id===ME.id&&evBanT.textContent==='Bạn vừa rời bàn mà chưa tắt màn hình!')bannerOff();return true;}
+function scrFine(v){const c=byId(v);if(!c||c.scrFined)return false;c.scrFined=true;c.scrOff=true;screensOn(c,false);
+  addKpi(c,KPI_PTS.scrfine,KPI_WHY.scrfine);c.think('🔓',2);beep(false);
+  setStatus(`🔐 Bảo mật: ${c.name} rời bàn mà không tắt màn hình — ${c.manager&&c.id!==ME.id?'bị trừ KPI':`trừ ${-KPI_PTS.scrfine} KPI`}! Màn hình đã được khóa tự động.`);
+  if(c.id===ME.id&&evBanT.textContent==='Bạn vừa rời bàn mà chưa tắt màn hình!')bannerOff();return true;}
+let scrAt=0;
+function scrTick(){const now=Date.now();
+  CHARS.forEach(c=>{const h=c.atHome();if(c._wasHome===undefined){c._wasHome=h;return;}
+    if(h!==c._wasHome){c._wasHome=h;h?scrBack(c):scrLeave(c);}});
+  if(now<scrAt||!CAT_HOST||powerOut())return;scrAt=now+1000;        // máy chủ phòng kiểm tra rồi gửi kết quả cho cả phòng
+  const c=CHARS.find(c=>!c.atHome()&&c.leftAt&&!c.scrOff&&!c.scrFined&&!scrSkip(c)&&now-c.leftAt>(isHuman(c)?SCR_GRACE:SCR_GRACE*.6));
+  if(c){if(!run('scrfine',null,{v:c.id}))c.scrFined=true;}}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -4502,7 +4592,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null;
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   MY_ACT={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
@@ -4692,7 +4782,7 @@ const whoOf=c=>c.id===ME.id?'🎭 Đây là bạn':c.claimName?'🟢 Có ngườ
 let hdrKey='';
 function refreshCards(){if(!uiReady)return;CHARS.forEach(c=>{const el=c.card;el.classList.toggle('sel',c===selected);el.classList.toggle('busy',c.busy);
   setAvatar(el.querySelector('.cav'),c);el.querySelector('.cname').textContent=c.name;
-  el.querySelector('.crole').textContent=(c.claimName?c.slot+' · ':'')+roleOf(c)+' · '+(c.kpi||0)+' KPI';
+  el.querySelector('.crole').textContent=(c.claimName?c.slot+' · ':'')+roleOf(c)+(c.manager&&c.id!==ME.id?' · 🔒':' · '+(c.kpi||0)+' KPI');
   el.querySelector('.cact').textContent=c.activity;el.querySelector('.cloc').textContent='📍 '+zoneOf(c.pos.x,c.pos.z);el.querySelector('.cwho').textContent=whoOf(c);});
   const free=CHARS.filter(c=>!c.busy).length,k=free+'|'+ME.id+'|'+ME.name;
   if(k!==hdrKey){hdrKey=k;hdrStats.textContent='';
@@ -4819,7 +4909,8 @@ function openRules(){
     const sm=document.createElement('small');sm.textContent=(i?`từ ${L.need} KPI`:'khởi đầu')+` · lương ${pay[i]||''}`;r.append(e,n,sm);box.appendChild(r);});
   const me=$('#rMe');
   if(!c)me.textContent='🎭 Chọn nhân vật để bắt đầu tích KPI và lên cấp!';
-  else if(c.manager)me.textContent=`⭐ Bạn là Quản lý (${c.name}) — có KPI riêng: làm việc, chủ trì họp, nhiệm vụ ngày, team được sếp tổng khen thì cộng; team phạm lỗi thì quản lý bị trừ.`;
+  else if(c.manager){const sl=slip(c);me.textContent=`⭐ Bạn là Quản lý (${c.name}) · ${c.kpi||0} KPI · 💰 lương dự kiến tháng này ${vnd(sl.tot)} (lương sếp ${vnd(payBase(c))} + phụ cấp ${vnd(MGR_ALLOW)} + thưởng team & KPI) — chỉ bạn thấy 🔒. Có KPI riêng: làm việc, chủ trì họp, nhiệm vụ ngày, team được sếp tổng khen thì cộng; team phạm lỗi thì quản lý bị trừ.`;
+    {const r=document.createElement('div');r.className='lv on';const e=document.createElement('span');e.className='e';e.textContent='⭐';const n=document.createElement('b');n.textContent='Quản lý (bạn)';const sm=document.createElement('small');sm.textContent=`lương ${vnd(payBase(c))} + phụ cấp ${vnd(MGR_ALLOW)} · chỉ bạn thấy 🔒`;r.append(e,n,sm);box.appendChild(r);}}
   else{const nx=LEVELS[c.lv+1];me.textContent=`🙋 ${c.name}: bạn đang là ${LEVELS[c.lv].e} ${LEVELS[c.lv].n} (cấp ${c.lv+1}) với ${c.kpi} KPI.`+(nx?` Cần thêm ${Math.max(0,nx.need-c.kpi)} KPI để lên ${nx.e} ${nx.n}.`:' Bạn đã ở cấp cao nhất! 👑');}
   $('#rulesModal').classList.add('show');}
 let customNext=false;
