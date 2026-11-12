@@ -462,6 +462,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .tripcard b{font-size:15px}.tcl{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px}.tcs{font-size:12px;color:var(--muted)}.tcs.done{color:#2f8a5f}.tcs.on{color:var(--ink);font-weight:700}
 .tcq{font-size:13px;line-height:1.45;background:#fff;border-radius:12px;padding:7px 10px}.tcp{display:flex;gap:4px;flex-wrap:wrap}.tcp .av3{width:40px;height:40px;box-shadow:0 0 0 2px #fff}
 #trGo{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff;box-shadow:0 6px 16px rgba(143,208,255,.4)}
+.mlbody{text-align:left;white-space:pre-line;background:#fffdf3;border:1.5px dashed #e6d39a;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.6;color:var(--ink);margin-top:8px}
+.mlbody b{color:#c0392b}
 </style>
 </head>
 <body>
@@ -777,6 +779,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div><div class="soopts" id="gaWhy" style="display:none"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
+<div id="mgrLetter" class="welcome" role="dialog" aria-modal="true" aria-labelledby="mlTitle"><div class="wcard mcardm">
+  <div class="wlogo" id="mlIcon">📄</div><h2 id="mlTitle"></h2><div class="mlbody" id="mlBody"></div>
+  <div class="crow"><button type="button" id="mlOk">Đã hiểu 💪</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -2923,7 +2928,8 @@ function updateKpiBox(){
   if(c.manager){lv.textContent='🎖️ Quản lý';pts.textContent=`${c.kpi||0} KPI · tháng này ${(c.kpiMonth||0)>0?'+':''}${c.kpiMonth||0}`;bar.parentNode.style.display='none';
     mis.textContent='';ensureDaily(c);{const done=c.ms.filter(x=>x.p>=x.n).length;const h=document.createElement('div');h.className='kmt';h.textContent=`🎯 Nhiệm vụ quản lý hôm nay (${done}/3) · mỗi cái +${MISSION_BONUS}`;mis.appendChild(h);
       c.ms.forEach(x=>{const d=misDef(x.k),r=document.createElement('div');r.className='kmis'+(x.p>=x.n?' ok':'');r.textContent=`${x.p>=x.n?'✅':'⬜'} ${d.e} ${d.t} (${Math.min(x.p,x.n)}/${x.n})`;mis.appendChild(r);});}
-    {const pd=document.createElement('div');pd.className='kmt';pd.textContent=`💰 Nhận lương ngày ${payDay()}/${new Date().getMonth()+1}`+(c.id===ME.id?` · dự kiến ${vnd(slip(c).tot)} (chỉ bạn thấy 🔒)`:' · mức lương là thông tin riêng 🔒');mis.appendChild(pd);}
+    {const k=c.kpiMonth||0;const h=document.createElement('div');h.className='kmt';h.textContent=`🎯 Target tháng: ${k}/${MGR_TARGET} KPI`+(k>=MGR_TARGET?` · ĐẠT 🎉 thưởng ${vnd(MGR_TARGET_BONUS)}`:` · còn thiếu ${MGR_TARGET-k}`);mis.appendChild(h);const b=document.createElement('div');b.className='kbar';const i=document.createElement('i');i.style.width=Math.max(2,Math.min(100,k/MGR_TARGET*100))+'%';b.appendChild(i);mis.appendChild(b);const n=document.createElement('div');n.className='kmis'+(k>=MGR_TARGET?' ok':'');n.textContent=k>=MGR_TARGET?'✅ Đã đạt chỉ tiêu tối thiểu tháng này':`⚠️ Ngày lương mà dưới ${MGR_TARGET} KPI sẽ nhận thư nhắc nhở — cố lên!`;mis.appendChild(n);}
+      {const pd=document.createElement('div');pd.className='kmt';pd.textContent=`💰 Nhận lương ngày ${payDay()}/${new Date().getMonth()+1}`+(c.id===ME.id?` · dự kiến ${vnd(slip(c).tot)} (chỉ bạn thấy 🔒)`:' · mức lương là thông tin riêng 🔒');mis.appendChild(pd);}
     {const h=document.createElement('div');h.className='kmt';h.textContent='👥 KPI nhân viên';mis.appendChild(h);}CHARS.filter(o=>!o.manager).slice().sort((a,b)=>b.kpi-a.kpi).forEach((o,i)=>{const r=document.createElement('div');r.className='krank';r.textContent=`${['🥇','🥈','🥉','4.'][i]||'•'} ${o.name} · ${LEVELS[o.lv].e} ${LEVELS[o.lv].n} · ${o.kpi} KPI`;mis.appendChild(r);});
     log.textContent='';c.log.forEach(l=>{const r=document.createElement('div');r.className=l.d>0?'plus':'minus';r.textContent=`${l.at} · ${l.d>0?'+':''}${l.d} · ${l.why}`;log.appendChild(r);});return;}
   bar.parentNode.style.display='';
@@ -3006,7 +3012,7 @@ function meow(loud){
 
 /* ===== ngày lương cuối tháng (theo ngày thật) ===== */
 // lương theo cấp: số đầu cố định, các chữ số "x" là phần lẻ (mỗi người mỗi tháng một số)
-const PAY_RANGE=[[5,8],[1,9],[15,8],[18,8]],MGR_RANGE=[2,9],KPI_RATE=1e6,OT_RATE=5e6,TEAM_RATE=5e5,MGR_ALLOW=5e7;
+const PAY_RANGE=[[5,8],[1,9],[15,8],[18,8]],MGR_RANGE=[2,9],KPI_RATE=1e6,OT_RATE=5e6,TEAM_RATE=5e5,MGR_ALLOW=5e7,MGR_TARGET=2000,MGR_TARGET_BONUS=1e8;window.__pay={vnd:n=>vnd(n),slip:c=>slip(c),T:MGR_TARGET,B:MGR_TARGET_BONUS};
 function payBase(c){const [lead,n]=c.manager?MGR_RANGE:PAY_RANGE[c.lv],unit=Math.pow(10,n);let h=2166136261;for(const ch of c.id+monKey())h=Math.imul(h^ch.charCodeAt(0),16777619);
   return lead*unit+Math.floor(((h>>>0)/4294967296)*unit/1000)*1000;}
 const vnd=n=>Math.round(n).toLocaleString('vi-VN')+'đ';
@@ -3015,7 +3021,7 @@ const monKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart
 function slip(c){const rows=[];
   if(c.manager){const team=CHARS.filter(o=>!o.manager).reduce((s,o)=>s+Math.max(0,o.kpiMonth||0),0);
     const mk=c.kpiMonth||0;
-    rows.push(['Lương sếp',payBase(c)],['Phụ cấp trách nhiệm',MGR_ALLOW],[`Thưởng team (${team} KPI × ${vnd(TEAM_RATE)})`,team*TEAM_RATE],[mk>=0?`Thưởng KPI quản lý (${mk} × ${vnd(KPI_RATE)})`:`Trừ KPI quản lý (${mk} điểm × ${vnd(KPI_RATE)})`,mk*KPI_RATE]);
+    rows.push(['Lương sếp',payBase(c)],['Phụ cấp trách nhiệm',MGR_ALLOW],[`Thưởng team (${team} KPI × ${vnd(TEAM_RATE)})`,team*TEAM_RATE],[mk>=0?`Thưởng KPI quản lý (${mk} × ${vnd(KPI_RATE)})`:`Trừ KPI quản lý (${mk} điểm × ${vnd(KPI_RATE)})`,mk*KPI_RATE],mk>=MGR_TARGET?[`🎯 Thưởng đạt target ${MGR_TARGET} KPI`,MGR_TARGET_BONUS]:[`⚠️ Chưa đạt target (${mk}/${MGR_TARGET} KPI) · thư nhắc nhở`,0]);
     if(c.otMonth)rows.push([`Tăng ca (${c.otMonth} buổi × ${vnd(OT_RATE)})`,c.otMonth*OT_RATE]);}
   else{const k=c.kpiMonth||0;rows.push([`Lương ${LEVELS[c.lv].n}`,payBase(c)]);
     rows.push([k>=0?`Thưởng KPI (${k} × ${vnd(KPI_RATE)})`:`Trừ KPI (${k} điểm × ${vnd(KPI_RATE)})`,k*KPI_RATE]);
@@ -3053,7 +3059,7 @@ async function actPayday(preview){
     if(here.length)confetti(0,1.8,2,70);
     payData=snap;if(!preview){try{const o={};CHARS.forEach((c,i)=>o[c.id]=snap[i]);localStorage.setItem('office_lastpay',JSON.stringify({mon:monKey(d),slips:o}));}catch(e){}LASTPAY={mon:monKey(d),snap};}
     openPhone();
-    if(!preview){CHARS.forEach(c=>{c.kpiMonth=0;c.otMonth=0;});kpiSave();refreshCards();
+    if(!preview){try{mgrTargetLetter();}catch(e){}CHARS.forEach(c=>{c.kpiMonth=0;c.otMonth=0;});kpiSave();refreshCards();
       setStatus('💰 Đã nhận lương tháng này! KPI tháng được tính lại từ đầu để chuẩn bị cho tháng sau.');}
     else setStatus(`👀 Đây là bản xem thử. Ngày lương thật: ${payDay()}/${d.getMonth()+1} — KPI tháng này vẫn giữ nguyên.`);
   }finally{payRunning=false;}
@@ -4428,6 +4434,16 @@ function scrTick(){const now=Date.now();
   const c=CHARS.find(c=>!c.atHome()&&c.leftAt&&!c.scrOff&&!c.scrFined&&!scrSkip(c)&&now-c.leftAt>(isHuman(c)?SCR_GRACE:SCR_GRACE*.6));
   if(c){if(!run('scrfine',null,{v:c.id}))c.scrFined=true;}}
 
+/* ================= target KPI tháng của quản lý: đạt thì thưởng, dưới thì thư nhắc nhở (chỉ quản lý thấy) ================= */
+function mgrTargetLetter(){const m=MGR;if(!m||m.id!==ME.id||!window.__pay)return;const MGR_TARGET=__pay.T,MGR_TARGET_BONUS=__pay.B,vnd=__pay.vnd;const k=m.kpiMonth||0,ok=k>=MGR_TARGET,mon=new Date().getMonth()+1;
+  $('#mlIcon').textContent=ok?'🏆':'📄';$('#mlTitle').textContent=ok?'Chúc mừng đạt target tháng!':'⚠️ Thư nhắc nhở';
+  $('#mlBody').textContent=ok
+    ?`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI — vượt chỉ tiêu tối thiểu của quản lý. Công ty thưởng thêm ${vnd(MGR_TARGET_BONUS)} vào lương tháng này. Cảm ơn bạn đã dẫn dắt team thật tốt! 🎉\n\n— Sếp tổng 👨‍💼`
+    :`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI, còn thiếu ${MGR_TARGET-k} KPI so với chỉ tiêu tối thiểu của quản lý.\n\nBan giám đốc ghi nhận nỗ lực của bạn và mong tháng tới bạn cố gắng hơn: chủ trì họp, hoàn thành nhiệm vụ ngày, giữ văn phòng gọn gàng để được sếp tổng khen. Chúng tôi tin bạn làm được! 💪\n\n— Sếp tổng 👨‍💼`;
+  setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(ok);},2500);}
+$('#mlOk').onclick=()=>$('#mgrLetter').classList.remove('show');
+window.mgrTargetLetter=mgrTargetLetter;
+
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
 const CAN_DL=(()=>{try{return window.top===window;}catch(e){return false;}})();   // trang Claude (khung nhúng) chặn tải file
@@ -4935,7 +4951,7 @@ function openRules(){
   if(!c)me.textContent='🎭 Chọn nhân vật để bắt đầu tích KPI và lên cấp!';
   else if(c.manager){const sl=slip(c);me.textContent=`🎖️ Bạn là Quản lý (${c.name}) — giao việc, chủ trì họp, giữ team gọn gàng.`;if(0){(`: làm việc, chủ trì họp, nhiệm vụ ngày, team được sếp tổng khen thì cộng; team phạm lỗi thì quản lý bị trừ.`);}
     {const rn=document.querySelector('.rnote');if(rn)rn.innerHTML='Đủ KPI bạn sẽ đến bàn nhân viên <b>trao bằng khen 🎓, cúp 🏆 và hoa 💐</b> rồi thăng cấp. Cấp càng cao lương càng cao.';}
-    {const r=document.createElement('div');r.className='lv on';const e=document.createElement('span');e.className='e';e.textContent='🎖️';const n=document.createElement('b');n.textContent='Quản lý (bạn)';const sm=document.createElement('small');sm.textContent=`lương ${Math.floor(payBase(c)/1e9)},x tỷ + phụ cấp · Chỉ bạn thấy 🔒`;r.append(e,n,sm);box.appendChild(r);}}
+    {const r=document.createElement('div');r.className='lv on';const e=document.createElement('span');e.className='e';e.textContent='🎖️';const n=document.createElement('b');n.textContent='Quản lý (bạn)';const sm=document.createElement('small');sm.textContent=`lương ${Math.floor(payBase(c)/1e9)},x tỷ + phụ cấp · target ${MGR_TARGET} KPI/tháng · Chỉ bạn thấy 🔒`;r.append(e,n,sm);box.appendChild(r);}}
   else{const nx=LEVELS[c.lv+1];me.textContent=`🙋 ${c.name}: bạn đang là ${LEVELS[c.lv].e} ${LEVELS[c.lv].n} (cấp ${c.lv+1}) với ${c.kpi} KPI.`+(nx?` Cần thêm ${Math.max(0,nx.need-c.kpi)} KPI để lên ${nx.e} ${nx.n}.`:' Bạn đã ở cấp cao nhất! 👑');}
   $('#rulesModal').classList.add('show');}
 let customNext=false;
