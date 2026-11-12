@@ -446,6 +446,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 #stage.pop-on #overlay,#stage.pop-on .evban,#stage.pop-on .yepcard,#stage.pop-on .cathud,#stage.pop-on .dancefab,#stage.pop-on .toast,#stage.pop-on .filerecv,#stage.pop-on .quizbox,#stage.pop-on .callwin,#stage.pop-on .fidtoast,#stage.pop-on .closedban,#stage.pop-on .hint{visibility:hidden!important}
 .promopop{z-index:300000!important}
 #stage.card-on #overlay,#stage.card-on .evban{visibility:hidden!important}
+#stage.quiz-on #overlay,#stage.quiz-on .cathud,#stage.quiz-on .dancefab,#stage.quiz-on .hint,#stage.quiz-on .yepcard{visibility:hidden!important}
 </style>
 </head>
 <body>
@@ -544,7 +545,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b pink big" data-cmd="boba">🥤 Trà sữa<small>Chọn món, shipper giao tận nơi</small></button>
           <button class="b pink big" data-cmd="quiz">🎮 Minigame<small>Đố vui cả phòng cùng chơi</small></button>
           <button class="b pink big" data-cmd="yep">🎊 Tiệc tất niên<small>Karaoke &amp; bốc thăm trúng thưởng</small></button>
-          <button class="b pink big" data-cmd="boss">👔 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
+          <button class="b pink big" data-cmd="boss">👨‍💼 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
           <button class="b pink big" data-cmd="incident">💥 Sự cố<small>Mất điện, kẹt giấy, Mochi phá…</small></button>
         </div>
       </div>
@@ -707,13 +708,14 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     <ul class="rlist">
       <li><b>😴 Ngủ gật trong giờ làm</b> — sếp bắt gặp trừ <b>10 KPI</b>. Muốn nghỉ thì dùng <b>🛏️ Ngủ trưa</b> (không bị trừ).</li>
       <li><b>😜 Khều, trêu đồng nghiệp trong giờ làm</b> — có thể bị trừ <b>3 KPI</b>. Được trêu thoải mái lúc <b>12:00–12:59</b> và <b>sau 17:30</b>.</li>
+      <li><b>👨‍💼 Sếp tổng ghé kiểm tra</b> — đang lười trừ <b>8 KPI</b>, bàn bừa bộn trừ <b>5 KPI</b>, văn phòng còn rác (giấy vụn, khay cát Mochi, vũng cà phê) cả team trừ <b>3 KPI</b>.</li>
       <li><b>📉 KPI âm</b> thì ngày lương bị trừ tiền theo số điểm âm.</li>
     </ul>
     <div class="rsec">✅ Cách cộng KPI</div>
     <ul class="rlist">
       <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
       <li>🖨️ In tài liệu <b>+6</b> · 📞 Gọi khách <b>+6</b> · 💬 Trao đổi <b>+5</b> · 🧹 Quét văn phòng <b>+5</b></li>
-      <li>🛠️ Xử lý sự cố <b>+8</b> · 👔 Sếp tổng khen <b>+5</b> (bắt lười <b>−8</b>) · 🎮 Minigame top 3 <b>+20/+10/+5</b></li>
+      <li>🛠️ Xử lý sự cố <b>+8</b> · 👨‍💼 Sếp tổng khen <b>+5</b> (bắt lười <b>−8</b>) · 🎮 Minigame top 3 <b>+20/+10/+5</b></li>
       <li>💐 Cắm hoa <b>+3</b> · 🧽 Dọn bàn <b>+4</b> · 🌱 Tưới cây, 🐟 chăm Mochi, 🧺 dọn cát <b>+3</b></li>
       <li>🎯 Mỗi ngày có <b>3 nhiệm vụ</b> (tab Cá nhân): xong mỗi cái <b>+20</b>, xong cả 3 mở <b>🎁 hộp quà KPI ngẫu nhiên (+15 đến +50)</b>.</li>
     </ul>
@@ -3484,7 +3486,7 @@ function bannerOff(){evBan.className='evban';}
 // seeded random (same result on every machine)
 function srand(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
 const hashStr=s=>{let h=2166136261;for(const ch of String(s))h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0;};
-Object.assign(KPI_PTS,{fix:8,bossok:5,bossbad:-8});Object.assign(KPI_WHY,{fix:'Xử lý sự cố',bossok:'Sếp tổng khen',bossbad:'Sếp tổng bắt lười'});
+Object.assign(KPI_PTS,{fix:8,bossok:5,bossbad:-8,bossmess:-5,bossdirty:-3});Object.assign(KPI_WHY,{fix:'Xử lý sự cố',bossok:'Sếp tổng khen',bossbad:'Sếp tổng bắt lười',bossmess:'Bàn bừa bộn khi sếp tổng ghé',bossdirty:'Văn phòng còn rác khi sếp tổng ghé'});
 
 /* ---- khách (shipper, sếp tổng): nhân vật chibi riêng, không chọn được ---- */
 const VISITORS=[];
@@ -3498,7 +3500,7 @@ const SHIPPER=makeGuest({id:'ship',name:'🛵 Shipper',short:'Shipper',slot:'Kh�
   const bag=new THREE.Group();bag.position.set(0,.16,.24);SHIPPER.body.add(bag);SHIPPER.dbag=bag;
   rbx(.3,.24,.2,.03,soft('#ffcf9e'),0,0,0,bag);bx(.31,.03,.21,soft('#33b36b'),0,.06,0,bag);
   for(const [x,cl] of [[-.08,'#f6d2a8'],[0,'#ffb3c9'],[.08,'#b9e6c9']]){cyl(.035,.03,.09,mat(cl),x,.16,0,bag,10);cyl(.004,.004,.08,mat('#ff6f9f'),x+.01,.23,0,bag,5);}}
-const BOSS=makeGuest({id:'boss',name:'👔 Sếp tổng',short:'Sếp tổng',slot:'Khách',hairStyle:'sidepart',hairColor:'#8d8a94',shirt:'#2d3350',skirt:'#262b45',tagColor:'#d23c4f'});
+const BOSS=makeGuest({id:'boss',name:'👨‍💼 Sếp tổng',short:'Sếp tổng',slot:'Khách',hairStyle:'sidepart',hairColor:'#8d8a94',shirt:'#2d3350',skirt:'#262b45',tagColor:'#d23c4f'});
 {const gl=new THREE.Group();BOSS.head.add(gl);BOSS.buildGlasses(gl,'#20202a',true);
   const bc=new THREE.Group();bc.position.set(0,-.07,0);BOSS.armL.hand.add(bc);rbx(.2,.15,.06,.02,soft('#5b3b2a',{roughness:.5}),0,-.06,0,bc);bx(.08,.025,.02,mat('#c9a24c',{metalness:.5}),0,.025,0,bc);}
 
@@ -3698,13 +3700,13 @@ const lazyOf=c=>c.eyesShut||c.danceOn||c.mode==='sofa'||!!c.sofaAct||/Ngủ gậ
 async function actBoss(){
   EV.boss=true;EV.lastBoss=simTime;
   try{
-    banner('🚨','Sếp tổng sắp tới!','Thang máy đang lên tầng… về bàn làm việc ngay!',{t:'🏃 Về bàn ngay',f:()=>{const c=ME.id&&byId(ME.id);if(c)run('work',c);}},'boss');
-    setStatus('🚨 Sếp tổng sắp đến kiểm tra! Ai đang ngủ gật, trêu nhau hay ngồi sofa thì về bàn ngay!');beep(false);
+    banner('🚨','Sếp tổng sắp tới!','Về bàn làm việc, dọn bàn, quét rác ngay!',{t:'🏃 Về bàn ngay',f:()=>{const c=ME.id&&byId(ME.id);if(c)run('work',c);}},'boss');
+    setStatus('🚨 Sếp tổng sắp đến kiểm tra! Ai đang ngủ gật, trêu nhau hay ngồi sofa thì về bàn ngay — bàn bừa bộn hay sàn còn rác cũng bị trừ KPI!');beep(false);
     if(!MGR.away&&!MGR.busy){MGR.say('Sếp tổng sắp tới! Mọi người về chỗ làm việc nhanh lên! 😱',2.6);}
     present().forEach((c,i)=>{if(isHuman(c)){if(!(c.atHome()&&c.mode==='working'))c.think('😱',2);return;}if(!c.busy&&!(c.atHome()&&c.mode==='working')){wait(.3+i*.25).then(()=>{if(!c.busy)guard(()=>actWork(c),[c]);});}else if(!c.busy)c.think('😰',1.6);});
-    for(let s=8;s>0;s--){evBanS.textContent=`Thang máy đang lên… còn ${s} giây! Về bàn làm việc ngay!`;await wait(1);}
+    for(let s=8;s>0;s--){evBanS.textContent=`Còn ${s} giây! Về bàn, dọn bàn, quét rác ngay!`;await wait(1);}
     const B=BOSS;B.pos.set(EXIT.out.x,0,EXIT.out.z);B.yaw=-PI/2;B.root.visible=true;B.arms='idle';B.lookAt=null;
-    banner('👔','Sếp tổng đang đi kiểm tra','Ai làm việc chăm chỉ sẽ được khen, ai lười sẽ bị trừ KPI!',null,'boss');
+    banner('👨‍💼','Sếp tổng đang đi kiểm tra','Làm việc chăm được khen · lười, bàn bừa bộn, văn phòng còn rác bị trừ KPI!',null,'boss');
     await doorIn();await walkDirect(B,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();
     const mgrFree=!MGR.away&&!MGR.busy;
     if(mgrFree){begin(MGR,'🙇 Đón sếp tổng');await MGR.goStand({x:9.9,z:2.7});MGR.faceTo(B);B.faceTo(MGR);
@@ -3724,12 +3726,24 @@ async function actBoss(){
         await B.say(`${pick(['Chăm chỉ quá, tốt lắm','Màn hình toàn số liệu đẹp, giỏi','Bàn gọn gàng, làm việc nghiêm túc','Tập trung ghê, anh thích'])} ${e.name}! +${KPI_PTS.bossok} KPI 👍`,2.4);
         e.think('🥺',1.4);addKpi(e,KPI_PTS.bossok,KPI_WHY.bossok);await e.say(pick(['Dạ em cảm ơn sếp tổng ạ! 🥰','Dạ em sẽ cố gắng hơn ạ 💪']),1.6);}
       else{await B.say(`${e.name} đang bận ${(e.activity||'việc').replace(/^\S+\s/,'').toLowerCase()} à, tốt, cứ tiếp tục nhé!`,2.4);}
+      {const m=MESS[e.id];if(m&&m.lv>=2){bad++;B.gesture('think',1.4);B.think('🗑️',1.6);
+        await B.say(`Bàn của ${e.name} toàn cốc với giấy vụn, chưa dọn à? Trừ ${-KPI_PTS.bossmess} KPI! 😤`,2.6);addKpi(e,KPI_PTS.bossmess,KPI_WHY.bossmess);e.think('😳',1.4);
+        await e.say(pick(['Dạ em dọn ngay ạ! 🧽','Em xin lỗi, em dọn liền ạ 😭']),1.8);}}
       B.lookAt=null;e.lookAt=null;await wait(.3);}
+    // rác trên sàn, khay cát Mochi, vũng cà phê: cả team bị trừ
+    {const dust=DUST.filter(d=>d.on),issues=[];if(dust.length)issues.push(`${dust.length} chỗ giấy vụn trên sàn`);if(LITTER.dirty>=2)issues.push('khay cát của Mochi bốc mùi');if(EV.inc&&EV.inc.k==='spill')issues.push('vũng cà phê chưa lau');
+      if(issues.length){bad++;const d=dust[0];if(d){await B.goStand({x:d.x+.55,z:d.z});B.faceTo(d);}else if(LITTER.dirty>=2){await B.goStand({x:LITTER.x,z:LITTER.z-.7});}
+        B.think('🗑️',2);setStatus(`🗑️ Sếp tổng phát hiện văn phòng chưa dọn: ${issues.join(', ')}.`);
+        const team=EMP.filter(c=>!c.away);
+        await B.say(`Văn phòng còn ${issues.join(', ')}! Không ai dọn à? Cả team trừ ${-KPI_PTS.bossdirty} KPI! 😠`,3.2);
+        team.forEach((c,i)=>{addKpi(c,KPI_PTS.bossdirty,KPI_WHY.bossdirty);wait(.2+i*.25).then(()=>c.think(pick(['😰','🙈','😳']),1.6));});
+        if(!MGR.away&&!MGR.busy)await MGR.say('Dạ em sẽ nhắc cả team dọn dẹp ngay ạ! 🙇‍♀️',2.2);}
+      else if(good){await B.say('Văn phòng sạch sẽ, không một mẩu rác. Tốt lắm! ✨',2.4);}}
     await B.goStand({x:0,z:4.4});B.yaw=0;
     const all=bad===0;
     await B.say(all?'Cả team làm việc tốt lắm! Cuối tháng anh duyệt thưởng thêm nhé! 💰':`Phần lớn làm tốt, nhưng ${bad} bạn cần nghiêm túc hơn nha. Cố lên cả team! 💪`,3);
     if(all&&good)present().forEach(c=>{if(!c.busy||c.atHome())c.gesture('cheer',1.6);});
-    setStatus(all?`👔 Sếp tổng rất hài lòng: ${good} người được khen, không ai bị bắt lười!`:`👔 Sếp tổng kiểm tra xong: ${good} người được khen, ${bad} người bị trừ KPI.`);
+    setStatus(all?`👨‍💼 Sếp tổng rất hài lòng: ${good} người được khen, không ai bị bắt lười!`:`👨‍💼 Sếp tổng kiểm tra xong: ${good} người được khen, ${bad} người bị trừ KPI.`);
     if(mgrFree){await MGR.say('Dạ em cảm ơn anh, em tiễn anh ạ!',1.8);}
     await B.goStand(EXIT.in);B.arms='wave';await B.say('Anh về nhé, làm việc tốt nha cả nhà! 👋',1.8);B.arms='idle';
     await doorIn();await walkDirect(B,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();B.root.visible=false;
@@ -3878,9 +3892,11 @@ const QBANK=[
 ];
 const QN=5,QT=12000,QR=3500,QLEAD=4500;
 const qzEl=$('#quizBox');
+function qzShow(){qzEl.classList.add('show');stage.classList.add('quiz-on');}   // bảng minigame hiện thì ẩn tên/bong bóng thoại cho khỏi chồng
+function qzHide(){qzEl.classList.remove('show');stage.classList.remove('quiz-on');}
 function makeQuiz(){const idx=shuffle(QBANK.map((_,i)=>i)).slice(0,QN);return `${Date.now()+QLEAD}|${idx.join('.')}|${Math.floor(Math.random()*1e9)}`;}
 function quizStart(v){
-  if(EV.quiz&&EV.quiz.on){qzEl.classList.add('show');setStatus('🎮 Minigame đang diễn ra rồi — vào chơi cùng nhé!');return false;}
+  if(EV.quiz&&EV.quiz.on){qzShow();setStatus('🎮 Minigame đang diễn ra rồi — vào chơi cùng nhé!');return false;}
   const [st,ids,sd]=String(v||'').split('|');const start=+st,seed=+sd|0;if(!start||!ids)return false;
   const rng=srand(seed);
   const qs=ids.split('.').map(i=>QBANK[i|0]).filter(Boolean).map(([q,o])=>{const ord=[0,1,2,3];for(let i=3;i>0;i--){const j=Math.floor(rng()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]];}return{q,opts:ord.map(k=>o[k]),correct:ord.indexOf(0)};});
@@ -3889,7 +3905,7 @@ function quizStart(v){
   players.forEach(c=>{Q.ans[c.id]={};Q.score[c.id]=0;});
   // nhân vật chưa có người chơi: tự trả lời (giống nhau trên mọi máy)
   players.forEach(c=>{if(isHuman(c))return;const r=srand(seed^hashStr(c.id));Q.npc[c.id]=qs.map(q=>{const ok=r()<(c.manager?.7:.58);let o=q.correct;if(!ok){o=Math.floor(r()*3);if(o>=q.correct)o++;}return{o,t:Math.round(2200+r()*8000)};});});
-  qzEl.classList.add('show');renderQuiz();
+  qzShow();renderQuiz();
   setStatus('🎮 Minigame “Đố vui công sở” bắt đầu! Trả lời nhanh và đúng để ghi điểm.');
   players.forEach((c,i)=>wait(i*.2).then(()=>{c.think('🎮',2);}));
   return true;}
@@ -3918,10 +3934,10 @@ function quizEnd(){const Q=EV.quiz;Q.on=false;Q.phase='end';const rk=rankOf(Q);r
   if(w&&Q.score[w.id]>0){setStatus(`🏆 ${w.name} vô địch minigame với ${Q.score[w.id]} điểm!${w.manager?'':' +20 KPI'}`);confetti(w.pos.x,2,w.pos.z,80);w.gesture('jump',2.2);w.say(pick(['Yeah! Vô địch rồi! 🏆','Ai chơi lại không? 😎','Kiến thức là sức mạnh! 💪']),2.4);
     rk.slice(1).forEach((c,i)=>wait(.6+i*.4).then(()=>c.think(pick(['👏','😆','😅']),1.6)));}
   else setStatus('🎮 Minigame kết thúc — chưa ai ghi điểm, chơi lại nhé!');
-  setTimeout(()=>{if(EV.quiz===Q&&!Q.on)qzEl.classList.remove('show');},14000);}
+  setTimeout(()=>{if(EV.quiz===Q&&!Q.on)qzHide();},14000);}
 const qzH=$('#qzH'),qzQ=$('#qzQ'),qzO=$('#qzO'),qzBar=$('#qzBar'),qzF=$('#qzF'),qzSc=$('#qzSc');
 qzO.addEventListener('click',e=>{const b=e.target.closest('button[data-o]');if(b)myAnswer(+b.dataset.o);});
-$('#qzX').onclick=()=>qzEl.classList.remove('show');
+$('#qzX').onclick=()=>qzHide();
 function renderQuiz(light){const Q=EV.quiz;if(!Q)return;const now=Date.now();
   if(Q.phase==='wait'){const s=Math.max(0,Math.ceil((Q.start-now)/1000));qzH.textContent='🎮 Đố vui công sở';qzQ.textContent=`Chuẩn bị… bắt đầu sau ${s} giây!`;qzBar.style.width='100%';
     if(!light){qzO.textContent='';qzF.textContent=ME.id&&Q.ans[ME.id]?'Bạn đang chơi với vai '+byId(ME.id).name+'. Trả lời đúng và nhanh để được nhiều điểm!':'👀 Bạn đang xem. Chọn nhân vật để chơi ở lượt sau nhé!';}}
@@ -4042,13 +4058,13 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
   if(n==='quiz'){if(!v)return false;return quizStart(v);}
   if(n==='incident'){if(!v)return false;return incStart(v);}
   if(n==='boba'){if(EV.boba){setStatus('🥤 Trà sữa đang được giao rồi!');return false;}if(!v)return false;guard(()=>actBoba(v),[]);return true;}
-  if(n==='boss'){if(EV.boss){setStatus('👔 Sếp tổng đang ở văn phòng rồi!');return false;}if(EV.yep){setStatus('🎊 Đang tiệc tất niên, sếp tổng để hôm khác ghé nhé!');return false;}
-    if(!EMP.some(e=>!e.away)){setStatus('👔 Văn phòng không có ai, sếp tổng không ghé nữa.');return false;}guard(actBoss,[]);return true;}
+  if(n==='boss'){if(EV.boss){setStatus('👨‍💼 Sếp tổng đang ở văn phòng rồi!');return false;}if(EV.yep){setStatus('🎊 Đang tiệc tất niên, sếp tổng để hôm khác ghé nhé!');return false;}
+    if(!EMP.some(e=>!e.away)){setStatus('👨‍💼 Văn phòng không có ai, sếp tổng không ghé nữa.');return false;}guard(actBoss,[]);return true;}
   if(n==='yep'){if(EV.yep){setStatus('🎊 Tiệc tất niên đang diễn ra rồi!');return false;}if(danceRunning||EV.boss){setStatus('⏳ Đợi xong hoạt động hiện tại rồi mở tiệc nhé!');return false;}
     if(freeEmp().length<3){setStatus('⏳ Cần ít nhất 3 người rảnh để mở tiệc tất niên.');return false;}if(!v)return false;guard(()=>actYep(v),[]);return true;}
   return o(n,c,a);};}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzEl.classList.add('show');return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),flowers:()=>openFlowers()};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),flowers:()=>openFlowers()};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
