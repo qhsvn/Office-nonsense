@@ -4460,8 +4460,8 @@ function scrTick(){const now=Date.now();
 function mgrTargetLetter(preview){const m=MGR;if(!m||m.id!==ME.id||!window.__pay)return;const MGR_TARGET=__pay.T,MGR_TARGET_BONUS=__pay.B,vnd=__pay.vnd;const k=m.kpiMonth||0,ok=k>=MGR_TARGET,mon=new Date().getMonth()+1;
   $('#mlIcon').textContent=ok?'🏆':'📄';$('#mlTitle').textContent=(ok?'Chúc mừng đạt target tháng!':'⚠️ Thư nhắc nhở')+(preview?' (xem thử)':'');
   $('#mlBody').textContent=ok
-    ?`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI — vượt chỉ tiêu tối thiểu của quản lý. Công ty thưởng thêm ${vnd(MGR_TARGET_BONUS)} vào lương tháng này. Cảm ơn bạn đã dẫn dắt team thật tốt! 🎉\n\n— Sếp tổng 👨‍💼`
-    :`Kính gửi Quản lý ${m.name},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI, còn thiếu ${MGR_TARGET-k} KPI so với chỉ tiêu tối thiểu của quản lý.\n\nBan giám đốc ghi nhận nỗ lực của bạn và mong tháng tới bạn cố gắng hơn. Chúng tôi tin bạn làm được! 💪\n\n— Sếp tổng 👨‍💼`;
+    ?`Kính gửi ${mgrLabel(m)},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI — vượt chỉ tiêu tối thiểu của quản lý. Công ty thưởng thêm ${vnd(MGR_TARGET_BONUS)} vào lương tháng này. Cảm ơn bạn đã dẫn dắt team thật tốt! 🎉\n\n— Sếp tổng 👨‍💼`
+    :`Kính gửi ${mgrLabel(m)},\n\nTháng ${mon} bạn đạt ${k}/${MGR_TARGET} KPI, còn thiếu ${MGR_TARGET-k} KPI so với chỉ tiêu tối thiểu của quản lý.\n\nBan giám đốc ghi nhận nỗ lực của bạn và mong tháng tới bạn cố gắng hơn. Chúng tôi tin bạn làm được! 💪\n\n— Sếp tổng 👨‍💼`;
   if(preview)$('#mlBody').textContent=`📌 Bản xem thử — tính theo KPI hiện tại, thư thật gửi vào ngày lương.\n\n`+$('#mlBody').textContent;
   // đợi đóng phiếu lương rồi mới hiện thư cho khỏi bị che
   const t0=Date.now(),iv=setInterval(()=>{const pe=$('#payModal');if((!pe||!pe.classList.contains('show'))||Date.now()-t0>120000){clearInterval(iv);setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(ok);},400);}},300);}
@@ -4470,6 +4470,7 @@ window.mgrTargetLetter=mgrTargetLetter;
 
 /* ================= nhân viên bị trừ KPI: lần 1–2 thư nhắc nhở, lần 3 sa thải & tuyển người mới ================= */
 const NEG_MAX=2;
+function mgrLabel(m,low){m=m||MGR;const n=String(m&&m.name||'');const base=low?'quản lý':'Quản lý';return !n||/^quản lý/i.test(n)?base:`${base} ${n}`;}
 function negStore(){const mk=new Date().getFullYear()+'-'+(new Date().getMonth()+1);let o=null;try{o=JSON.parse(localStorage.getItem('office_neg')||'null');}catch(e){}if(!o||o.mon!==mk)o={mon:mk,n:{}};return o;}
 function negSave(o){try{localStorage.setItem('office_neg',JSON.stringify(o));}catch(e){}}
 const negCount=c=>negStore().n[c.id]||0;
@@ -4477,7 +4478,7 @@ const NEG_T=[0,-10,-20];   // âm (0…-10]: nhắc nhở lần 1 · dưới -10
 const negLevel=km=>km< -20?3:km< -10?2:km<0?1:0;
 function negLetter(c,n,why,d){const mg=MGR?MGR.name:'Quản lý',km=c.kpiMonth||0;
   $('#mlIcon').textContent='📄';$('#mlTitle').textContent=`⚠️ Thư nhắc nhở (lần ${n}/${NEG_MAX})`;
-  $('#mlBody').textContent=`Kính gửi ${c.name},\n\nKPI tháng này của bạn đang là ${km} KPI${why?` (lần gần nhất: ${why} ${d} KPI)`:''}.\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu KPI tháng xuống dưới -20, quản lý sẽ xem xét sa thải.':'KPI dưới -10 sẽ nhận thư nhắc nhở lần 2, dưới -20 sẽ bị xem xét sa thải. Cố gắng kéo KPI lên lại nhé!'}\n\n— Quản lý ${mg} 🎖️`;
+  $('#mlBody').textContent=`Kính gửi ${c.name},\n\nKPI tháng này của bạn đang là ${km} KPI${why?` (lần gần nhất: ${why} ${d} KPI)`:''}.\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu KPI tháng xuống dưới -20, quản lý sẽ xem xét sa thải.':'KPI dưới -10 sẽ nhận thư nhắc nhở lần 2, dưới -20 sẽ bị xem xét sa thải. Cố gắng kéo KPI lên lại nhé!'}\n\n— ${mgrLabel()} 🎖️`;
   setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(false);},900);}
 function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;const km=c.kpiMonth||0,L=negLevel(km);if(!L)return;
   const o=negStore(),w=o.n[c.id]||0,msg=n=>[c.id,n,d,String(why||'').replace(/[|]/g,' ').slice(0,60),km].join('|');
@@ -4503,10 +4504,10 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
   try{
     while(c.busy&&!c.away)await wait(1);
     begin(c,'📦 Ôm thùng đồ nghỉ việc');holdBox(c,true);
-    hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',`KPI tháng ${c.kpiMonth||0} · Quản lý ${MGR.name} đã duyệt`,'Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”');
-    setStatus(`📦 ${c.name} bị sa thải (KPI tháng ${c.kpiMonth||0}, đã nhận 2 thư nhắc nhở). Quản lý ${MGR.name} đã ký đơn — phòng nhân sự đang tuyển người mới…`);
+    hrPop('sad',c,'📦 THÔNG BÁO SA THẢI',`KPI tháng ${c.kpiMonth||0} · ${mgrLabel()} đã duyệt`,'Ôm thùng đồ tạm biệt mọi người… “Mọi người ở lại làm tốt nhé 😭”');
+    setStatus(`📦 ${c.name} bị sa thải (KPI tháng ${c.kpiMonth||0}, đã nhận 2 thư nhắc nhở). ${mgrLabel()} đã ký đơn — phòng nhân sự đang tuyển người mới…`);
     if(wasMe){$('#mlIcon').textContent='📦';$('#mlTitle').textContent='Quyết định thôi việc';
-      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nKPI tháng của bạn xuống ${c.kpiMonth||0} KPI dù đã nhận đủ 2 thư nhắc nhở. Quản lý ${MGR.name} đã ký quyết định chấm dứt hợp đồng.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi tiếp nhé! 💪`;
+      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nKPI tháng của bạn xuống ${c.kpiMonth||0} KPI dù đã nhận đủ 2 thư nhắc nhở. ${mgrLabel()} đã ký quyết định chấm dứt hợp đồng.\n\nSau khi bạn rời văn phòng, hãy chọn lại nhân vật để chơi tiếp nhé! 💪`;
       $('#mgrLetter').classList.add('show');beep(false);}
     if(!MGR.away&&MGR!==c)MGR.say(`${c.name} ơi, rất tiếc… công ty phải cho em nghỉ việc. 😔`,2.6);
     CHARS.filter(o=>o!==c&&!o.away&&!o.manager).forEach((o,i)=>wait(.6+i*.4).then(()=>{o.lookAt=c;o.think(pick(['😢','🥺','😟']),1.8);}));
@@ -4557,7 +4558,7 @@ function fireDec(v){const [id,k]=String(v||'').split(':');const c=byId(id);if(!c
     if(!MGR.away)MGR.say(`Lần này chị cho ${c.name} thêm cơ hội. Cố gắng lên nha! 🙏`,2.6);
     if(!isHuman(c))wait(1.2).then(()=>thankMgr(c));          // NPC tự lên cảm ơn quản lý
     if(c.id===ME.id){$('#mlIcon').textContent='🙏';$('#mlTitle').textContent='Bạn được giữ lại!';
-      $('#mlBody').textContent=`Kính gửi ${c.name},\n\nQuản lý ${MGR.name} đã xem xét và quyết định cho bạn ở lại làm việc ngoại lệ lần này.\n\nHãy kéo KPI tháng lên lại — nếu tiếp tục giảm, quản lý sẽ xem xét lại.\n\nHãy lên cảm ơn quản lý nhé! 🙏`;
+      $('#mlBody').textContent=`Kính gửi ${c.name},\n\n${mgrLabel()} đã xem xét và quyết định cho bạn ở lại làm việc ngoại lệ lần này.\n\nHãy kéo KPI tháng lên lại — nếu tiếp tục giảm, quản lý sẽ xem xét lại.\n\nHãy lên cảm ơn quản lý nhé! 🙏`;
       const ok=$('#mlOk');ok.textContent='🙏 Cảm ơn quản lý';ok.dataset.thank='1';$('#mgrLetter').classList.add('show');beep(true);}
     return true;}
   setStatus(`✍️ ${MGR.name} đã duyệt sa thải ${c.name}.`);if(!MGR.away)MGR.think('✍️',1.8);
