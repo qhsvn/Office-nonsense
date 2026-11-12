@@ -548,7 +548,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     </section>
 
     <section class="tabpane" data-pane="solo" id="paneSolo">
-      <button type="button" class="bigcus" id="soloCustom">🎨 Tùy chỉnh ngoại hình của bạn (tóc, áo, váy, phụ kiện)</button>
+      <button type="button" class="bigcus" id="soloCustom">🎨 Tùy chỉnh ngoại hình của bạn (tóc, áo, quần, phụ kiện)</button>
       <div class="needsel">👆 Chạm vào một nhân vật trong văn phòng (hoặc thẻ ở tab “Mọi người”) để chọn trước nhé.</div>
       <div class="box" id="kpiBox" style="display:none"><div class="ttl">🏅 Cấp bậc &amp; KPI</div><div class="krow"><b id="kLv"></b><span id="kPts"></span></div><div class="kbar"><i id="kBar"></i></div><div id="kMis"></div><div class="klog" id="kLog"></div></div>
       <div class="box">
@@ -714,7 +714,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     <div class="wstep">Kiểu tóc</div><div class="copts" id="cHair"></div>
     <div class="wstep">Màu tóc</div><div class="sw" id="cHairC"></div>
     <div class="wstep" id="cShirtT">Màu áo</div><div class="sw" id="cShirt"></div>
-    <div class="wstep" id="cSkirtT">Màu váy</div><div class="sw" id="cSkirt"></div>
+    <div class="wstep" id="cSkirtT">Màu quần</div><div class="sw" id="cSkirt"></div>
     <div class="wstep">Phụ kiện</div><div class="copts" id="cAcc"></div>
     <div class="wstep" id="cAccCT">Màu phụ kiện</div><div class="sw" id="cAccC"></div>
     <div class="crow"><button type="button" id="cRand" class="cghost">Ngẫu nhiên</button><button type="button" id="cDone">Xong ✓</button></div>
@@ -1503,13 +1503,13 @@ function soft(c,o){const m=new THREE.MeshStandardMaterial(Object.assign({color:c
 const SKIN=soft('#ffe2d2',{roughness:.6}),LEG=soft('#fde0d1',{roughness:.6}),EYE=mat('#33221f',{roughness:.2}),WHITE=new THREE.MeshBasicMaterial({color:0xffffff});
 const CHEEK=new THREE.MeshStandardMaterial({color:0xffa6b6,transparent:true,opacity:.62,roughness:1});
 const MOUTH=mat('#e5808f');
-const STYLES=['long','bob','bangs','ponytail','buns','lowtail'],STYLES_M=['short','spiky','sidepart','curly'];const stylesOf=c=>c.gender==='m'?STYLES_M:STYLES;
-const STYLE_LABEL={short:'tóc ngắn',spiky:'tóc dựng',sidepart:'rẽ ngôi',curly:'tóc xoăn',long:'tóc dài',bob:'tóc bob',bangs:'mái ngố',ponytail:'đuôi ngựa',buns:'hai búi',lowtail:'tóc buộc thấp'};
+const STYLES=['topbun','long','bob','bangs','ponytail','buns','lowtail'],STYLES_M=['fluffy','short','spiky','sidepart','curly'];const stylesOf=c=>c.gender==='m'?STYLES_M:STYLES;
+const STYLE_LABEL={topbun:'búi cao rối',fluffy:'tóc xù bồng',short:'tóc ngắn',spiky:'tóc dựng',sidepart:'rẽ ngôi',curly:'tóc xoăn',long:'tóc dài',bob:'tóc bob',bangs:'mái ngố',ponytail:'đuôi ngựa',buns:'hai búi',lowtail:'tóc buộc thấp'};
 const ACCS=['none','bow','headband','roundGlasses','flower','earrings'];
 const ACC_LABEL={none:'không phụ kiện',bow:'nơ',headband:'băng đô',roundGlasses:'kính tròn',flower:'kẹp hoa',earrings:'khuyên tai',glassPearl:'kính đen & ngọc trai'};
 const HAIR_COLORS=['#3b2a26','#5b3a2e','#2b2233','#8a5636','#b77b55','#e8a9b8','#b5a1e6','#8fb3de','#f0cf8a','#9b7bb5','#c46a6a'];
-const SHIRTS=['#a8e6cf','#ffc8a2','#cdb4f6','#a0d2eb','#ffb3c8','#ffe08a','#bde0fe','#d0f4de','#fcd5ce','#e4c1f9'];
-const PANTS=['#3f495c','#5a6b8c','#2b2233','#4d6b5f','#8a7560','#7d9bd6','#6f68a8'];
+const SHIRTS=['#ffffff','#eaf4ff','#a8e6cf','#ffc8a2','#cdb4f6','#a0d2eb','#ffb3c8','#ffe08a','#bde0fe','#d0f4de','#fcd5ce','#e4c1f9'];
+const PANTS=['#1f222c','#262b3a','#3f495c','#5a6b8c','#2b2233','#4d6b5f','#8a7560','#7d9bd6','#6f68a8','#e48aa8','#5fa891','#b48ad6','#d69a6f','#f3b9c6'];
 const SKIRTS=['#6f68a8','#e48aa8','#5fa891','#7d9bd6','#b48ad6','#d69a6f','#8a8aa8'];
 const VESTS=['#8e86c9','#7f9cc9','#c98ea8','#6fae9c','#9a8ec9','#c9a36f'];
 const ACC_COLORS=['#6fc3ff','#8fd0ff','#8cb6ff','#5ec2b7','#ffb84d','#7aa7ff'];
@@ -1526,11 +1526,13 @@ class Chibi{
     if(this.manager)this.mVest=soft(cfg.vest,{roughness:.7,side:THREE.DoubleSide});
     const P=this.root;
     this.hips=new THREE.Group();this.hips.position.y=LEGH;P.add(this.hips);
-    const shoeM=soft(cfg.shoe||(this.manager?'#d5c9ec':'#f8d6ca'),{roughness:.5}),soleM=soft('#fff6ee'),sockM=soft('#fffaf3',{roughness:.8}),shoeBowM=soft(cfg.shoeBow?'#f7c6d0':'#fff3ea');
+    const shoeM=soft('#ffffff',{roughness:.45}),soleM=soft('#dfe5ee'),sockM=soft('#fffaf3',{roughness:.8}),shoeBowM=soft(cfg.shoeBow?'#f7c6d0':'#fff3ea');
     // slim legs, white socks, chunky sneakers with little bows
     const mkLeg=s=>{const g=new THREE.Group();g.position.x=s*.09;this.hips.add(g);
       cyl(.052,.046,.2,this.mLeg,0,-.12,0,g,14);
       cyl(.06,.058,.1,sockM,0,-.27,0,g,14);
+      (this.trLegs=this.trLegs||[]).push(cyl(.086,.094,.3,this.mSkirt,0,-.165,0,g,16));
+      {const lc=mk(new THREE.TorusGeometry(.05,.008,6,14),soft('#e9edf3'),0,-.33,.075,g);lc.rotation.x=PI/2-.4;lc.castShadow=false;}
       sph(.098,shoeM,0,-.345,.035,g,16,10).scale.set(1,.62,1.35);
       sph(.101,soleM,0,-.385,.037,g,16,8).scale.set(1,.2,1.38);
       for(const b of [1,-1]){const o=sph(.022,shoeBowM,b*.028,-.292,.085,g,8,6);o.scale.set(1.2,.7,.8);this.sb.push(o);}
@@ -1552,15 +1554,24 @@ class Chibi{
     cyl(.153,.153,.028,soft('#5b4a42',{roughness:.6}),0,.075,0,MG,28);
     if(!this.manager){const tm=soft(cfg.tagColor||'#ff8fb8',{roughness:.5});bx(.036,.12,.012,tm,0,.212,.142,MG);sph(.022,tm,0,.28,.128,MG,8,6);}hem.rotation.x=PI/2;hem.castShadow=false;
     cyl(.045,.05,.06,SKIN,0,.34,0,B,14);
+    {const OG=this.officeG=new THREE.Group();B.add(OG);
+      cyl(.152,.168,.2,this.mSkirt,0,-.005,0,OG,28);cyl(.155,.155,.026,soft('#3a3030',{roughness:.5}),0,.085,0,OG,28);bx(.03,.022,.012,mat('#d9dee8',{metalness:.5,roughness:.3}),0,.085,.156,OG).castShadow=false;
+      const colM=this.manager?soft('#ffffff'):this.mShirt;
+      for(const s of [1,-1]){const cl=bx(.07,.05,.014,colM,s*.04,.322,.108,OG);cl.rotation.set(-.55,s*.35,s*.55);cl.castShadow=false;}
+      const lan=mat('#2f5fb3',{roughness:.5});
+      for(const s of [1,-1]){const st=bx(.012,.15,.005,lan,s*.032,.258,.132,OG);st.rotation.set(-.42,0,s*.28);st.castShadow=false;}
+      const bd=rbx(.072,.094,.012,.012,mat('#cfe6ff',{roughness:.4}),0,.165,.152,OG);bd.castShadow=false;
+      bx(.05,.036,.003,mat('#ffffff'),0,.176,.159,OG).castShadow=false;bx(.024,.024,.004,mat('#3f8be0'),0,.15,.159,OG).castShadow=false;}
     if(this.manager){
       const v=mk(new THREE.CylinderGeometry(.128,.158,.22,24,1,true,.45,TAU-.9),this.mVest,0,.21,0,B);v.castShadow=true;
       const col=mk(new THREE.TorusGeometry(.1,.022,8,24),soft('#ffffff'),0,.315,0,B);col.rotation.x=PI/2;
       const st=mk(starGeo(.03,.013,.01),mat('#ffcc4d',{emissive:0x553300,emissiveIntensity:.3}),.062,.225,.152,B);st.castShadow=false;
     }else{
       // sailor collar + name tag
-      cyl(.118,.19,.035,soft(tint(cfg.shirt,.55)),0,.305,0,B,32);
-      const ct=mk(new THREE.TorusGeometry(.19,.007,6,40),this.mShirt,0,.288,0,B);ct.rotation.x=PI/2;ct.castShadow=false;
-      bx(.035,.02,.013,mat(cfg.tagColor||'#ff8fb8'),.062,.19,.137,B);
+      const SG=this.sailorG=new THREE.Group();B.add(SG);SG.visible=false;
+      cyl(.118,.19,.035,soft(tint(cfg.shirt,.55)),0,.305,0,SG,32);
+      const ct=mk(new THREE.TorusGeometry(.19,.007,6,40),this.mShirt,0,.288,0,SG);ct.rotation.x=PI/2;ct.castShadow=false;
+      bx(.035,.02,.013,mat(cfg.tagColor||'#ff8fb8'),.062,.19,.137,SG);
     }
     // bow at the chest
     const bowC=soft(this.manager?'#ff9fb8':tint(cfg.tagColor||'#ff8fb8',.4),{roughness:.5});
@@ -1568,14 +1579,16 @@ class Chibi{
     for(const s of [1,-1]){const w=sph(.046,bowC,s*.05,0,0,bowG,12,8);w.scale.set(1.25,.85,.5);w.rotation.z=-s*.25;const tl=bx(.028,.085,.012,bowC,s*.022,-.055,-.005,bowG);tl.rotation.z=s*.22;tl.castShadow=false;}
     sph(.026,bowC,0,0,.006,bowG,10,8);
     if(cfg.necklace){const nk=mk(new THREE.TorusGeometry(.053,.005,6,24),mat('#ffd45e',{roughness:.3}),0,.338,0,B);nk.rotation.x=PI/2;nk.castShadow=false;sph(.011,mat('#ffd45e',{roughness:.3}),0,.33,.054,B,8,6);}
-    const sleeveM=this.manager?this.mVest:this.mShirt,cuffM=soft('#fff6ee');
+    const sleeveM=this.manager?this.mVest:this.mShirt,cuffM=this.manager?soft('#f4f6fa'):this.mShirt;
     // puffy short sleeves, small round hands
     const mkArm=s=>{const g=new THREE.Group();g.position.set(s*.185,.27,0);B.add(g);
       sph(.085,sleeveM,0,-.03,0,g,16,12).scale.set(1,.95,1);
-      const cf=mk(new THREE.TorusGeometry(.062,.013,8,18),cuffM,0,-.085,0,g);cf.rotation.x=PI/2;cf.castShadow=false;
+      const cf=mk(new THREE.TorusGeometry(.066,.021,8,18),cuffM,0,-.088,0,g);cf.rotation.x=PI/2;cf.castShadow=false;
       cyl(.047,.042,.12,SKIN,0,-.15,0,g,12);
       const hand=new THREE.Group();hand.position.y=-.215;g.add(hand);sph(.052,SKIN,0,0,0,hand,14,10);return{g,hand};};
     this.armL=mkArm(1);this.armR=mkArm(-1);
+    {const wg=new THREE.Group();this.armL.g.add(wg);this.watchG=wg;const band=mk(new THREE.TorusGeometry(.047,.011,6,18),mat('#2a2a30',{roughness:.5}),0,-.183,0,wg);band.rotation.x=PI/2;band.castShadow=false;
+      const fc=cyl(.022,.022,.012,mat('#d9dee8',{metalness:.5,roughness:.3}),.05,-.183,0,wg,14);fc.rotation.z=PI/2;fc.castShadow=false;}
     if(cfg.bracelet){const br=mk(new THREE.TorusGeometry(.05,.01,6,16),mat('#f2a1b0',{roughness:.3}),0,-.185,0,this.armL.g);br.rotation.x=PI/2;br.castShadow=false;}
     // big round head
     this.head=new THREE.Group();this.head.position.y=.6;this.head.scale.set(HEAD_S*1.05,HEAD_S*.97,HEAD_S);B.add(this.head);const Hd=this.head;
@@ -1630,7 +1643,7 @@ class Chibi{
     this.bdgEl=document.createElement('div');this.bdgEl.className='bdg';
     this.tagEl.append(this.bubEl,this.nameEl,this.bdgEl);overlay.appendChild(this.tagEl);
   }
-  applyGender(){const m=this.gender==='m';this.femG.visible=!m;this.maleG.visible=m;this.sb.forEach(o=>o.visible=!m);this.mLeg.color.set(m?'#'+this.mSkirt.color.getHexString():'#fde0d1');this.mLeg.emissive.copy(this.mLeg.color);}
+  applyGender(){if(this.watchG)this.watchG.visible=this.gender==='m';this.femG.visible=false;this.maleG.visible=false;this.sb.forEach(o=>o.visible=false);this.mLeg.color.set('#'+this.mSkirt.color.getHexString());this.mLeg.emissive.copy(this.mLeg.color);}
   buildGlasses(g,color,rect){
     const m=mat(color,{roughness:.4});
     for(const s of [1,-1]){
@@ -1653,12 +1666,24 @@ class Chibi{
       case 'ponytail':back(R*1.09,.62);bangs(.37);sph(.06,mat('#ff8fab'),0,.14,-.38,g,10,8);{const t=sph(.16,m,0,-.14,-.5,g,16,12);t.scale.set(.85,1.9,.85);t.rotation.x=.35;}break;
       case 'lowtail':back(R*1.09,.62);bangs(.3);for(const s of [1,-1]){const l=sph(.06,m,s*.33,-.1,.1,g,10,8);l.scale.set(.6,1.8,.7);}sph(.045,m,0,-.2,-.36,g,10,8);{const t=sph(.14,m,0,-.42,-.42,g,16,12);t.scale.set(.8,2.5,.8);t.rotation.x=.18;}break;
       case 'buns':back(R*1.09,.66);bangs(.39);for(const s of [1,-1])sph(.17,m,s*.33,.22,-.03,g,24,18);break;
+      case 'topbun':back(R*1.1,.6);bangs(.33);
+        {const sw=sph(.2,m,-.11,.2,.21,g,18,12);sw.scale.set(1.3,.5,.75);sw.rotation.z=.38;}
+        {const bn=sph(.165,m,0,.45,-.1,g,22,16);bn.scale.set(1,.86,1);const tw=mk(new THREE.TorusGeometry(.115,.034,8,22),m,0,.39,-.085,g);tw.rotation.x=PI/2+.3;
+         for(let i=0;i<5;i++){const w=sph(.034,m,Math.cos(i*1.3)*.13,.49+Math.sin(i*2.1)*.035,-.1+Math.sin(i*1.3)*.12,g,8,6);w.scale.set(1.7,.6,.8);w.rotation.y=i;}}
+        for(const s of [1,-1]){const l=sph(.05,m,s*.315,-.15,.15,g,10,8);l.scale.set(.5,2.3,.6);l.rotation.z=s*.14;}
+        break;
+      case 'fluffy':back(R*1.12,.6);bangs(.3);
+        for(let i=0;i<11;i++){const a=i/11*TAU;const t=sph(.12,m,Math.cos(a)*.245,.25+Math.sin(i*2.3)*.03,Math.sin(a)*.22-.05,g,12,10);t.scale.set(1.15,.75,1.15);}
+        sph(.17,m,0,.33,-.04,g,16,12).scale.set(1.25,.7,1.25);
+        for(let i=0;i<4;i++){const f=sph(.072,m,-.17+i*.115,.14-Math.abs(i-1.5)*.012,.3,g,10,8);f.scale.set(1.3,1.0,.55);f.rotation.z=.45-i*.17;}
+        for(const s of [1,-1]){const sb=sph(.06,m,s*.335,-.04,.05,g,10,8);sb.scale.set(.6,1.45,.8);}
+        break;
       case 'short':back(R*1.08,.52);bangs(.24);break;
       case 'spiky':back(R*1.08,.5);bangs(.2);for(let i=0;i<7;i++){const a=(i/6-.5)*2.1;const sp=mk(new THREE.ConeGeometry(.075,.2,6),m,Math.sin(a)*.21,.31+Math.cos(a)*.04,-.03+Math.cos(a)*.05,g);sp.rotation.z=-a*.55;sp.rotation.x=-.3;}break;
       case 'sidepart':back(R*1.09,.56);bangs(.2);{const sw=sph(.17,m,.09,.25,.17,g,16,12);sw.scale.set(1.5,.62,.95);sw.rotation.z=-.3;}break;
       case 'curly':back(R*1.1,.56);bangs(.18);for(let i=0;i<14;i++){const a=i/14*TAU;sph(.085,m,Math.cos(a)*.25,.24+Math.sin(i*1.7)*.035,Math.sin(a)*.22-.03,g,10,8);}sph(.12,m,0,.34,-.02,g,12,10);break;
     }
-    if(!['long','bob','bangs','lowtail','short','spiky','sidepart','curly'].includes(this.hairStyle))for(const s of [1,-1]){const l=sph(.07,m,s*.325,-.1,.1,g,12,10);l.scale.set(.6,1.7,.75);}
+    if(!['topbun','fluffy','long','bob','bangs','lowtail','short','spiky','sidepart','curly'].includes(this.hairStyle))for(const s of [1,-1]){const l=sph(.07,m,s*.325,-.1,.1,g,12,10);l.scale.set(.6,1.7,.75);}
   }
   buildAcc(){
     const g=this.accG;this.clear(g);const c=this.accColor||pick(ACC_COLORS);this.accColor=c;const m=mat(c,{roughness:.5});
@@ -1674,14 +1699,14 @@ class Chibi{
   restyle(){
     this.hairStyle=pick(stylesOf(this).filter(s=>s!==this.hairStyle));
     this.mHair.color.set(pick(HAIR_COLORS));this.mHair.emissive.copy(this.mHair.color);
-    if(this.manager){this.mVest.color.set(pick(VESTS));this.mVest.emissive.copy(this.mVest.color);}else{this.mShirt.color.set(pick(SHIRTS));this.mSkirt.color.set(pick(SKIRTS));this.mShirt.emissive.copy(this.mShirt.color);this.mSkirt.emissive.copy(this.mSkirt.color);}
+    if(this.manager){this.mVest.color.set(pick(VESTS));this.mVest.emissive.copy(this.mVest.color);}else{this.mShirt.color.set(pick(SHIRTS));this.mSkirt.color.set(pick(PANTS));this.mShirt.emissive.copy(this.mShirt.color);this.mSkirt.emissive.copy(this.mSkirt.color);}
     if(this.gender==='m'&&!this.manager){this.mSkirt.color.set(pick(PANTS));this.mSkirt.emissive.copy(this.mSkirt.color);}
     this.acc=pick(this.accOptions().filter(a=>a!==this.acc&&a!=='glassPearl'));this.accColor=null;this.applyGender();
     this.buildHair();this.buildAcc();this.think('✨',1.6);
   }
   colorHex(){return '#'+(this.manager?this.mVest:this.mShirt).color.getHexString();}
   accOptions(){return (this.gender==='m'?['none','roundGlasses','headband','earrings']:ACCS.concat(['glassPearl'])).filter(a=>!(this.manager&&(a==='roundGlasses'||a==='glassPearl')));}
-  look(){return{hair:this.hairStyle,hairColor:'#'+this.mHair.color.getHexString(),shirt:this.colorHex(),skirt:'#'+this.mSkirt.color.getHexString(),acc:this.acc,accColor:this.accColor||'',gender:this.gender||'f'};}
+  look(){return{hair:this.hairStyle,hairColor:'#'+this.mHair.color.getHexString(),shirt:this.colorHex(),skirt:'#'+this.mSkirt.color.getHexString(),acc:this.acc,accColor:this.accColor||'',gender:this.gender||'f',of:1};}
   applyLook(L){
     if(!L||typeof L!=='object')return false;
     const hex=v=>typeof v==='string'&&/^#[0-9a-fA-F]{6}$/.test(v),setM=(m,v)=>{m.color.set(v);m.emissive.copy(m.color);};
@@ -1689,8 +1714,8 @@ class Chibi{
     if((L.gender==='m'||L.gender==='f')&&L.gender!==this.gender){this.gender=L.gender;hair=acc=true;}
     if(stylesOf(this).includes(L.hair)&&L.hair!==this.hairStyle){this.hairStyle=L.hair;hair=true;}
     if(hex(L.hairColor))setM(this.mHair,L.hairColor);
-    if(hex(L.shirt))setM(this.manager?this.mVest:this.mShirt,L.shirt);
-    if(hex(L.skirt))setM(this.mSkirt,L.skirt);
+    if(hex(L.shirt)&&L.of===1)setM(this.manager?this.mVest:this.mShirt,L.shirt);
+    if(hex(L.skirt)&&L.of===1)setM(this.mSkirt,L.skirt);
     if(this.accOptions().includes(L.acc)&&L.acc!==this.acc){this.acc=L.acc;acc=true;}
     if(hex(L.accColor)&&L.accColor!==this.accColor){this.accColor=L.accColor;acc=true;}
     if(!stylesOf(this).includes(this.hairStyle)){this.hairStyle=stylesOf(this)[0];hair=true;}
@@ -1807,11 +1832,11 @@ class Chibi{
 }
 
 const PEOPLE=[
-  {id:'thanh',slot:'Quản lý',manager:true,hairStyle:'bob',hairColor:'#2f2328',shirt:'#ffffff',vest:'#8e86c9',skirt:'#6f68a8',acc:'earrings',accColor:'#ffd45e'},
-  {id:'lieu',slot:'Nhân viên 1',hairStyle:'lowtail',hairColor:'#4a1424',eyeColor:'#5b3a2e',shirt:'#f7c9d2',skirt:'#f3b9c6',acc:'glassPearl',accColor:'#fff6ee',shoe:'#f6ead9',shoeBow:true,necklace:true,bracelet:true,tagColor:'#ff8fb8'},
-  {id:'nhung',slot:'Nhân viên 2',hairStyle:'ponytail',hairColor:'#6b3e2e',shirt:'#ffc8a2',skirt:'#d69a6f',acc:'bow',accColor:'#ff6f9f',tagColor:'#f7b955'},
-  {id:'an',slot:'Nhân viên 3',gender:'m',hairStyle:'sidepart',hairColor:'#2b2233',shirt:'#bde0fe',skirt:'#3f495c',acc:'none',accColor:'#6fc3ff',tagColor:'#3f8be0'},
-  {id:'linh',slot:'Nhân viên 4',hairStyle:'buns',hairColor:'#8a5636',shirt:'#a0d2eb',skirt:'#7d9bd6',acc:'roundGlasses',accColor:'#ff8fb8',tagColor:'#a996ff'},
+  {id:'thanh',slot:'Quản lý',manager:true,hairStyle:'bob',hairColor:'#2f2328',shirt:'#ffffff',vest:'#8e86c9',skirt:'#2a2f45',acc:'earrings',accColor:'#ffd45e'},
+  {id:'lieu',slot:'Nhân viên 1',hairStyle:'lowtail',hairColor:'#4a1424',eyeColor:'#5b3a2e',shirt:'#ffffff',skirt:'#262b3a',acc:'glassPearl',accColor:'#fff6ee',necklace:true,bracelet:true,tagColor:'#ff8fb8'},
+  {id:'nhung',slot:'Nhân viên 2',hairStyle:'ponytail',hairColor:'#6b3e2e',shirt:'#ffffff',skirt:'#3a4256',acc:'bow',accColor:'#ff6f9f',tagColor:'#f7b955'},
+  {id:'an',slot:'Nhân viên 3',gender:'m',hairStyle:'fluffy',hairColor:'#3a2620',shirt:'#ffffff',skirt:'#1f222c',acc:'roundGlasses',accColor:'#2a2a33',tagColor:'#3f8be0'},
+  {id:'linh',slot:'Nhân viên 4',hairStyle:'topbun',hairColor:'#5b3427',shirt:'#ffffff',skirt:'#1f222c',acc:'roundGlasses',accColor:'#2a2a33',tagColor:'#a996ff'},
 ];
 PEOPLE.forEach(p=>{p.name=p.short=p.slot;});
 const CHARS=PEOPLE.map((p,i)=>{const c=new Chibi(p);c.seed=i*1.7;c.claimName=null;c.nameEl.classList.add('empty');return c;});
@@ -4428,21 +4453,24 @@ const lookOf=c=>STYLE_LABEL[c.hairStyle]+(c.acc!=='none'?' · '+ACC_LABEL[c.acc]
 /* little 2D portrait drawn from each character's current look */
 function avatarSVG(c){
   const hair='#'+c.mHair.color.getHexString(),shirt=c.colorHex(),acc=c.accColor||'#8fd0ff',st=c.hairStyle,skin='#ffe2d2';
-  const bg='#'+new THREE.Color(shirt).lerp(new THREE.Color('#ffffff'),.55).getHexString();
+  const bg='#'+new THREE.Color(c.manager?shirt:(c.tagColor||'#8fd0ff')).lerp(new THREE.Color('#ffffff'),.62).getHexString();
   let back='',behind='',front='',acs='';
   if(st==='long')back=`<path d="M20 46Q20 16 50 16Q80 16 80 46L83 90Q66 96 50 94Q34 96 17 90Z" fill="${hair}"/>`;
   else if(st==='bob')back=`<path d="M18 50Q18 14 50 14Q82 14 82 50L80 71Q50 79 20 71Z" fill="${hair}"/>`;
   else if(st==='bangs')back=`<path d="M20 50Q20 16 50 16Q80 16 80 50L78 67Q50 73 22 67Z" fill="${hair}"/>`;
   else back=`<circle cx="50" cy="44" r="30" fill="${hair}"/>`;
+  if(st==='topbun')behind=`<ellipse cx="50" cy="13" rx="13" ry="11" fill="${hair}"/><path d="M40 20Q50 15 60 20" stroke="rgba(0,0,0,.18)" stroke-width="1.6" fill="none"/>`;
   if(st==='buns')behind=`<circle cx="24" cy="23" r="11" fill="${hair}"/><circle cx="76" cy="23" r="11" fill="${hair}"/>`;
   if(st==='ponytail')behind=`<ellipse cx="81" cy="52" rx="8" ry="17" fill="${hair}" transform="rotate(-18 81 52)"/><circle cx="74" cy="30" r="4" fill="#ff8fab"/>`;
-  front=st==='bangs'?`<path d="M24 53Q22 20 50 20Q78 20 76 53L72 44L66 47L60 42L54 47L48 42L42 47L36 42L30 47Z" fill="${hair}"/>`
+  front=st==='topbun'?`<path d="M24 52Q21 20 50 20Q79 20 76 50Q66 30 44 33Q34 38 30 50L28 60Z" fill="${hair}"/><path d="M26 47Q22 62 27 73L30 72Q27 61 29 49Z" fill="${hair}"/><path d="M74 47Q78 62 73 73L70 72Q73 61 71 49Z" fill="${hair}"/>`:st==='bangs'?`<path d="M24 53Q22 20 50 20Q78 20 76 53L72 44L66 47L60 42L54 47L48 42L42 47L36 42L30 47Z" fill="${hair}"/>`
                     :`<path d="M24 50Q22 20 50 20Q78 20 76 50Q70 36 62 39Q56 31 50 37Q43 31 37 39Q29 36 24 50Z" fill="${hair}"/>`;
   if(['long','bob','bangs','lowtail'].includes(st))front+=`<path d="M25 45Q21 62 26 75L31 73Q28 60 29.5 47Z" fill="${hair}"/><path d="M75 45Q79 62 74 75L69 73Q72 60 70.5 47Z" fill="${hair}"/>`;
   const male=c.gender==='m';
   if(male){behind='';back=`<path d="M21 48Q21 15 50 15Q79 15 79 48L77 56Q74 40 50 38Q26 40 23 56Z" fill="${hair}"/>`;
     front=st==='sidepart'?`<path d="M24 47Q23 19 50 19Q77 19 76 47Q72 30 40 32Q30 36 24 47Z" fill="${hair}"/>`:`<path d="M24 47Q23 19 50 19Q77 19 76 47Q70 33 58 35Q50 29 42 35Q30 33 24 47Z" fill="${hair}"/>`;
     if(st==='spiky')front+=`<path d="M27 32L32 12L40 26L47 8L54 25L62 10L67 27L75 15L75 36Z" fill="${hair}"/>`;
+    if(st==='fluffy'){back=`<path d="M19 50Q16 12 50 13Q84 12 81 50L78 58Q75 38 50 37Q25 38 22 58Z" fill="${hair}"/>`+[20,30,40,50,60,70,80].map((x,i)=>`<circle cx="${x}" cy="${i%2?17:22}" r="9" fill="${hair}"/>`).join('');
+      front=`<path d="M23 50Q21 20 50 20Q79 20 77 50Q74 36 64 38Q60 31 52 36Q44 30 37 37Q28 35 23 50Z" fill="${hair}"/><path d="M33 33Q38 46 30 49Q36 41 33 33Z" fill="${hair}"/><path d="M60 31Q70 40 64 47Q66 39 60 31Z" fill="${hair}"/>`;}
     if(st==='curly')front+=[22,31,40,50,60,69,78].map((x,i)=>`<circle cx="${x}" cy="${i%2?22:27}" r="8" fill="${hair}"/>`).join('');}
   switch(c.acc){
     case 'bow':acs=`<g transform="translate(70 25) rotate(-25)"><ellipse cx="-6" rx="7" ry="5" fill="${acc}"/><ellipse cx="6" rx="7" ry="5" fill="${acc}"/><circle r="3" fill="${acc}"/></g>`;break;
@@ -4454,11 +4482,11 @@ function avatarSVG(c){
   }
   if(c.manager)acs+=`<g fill="none" stroke="#3d3350" stroke-width="1.8"><rect x="33" y="47.5" width="15" height="11" rx="2"/><rect x="52" y="47.5" width="15" height="11" rx="2"/><path d="M48 52H52"/></g><circle cx="61" cy="88" r="3.2" fill="#ffcc4d"/>`;
   return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="100" height="100" fill="${bg}"/>${behind}${back}`+
-    `<path d="M21 101Q23 74 50 72Q77 74 79 101Z" fill="${shirt}"/>`+(c.manager?`<path d="M41 73L50 85L59 73Z" fill="#fff"/>`:`<path d="M36 75Q50 86 64 75" stroke="#fff" stroke-width="3" fill="none"/>`)+
+    `<path d="M21 101Q23 74 50 72Q77 74 79 101Z" fill="${shirt}"/>`+(c.manager?`<path d="M41 73L50 85L59 73Z" fill="#fff"/>`:`<path d="M21 101Q23 74 50 72Q77 74 79 101" stroke="#d8e0ec" stroke-width="1.4" fill="none"/><path d="M39 73L50 81L61 73" stroke="#d8e0ec" stroke-width="2.2" fill="none"/>`)+`<path d="M42 74L50 91L58 74" stroke="#2f5fb3" stroke-width="2" fill="none"/><rect x="45" y="89" width="10" height="10" rx="1.6" fill="#cfe6ff" stroke="#2f5fb3" stroke-width="1"/><rect x="48" y="93.5" width="4" height="4" fill="#3f8be0"/>`+
     `<rect x="45" y="66" width="10" height="9" rx="4" fill="${skin}"/><ellipse cx="50" cy="48" rx="25" ry="24" fill="${skin}"/>${front}`+
     `<ellipse cx="40.5" cy="53" rx="3.6" ry="4.8" fill="#33221f"/><ellipse cx="59.5" cy="53" rx="3.6" ry="4.8" fill="#33221f"/><circle cx="41.8" cy="51.3" r="1.4" fill="#fff"/><circle cx="60.8" cy="51.3" r="1.4" fill="#fff"/>`+
     `<ellipse cx="33.5" cy="60.5" rx="4.6" ry="2.6" fill="#ffa6b6" opacity=".75"/><ellipse cx="66.5" cy="60.5" rx="4.6" ry="2.6" fill="#ffa6b6" opacity=".75"/>`+
-    `<path d="M47 62.5Q50 65.5 53 62.5" stroke="#e5808f" stroke-width="1.8" fill="none" stroke-linecap="round"/>${male&&!c.manager?`<path d="M48 75L52 75L54 91L50 95L46 91Z" fill="${c.tagColor||'#ff8fab'}"/>`:''}${acs}</svg>`;
+    `<path d="M47 62.5Q50 65.5 53 62.5" stroke="#e5808f" stroke-width="1.8" fill="none" stroke-linecap="round"/>${acs}</svg>`;
 }
 const avKey=c=>c.mHair.color.getHexString()+c.colorHex()+c.hairStyle+c.acc+c.accColor+c.gender;
 function setAvatar(el,c){const k=avKey(c);if(el._k!==k){el._k=k;el.innerHTML=avatarSVG(c);}}
@@ -4615,13 +4643,13 @@ function chips(box,opts,cur,label,fn){box.textContent='';opts.forEach(o=>{const 
 function renderCustom(){
   const c=ME.id&&byId(ME.id);if(!c)return;const L=c.look(),set=patch=>{c.applyLook(Object.assign(c.look(),patch));lookChanged(c);renderCustom();};
   setAvatar($('#cAv'),c);$('#cSub').textContent=`${ME.name} · ${c.slot}. Thay đổi hiện ngay trong văn phòng, người cùng phòng chat cũng thấy.`;
-  chips($('#cGender'),['f','m'],L.gender,{f:'👩 Nữ',m:'👨 Nam'},v=>{if(v!==L.gender)set(v==='m'?{gender:'m',hair:'short',skirt:'#3f495c'}:{gender:'f',hair:'ponytail',skirt:'#d69a6f'});});
+  chips($('#cGender'),['f','m'],L.gender,{f:'👩 Nữ',m:'👨 Nam'},v=>{if(v!==L.gender)set(v==='m'?{gender:'m',hair:'fluffy',skirt:'#262b3a'}:{gender:'f',hair:'topbun',skirt:'#262b3a'});});
   chips($('#cHair'),stylesOf(c),L.hair,STYLE_LABEL,v=>set({hair:v}));
   swatches($('#cHairC'),HAIR_COLORS,L.hairColor,v=>set({hairColor:v}));
   $('#cShirtT').textContent=c.manager?'Màu áo vest':'Màu áo';
   swatches($('#cShirt'),c.manager?VESTS.concat(['#5a5f7a','#d9a1b8']):SHIRTS,L.shirt,v=>set({shirt:v}));
-  $('#cSkirtT').textContent=L.gender==='m'?'Màu quần':'Màu váy';
-  swatches($('#cSkirt'),L.gender==='m'?PANTS:SKIRTS.concat(['#f3b9c6','#3f495c']),L.skirt,v=>set({skirt:v}));
+  $('#cSkirtT').textContent='Màu quần';
+  swatches($('#cSkirt'),PANTS,L.skirt,v=>set({skirt:v}));
   chips($('#cAcc'),c.accOptions(),L.acc,ACC_LABEL,v=>set({acc:v}));
   const noAccColor=L.acc==='none'||L.acc==='glassPearl';$('#cAccCT').style.display=$('#cAccC').style.display=noAccColor?'none':'';
   swatches($('#cAccC'),CUST_ACC_COLORS,L.accColor,v=>set({accColor:v}));
