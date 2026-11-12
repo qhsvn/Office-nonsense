@@ -445,6 +445,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .tag .ctl{margin-top:2px;font-size:9.5px;font-weight:700;border-radius:999px;padding:1px 7px;background:#fff1c9;color:#8a6420;white-space:nowrap;box-shadow:0 2px 6px rgba(140,110,40,.2)}
 #stage.pop-on #overlay,#stage.pop-on .evban,#stage.pop-on .yepcard,#stage.pop-on .cathud,#stage.pop-on .dancefab,#stage.pop-on .toast,#stage.pop-on .filerecv,#stage.pop-on .quizbox,#stage.pop-on .callwin,#stage.pop-on .fidtoast,#stage.pop-on .closedban,#stage.pop-on .hint{visibility:hidden!important}
 .promopop{z-index:300000!important}
+#stage.card-on #overlay,#stage.card-on .evban{visibility:hidden!important}
 </style>
 </head>
 <body>
@@ -3781,8 +3782,8 @@ const SONGS=[{n:'Deadline Ơi',l:['Deadline ơi, sao cứ đuổi theo em hoài�
   {n:'Công Sở Zô Tri',l:['Sáng check-in, mặt còn ngái ngủ…','Trưa ăn cơm hộp, chiều order trà sữa…','Họp xong lại họp, slide dài ba chục trang…','Nhưng có team này, đi làm vui như đi chơi! 🥳']}];
 const PRIZES=[{n:'🥤 Voucher trà sữa cả tháng',lv:'Giải Khuyến khích',k:10},{n:'🍳 Nồi chiên không dầu',lv:'Giải Ba',k:15},{n:'🏖️ Thêm 2 ngày nghỉ phép',lv:'Giải Nhì',k:20},{n:'💵 Phong bì 5 triệu',lv:'Giải Đặc biệt',k:50}];
 const yepEl=$('#yepCard'),yepT=$('#yepT'),yepS=$('#yepS'),yepB=$('#yepB');
-function yepCard(t,s,b,cls){yepT.textContent=t;yepS.textContent=s||'';yepB.textContent=b||'';yepEl.className='yepcard show '+(cls||'');}
-function yepCardOff(){yepEl.className='yepcard';}
+function yepCard(t,s,b,cls){yepT.textContent=t;yepS.textContent=s||'';yepB.textContent=b||'';yepEl.className='yepcard show '+(cls||'');stage.classList.add('card-on');}   // thẻ tiệc hiện thì ẩn tên/bong bóng thoại để không chồng lên nhau
+function yepCardOff(){yepEl.className='yepcard';stage.classList.remove('card-on');}
 function makeYep(){const emp=shuffle(present().filter(c=>!c.manager).map(c=>c.id));const s=shuffle(emp).slice(0,2);
   return `w=${emp.join('.')};s=${s.join('.')};p=${s.map(()=>Math.round(rand(86,100))).join('.')};g=${Math.floor(Math.random()*SONGS.length)}`;}
 function yepAud(){return[{x:-2.1,z:6.6,face:PI},{x:-.7,z:6.9,face:PI},{x:.7,z:6.9,face:PI},{x:2.1,z:6.6,face:PI},{x:0,z:7.3,face:PI}];}
@@ -3798,7 +3799,7 @@ async function actYep(v){
     banner('🎊',`Tiệc tất niên ${YEAR}`,'Văn phòng lên đèn — karaoke và bốc thăm trúng thưởng!',null,'yep');
     setStatus(`🎊 Tiệc tất niên ${YEAR}! Văn phòng được trang trí, mọi người kéo nhau ra sân khấu.`);
     drawTV('🎊 TẤT NIÊN '+YEAR,'Chào mừng cả team!','Karaoke · Bốc thăm · Quẩy');
-    confetti(0,2.4,5,90);
+    confetti(0,2.4,5,90);wait(5).then(()=>{if(evBanT.textContent.startsWith('Tiệc tất niên'))bannerOff();});
     const aud=yepAud();await Promise.all(ppl.map((c,i)=>c===host?c.goStand({x:0,z:5.0,face:0}):c.goStand(aud[i%aud.length])));
     ppl.forEach(c=>{if(c!==host){c.faceTo({x:0,z:5});}});host.yaw=0;
     // phát biểu + nâng ly
@@ -3812,29 +3813,29 @@ async function actYep(v){
     // karaoke
     let si=0;
     for(const sg of singers){if(!ppl.includes(sg))continue;const song=SONGS[(song0+si)%SONGS.length],score=pts[si]||90;si++;
-      const back=sg.pos.clone();if(host!==sg)await host.goStand({x:-.9,z:5.3});host.yaw=0;
+      yepCardOff();const back=sg.pos.clone();if(host!==sg)await host.goStand({x:-.9,z:5.3});host.yaw=0;
       await host.say(`Mời ${sg.name} lên hát “${song.n}”! 🎤`,2);
       await sg.goStand({x:0,z:5.0});sg.yaw=0;sg.mic.visible=true;sg.arms='mic';
       yepCard('🎤 '+song.n,`${sg.name} đang hát…`,'');setStatus(`🎤 Karaoke: ${sg.name} hát “${song.n}”!`);
-      for(const line of song.l){drawTV('🎤 '+song.n,line,sg.name);yepCard('🎤 '+song.n,line,sg.name);sg.say('🎵 '+line,3);sg.gesture(Math.random()<.5?'heart':'cheer',3);
+      for(const line of song.l){drawTV('🎤 '+song.n,line,sg.name);yepCard('🎤 '+song.n,line,sg.name);sg.think('🎤',3);sg.gesture(Math.random()<.5?'heart':'cheer',3);
         ppl.forEach(c=>{if(c!==sg&&Math.random()<.5)c.gesture(Math.random()<.5?'clap':'heart',2);if(c!==sg&&Math.random()<.4)c.think(pick(['👏','🎶','😍','🔥']),1.4);});await wait(3.1);}
       sg.mic.visible=false;sg.arms='idle';
       drawTV('🎤 '+song.n,`Điểm: ${score} 🌟`,score>=95?'Xuất sắc!':'Hay quá!');yepCard(`🌟 ${score} điểm!`,`${sg.name} hát “${song.n}”`,score>=95?'Ca sĩ của năm! 🏆':'Vỗ tay nào! 👏','score');
-      ppl.forEach(c=>{if(c!==sg)c.gesture('clap',2);});confetti(0,2.2,5,50);await sg.say(score>=95?'Woa, điểm cao quá! 😆':'Hihi, cảm ơn mọi người! 🥰',2);
+      ppl.forEach(c=>{if(c!==sg)c.gesture('clap',2);});confetti(0,2.2,5,50);sg.think(score>=95?'😆':'🥰',2);await wait(2.4);
       await sg.goStand({x:back.x,z:back.z});sg.faceTo({x:0,z:5});await wait(.4);}
     // bốc thăm
     await host.goStand({x:-.55,z:4.95});host.yaw=0;
-    yepCard('🎁 Bốc thăm trúng thưởng','Hộp quà bí mật đã sẵn sàng!','');drawTV('🎁 BỐC THĂM','Ai sẽ là người may mắn?','');
+    yepCardOff();drawTV('🎁 BỐC THĂM','Ai sẽ là người may mắn?','');
     await host.say('Phần được mong chờ nhất: bốc thăm trúng thưởng! 🥁',2.4);
     const prizes=PRIZES.slice(0,Math.max(1,winners.length)),order=prizes.map((p,i)=>({p,w:winners[winners.length-prizes.length+i]||winners[i]})).filter(x=>x.w);
     setStatus('🎁 Bốc thăm trúng thưởng: 4 giải từ thấp đến cao, ai sẽ trúng giải đặc biệt?');
     for(const it of order){setStatus(`🥁 Đang bốc ${it.p.lv}: ${it.p.n}…`);host.arms='poke';host.think('🥁',1.6);yepCard('🥁 Tùng tùng tùng…',it.p.lv+': '+it.p.n,'');
       await tween(1.4,p=>{YEPD.box.rotation.z=Math.sin(p*PI*8)*.08;});YEPD.box.rotation.z=0;host.arms='hold';host.doc.visible=true;
       const w=it.w;yepCard(`🎉 ${it.p.lv}`,it.p.n,`Thuộc về: ${w.name}!`,'win');drawTV('🎉 '+it.p.lv,it.p.n,w.name);
-      await host.say(`${it.p.lv}: ${it.p.n} — chúc mừng ${w.name}! 🎉`,2.6);host.doc.visible=false;host.arms='idle';
+      await wait(2.6);host.doc.visible=false;host.arms='idle';
       const back=w.pos.clone();if(w!==host){await w.goStand({x:.55,z:5.05});w.faceTo(host);host.faceTo(w);}
       w.gesture('jump',2);w.think('🤩',1.8);setStatus(`🎉 ${w.name} trúng ${it.p.lv}: ${it.p.n} (+${it.p.k} KPI)!`);confetti(w.pos.x,2,w.pos.z,70);addKpi(w,it.p.k,'🎁 Bốc thăm tất niên: '+it.p.n);
-      await w.say(pick(['Á á á! Em trúng rồi!!! 🤩','Cảm ơn công ty! Năm sau em cày gấp đôi! 💪','Không tin được luôn! 😭💖']),2.2);
+      yepCard(`🎉 ${it.p.lv}`,it.p.n,`${w.name}: “${pick(['Á á á! Em trúng rồi!!! 🤩','Cảm ơn công ty! Năm sau em cày gấp đôi! 💪','Không tin được luôn! 😭💖'])}”`,'win');await wait(2.4);
       if(w!==host){await w.goStand({x:back.x,z:back.z});w.faceTo({x:0,z:5});}host.yaw=0;await wait(.3);}
     // quẩy kết
     yepCardOff();drawTV('💃 QUẨY THÔI!','Chúc mừng năm mới!','');setStatus('💃 Kết tiệc: cả team cùng quẩy hết mình!');
