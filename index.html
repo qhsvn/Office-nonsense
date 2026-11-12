@@ -4552,9 +4552,7 @@ async function actFire(c){if(!c||c._firing)return;c._firing=true;const wasMe=c.i
     setAct(c,'🚶 Về chỗ ngồi');await c.goSit(c.home);end(c,'working');
   }finally{c._firing=false;holdBox(c,false);if(c.outside){c.root.visible=true;c.outside=false;c.awaySp.visible=false;c.pack.visible=false;screensOn(c,true);}refreshCards();}}
 function runFire(v){const c=byId(v);if(!c||c.manager||c._firing)return false;guard(()=>actFire(c),[c]);return true;}
-// hồ sơ KPI của chính mình: số lần bị trừ trong tháng
-{const o=updateKpiBox;updateKpiBox=()=>{o();const c=selected;if(!c||c.manager||c.id!==ME.id)return;const mis=$('#kMis');if(!mis)return;
-  const n=negCount(c),r=document.createElement('div');r.className='kmis'+(n?'':' ok');r.textContent=`${n?'⚠️':'✅'} Thư nhắc nhở tháng này: ${n}/${NEG_MAX} · KPI âm → lần 1, dưới -10 → lần 2, dưới -20 → xem xét sa thải`;mis.appendChild(r);};}
+
 
 /* ===== quản lý xem xét: cho ở lại ngoại lệ hoặc ký đơn thôi việc ===== */
 const FIRE_WAIT=30000;let FIRE_PEND={},fireTimer=0;
