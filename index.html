@@ -447,6 +447,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .promopop{z-index:300000!important}
 #stage.card-on #overlay,#stage.card-on .evban{visibility:hidden!important}
 #stage.quiz-on #overlay,#stage.quiz-on .cathud,#stage.quiz-on .dancefab,#stage.quiz-on .hint,#stage.quiz-on .yepcard{visibility:hidden!important}
+.soopts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.soopts button{font:inherit;font-size:13.5px;font-weight:600;text-align:left;border:2px solid #e3e9f4;background:#f8fbff;color:var(--ink);border-radius:14px;padding:11px 12px;cursor:pointer}
+.soopts button:hover{border-color:#ff8fb8;background:#fff0f6}
 </style>
 </head>
 <body>
@@ -755,6 +758,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
+<div id="sorryModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="soTitle"><div class="wcard mcardm">
+  <div class="wlogo">🙇‍♀️</div><h2 id="soTitle">Sếp tổng đang chờ bạn xin lỗi!</h2><p class="wsub">Văn phòng chưa dọn hoặc nhân viên phạm lỗi. Là quản lý, bạn phải xin lỗi sếp tổng thay cả team (25 giây).</p>
+  <div class="soopts" id="soOpts"></div></div></div>
 <div id="flowerModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="flTitle"><div class="wcard mcardm">
   <div class="wlogo">💐</div><h2 id="flTitle">Cắm hoa cho văn phòng</h2><p class="wsub">3 bình hoa ở góc thư giãn, góc ăn trưa và phòng sếp. Hoa tươi khoảng 9 phút rồi héo dần, cắm hoa mới được +3 KPI.</p><div class="flwho" id="flWho"></div>
   <div class="wstep">1 · Cắm ở đâu</div><div class="flspots" id="flSpots"></div>
@@ -3704,7 +3710,7 @@ async function actBoss(){
     setStatus('🚨 Sếp tổng sắp đến kiểm tra! Ai đang ngủ gật, trêu nhau hay ngồi sofa thì về bàn ngay — bàn bừa bộn hay sàn còn rác cũng bị trừ KPI!');beep(false);
     if(!MGR.away&&!MGR.busy){MGR.say('Sếp tổng sắp tới! Mọi người về chỗ làm việc nhanh lên! 😱',2.6);}
     present().forEach((c,i)=>{if(isHuman(c)){if(!(c.atHome()&&c.mode==='working'))c.think('😱',2);return;}if(!c.busy&&!(c.atHome()&&c.mode==='working')){wait(.3+i*.25).then(()=>{if(!c.busy)guard(()=>actWork(c),[c]);});}else if(!c.busy)c.think('😰',1.6);});
-    for(let s=8;s>0;s--){evBanS.textContent=`Còn ${s} giây! Về bàn, dọn bàn, quét rác ngay!`;await wait(1);}
+    for(let s=20;s>0;s--){evBanS.textContent=`Còn ${s} giây! Về bàn, dọn bàn, quét rác ngay!`;await wait(1);}
     const B=BOSS;B.pos.set(EXIT.out.x,0,EXIT.out.z);B.yaw=-PI/2;B.root.visible=true;B.arms='idle';B.lookAt=null;
     banner('👨‍💼','Sếp tổng đang đi kiểm tra','Làm việc chăm được khen · lười, bàn bừa bộn, văn phòng còn rác bị trừ KPI!',null,'boss');
     await doorIn();await walkDirect(B,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();
@@ -3712,7 +3718,20 @@ async function actBoss(){
     if(mgrFree){begin(MGR,'🙇 Đón sếp tổng');await MGR.goStand({x:9.9,z:2.7});MGR.faceTo(B);B.faceTo(MGR);
       await MGR.say('Dạ em chào sếp tổng ạ! Mời anh vào xem tình hình team ạ 🙇‍♀️',2.6);}
     await B.say('Chào cả nhà! Anh ghé xem mọi người làm việc thế nào nhé 👀',2.6);
-    let good=0,bad=0;
+    let good=0,bad=0,sorry=false;
+    // văn phòng dơ hoặc nhân viên phạm lỗi: sếp quản lý bắt buộc phải xin lỗi sếp tổng
+    const mgrSorry=async line=>{if(MGR.away)return;sorry=true;MGR.lookAt=B;B.lookAt=MGR;if(!MGR.busy||mgrFree){MGR.faceTo(B);}
+      let text=line;
+      if(isHuman(MGR)){   // sếp quản lý do người chơi điều khiển: chính người đó phải bấm xin lỗi
+        const opts=[line,'Dạ em nhận lỗi ạ, lần sau team em sẽ không tái phạm! 🙇‍♀️','Dạ là lỗi của em, em sẽ họp team rút kinh nghiệm ngay ạ 🙏'];
+        banner('🙇‍♀️','Sếp tổng đang chờ sếp quản lý xin lỗi',`${MGR.name} cần xin lỗi thay cả team…`,null,'boss');
+        const r=await new Promise(res=>{SORRY={res};if(MGR.id===ME.id)openSorry(opts);setTimeout(()=>{if(SORRY&&SORRY.res===res){SORRY=null;closeSorry();res(-1);}},25000);});
+        banner('👨‍💼','Sếp tổng đang đi kiểm tra','Làm việc chăm được khen · lười, bàn bừa bộn, văn phòng còn rác bị trừ KPI!',null,'boss');
+        text=r>=0?opts[r%opts.length]:null;}
+      if(text){setStatus(`🙇‍♀️ ${MGR.name} cúi đầu xin lỗi sếp tổng thay cả team.`);await MGR.say(text,2.8);MGR.gesture('bow',1.8);await wait(1.2);
+        await B.say(pick(['Lần sau anh không muốn thấy nữa đâu nhé!','Ừ, nhớ chấn chỉnh ngay đấy!','Được, anh cho cơ hội sửa sai!']),2);}
+      else{setStatus(`😠 ${MGR.name} không xin lỗi sếp tổng!`);B.gesture('think',1.6);await B.say(`${MGR.name} không nói gì à?! Quản lý mà để team thế này, anh sẽ ghi nhận đấy! 😠`,3);}
+      MGR.lookAt=null;B.lookAt=null;};
     const emps=EMP.filter(c=>!c.away).sort((a,b)=>b.home.x-a.home.x||b.home.z-a.home.z);
     for(const e of emps){
       const spot=lazyOf(e)&&!e.atHome()?{x:e.pos.x+.7,z:e.pos.z+.5}:{x:e.home.x-Math.sign(e.home.x)*.9,z:e.home.z+(e.home.face===0?-.55:.55)};
@@ -3737,11 +3756,12 @@ async function actBoss(){
         const team=EMP.filter(c=>!c.away);
         await B.say(`Văn phòng còn ${issues.join(', ')}! Không ai dọn à? Cả team trừ ${-KPI_PTS.bossdirty} KPI! 😠`,3.2);
         team.forEach((c,i)=>{addKpi(c,KPI_PTS.bossdirty,KPI_WHY.bossdirty);wait(.2+i*.25).then(()=>c.think(pick(['😰','🙈','😳']),1.6));});
-        if(!MGR.away&&!MGR.busy)await MGR.say('Dạ em sẽ nhắc cả team dọn dẹp ngay ạ! 🙇‍♀️',2.2);}
+        await mgrSorry('Dạ em xin lỗi anh! Em sẽ nhắc cả team dọn dẹp ngay ạ 🙇‍♀️');}
       else if(good){await B.say('Văn phòng sạch sẽ, không một mẩu rác. Tốt lắm! ✨',2.4);}}
     await B.goStand({x:0,z:4.4});B.yaw=0;
     const all=bad===0;
-    await B.say(all?'Cả team làm việc tốt lắm! Cuối tháng anh duyệt thưởng thêm nhé! 💰':`Phần lớn làm tốt, nhưng ${bad} bạn cần nghiêm túc hơn nha. Cố lên cả team! 💪`,3);
+    await B.say(all?'Cả team làm việc tốt lắm! Cuối tháng anh duyệt thưởng thêm nhé! 💰':`Phần lớn làm tốt, nhưng ${bad} lỗi cần chấn chỉnh nha. Cố lên cả team! 💪`,3);
+    if(!all&&!sorry)await mgrSorry('Dạ em xin lỗi anh, là em quản lý chưa tốt. Em sẽ chấn chỉnh lại team ngay ạ 🙇‍♀️');
     if(all&&good)present().forEach(c=>{if(!c.busy||c.atHome())c.gesture('cheer',1.6);});
     setStatus(all?`👨‍💼 Sếp tổng rất hài lòng: ${good} người được khen, không ai bị bắt lười!`:`👨‍💼 Sếp tổng kiểm tra xong: ${good} người được khen, ${bad} người bị trừ KPI.`);
     if(mgrFree){await MGR.say('Dạ em cảm ơn anh, em tiễn anh ạ!',1.8);}
@@ -3756,6 +3776,12 @@ let NH_AT=0;
   if(!CAT_HOST){if(auto&&simTime>=NH_AT){NH_AT=simTime+4;autoDay();}return;}   // phòng nhiều người: chỉ máy chủ phòng tự điều khiển nhân vật trống rồi gửi cho mọi người
   o();};}
 {const o=setAuto;setAuto=v=>{o(v);if(v&&!CAT_HOST)setTimeout(()=>setStatus('🤖 Phòng đang có nhiều người: máy chủ phòng điều khiển các nhân vật trống, mọi người đều thấy giống nhau.'),60);};}
+
+let SORRY=null;const soEl=$('#sorryModal');
+function openSorry(opts){const g=$('#soOpts');g.textContent='';opts.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>{const c=byId(ME.id);closeSorry();if(c)run('mgrsorry',c,{v:String(i)});};g.appendChild(b);});
+  soEl.classList.add('show');beep(false);}
+function closeSorry(){soEl.classList.remove('show');}
+function mgrSorryAns(c,v){if(SORRY&&c===MGR){const r=SORRY.res;SORRY=null;closeSorry();r(Math.max(0,parseInt(v,10)||0));}return true;}
 
 /* ================= 4. Tiệc tất niên ================= */
 const YEAR=new Date().getFullYear();
@@ -4052,6 +4078,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
   if(c&&!REMOTE_EXEC&&isHuman(c)&&c.id!==ME.id&&!['birthday','restyle','quizans'].includes(n)){if(!AUTO_EXEC)setStatus(`🔒 ${c.name} là nhân vật của người chơi khác — bạn chỉ ra lệnh được cho nhân vật của mình.`);return false;}
   if(c&&AUTO_EXEC&&(isHuman(c)||PEERSEL[c.id]||c===selected))return false;      // chế độ Tự động không điều khiển nhân vật có người chơi / đang có người chọn
   if(c&&!REMOTE_EXEC&&!AUTO_EXEC&&!isHuman(c)&&PEERSEL[c.id]&&!['birthday','restyle'].includes(n)){setStatus(`🎮 ${PEERSEL[c.id].name} đang điều khiển ${c.name} — bạn không ra lệnh cho nhân vật này được.`);return false;}
+  if(n==='mgrsorry')return mgrSorryAns(c,v);
   if(n==='quizans'){if(!c||!v)return false;const [qi,op,t]=v.split(':').map(Number);quizAnswer(c.id,qi,op,t);return true;}
   if(n==='fix')return runFix(c);
   if(n==='flowers')return runFlowers(c,v);
@@ -4357,7 +4384,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null;
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   MY_ACT={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
@@ -4375,7 +4402,7 @@ let actAt=0;function actTick(){if(simTime<actAt||!actQueue.length)return;actAt=s
   for(let i=actQueue.length-1;i>=0;i--){const q=actQueue[i];if(simTime<q.next)continue;const a=q.act;
     const c=a.c?byId(a.c):null;if(a.c&&(!c||c.id===ME.id)){actQueue.splice(i,1);continue;}
     let arg;if(a.a&&a.a.id)arg=byId(a.a.id);else if(a.a&&typeof a.a.x==='number')arg={x:a.a.x,z:a.a.z};else if(a.a&&typeof a.a.v==='string')arg={v:a.a.v.slice(0,400)};
-    if(c&&c.busy&&a.n!=='quizans'&&a.n!=='bobapick'&&a.n!=='grpans'&&q.tries<40){q.tries++;q.next=simTime+1;continue;}    // nhân vật đang dở việc trên máy này: đợi xong rồi làm
+    if(c&&c.busy&&a.n!=='quizans'&&a.n!=='bobapick'&&a.n!=='grpans'&&a.n!=='mgrsorry'&&q.tries<40){q.tries++;q.next=simTime+1;continue;}    // nhân vật đang dở việc trên máy này: đợi xong rồi làm
     REMOTE_EXEC=true;try{run(a.n,c,arg);}catch(e){}finally{REMOTE_EXEC=false;}
     actQueue.splice(i,1);}}
 setTimeout(()=>{if(window.OFFICE){OFFICE.peerAct=peerAct;OFFICE.myAct=()=>MY_ACT;}},0);
