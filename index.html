@@ -443,6 +443,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .flwho{font-size:12.5px;font-weight:600;color:#3f8ec9;background:#eef6ff;border-radius:10px;padding:6px 10px;margin-top:6px}
 #flGo{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff;box-shadow:0 6px 16px rgba(143,208,255,.4)}
 .tag .ctl{margin-top:2px;font-size:9.5px;font-weight:700;border-radius:999px;padding:1px 7px;background:#fff1c9;color:#8a6420;white-space:nowrap;box-shadow:0 2px 6px rgba(140,110,40,.2)}
+#stage.pop-on #overlay,#stage.pop-on .evban,#stage.pop-on .yepcard,#stage.pop-on .cathud,#stage.pop-on .dancefab,#stage.pop-on .toast,#stage.pop-on .filerecv,#stage.pop-on .quizbox,#stage.pop-on .callwin,#stage.pop-on .fidtoast,#stage.pop-on .closedban,#stage.pop-on .hint{visibility:hidden!important}
+.promopop{z-index:300000!important}
 </style>
 </head>
 <body>
@@ -3941,9 +3943,10 @@ const prEl=$('#promoPop');let prTimer=0;
 function promoPop(c,L){setAvatar($('#prAv'),c);$('#prName').textContent=c.name+(c.claimName&&c.claimName!==c.name?' ('+c.claimName+')':'');
   $('#prLv').textContent=`${L.e} ${L.n}`;$('#prSub').textContent=`Đạt ${c.kpi} KPI · ${MGR.away?'Công ty':MGR.name} trao bằng khen, cúp và hoa 🏆💐`;
   const fx=$('#prFx');fx.textContent='';for(let i=0;i<26;i++){const s=document.createElement('i');s.textContent=pick(['🎉','✨','🎊','⭐','💖','🌟']);s.style.left=rand(0,100)+'%';s.style.animationDelay=rand(0,1.2)+'s';s.style.fontSize=rand(14,24)+'px';fx.appendChild(s);}
-  prEl.classList.remove('show');void prEl.offsetWidth;prEl.classList.add('show');beep(true);setTimeout(()=>beep(true),180);
-  clearTimeout(prTimer);prTimer=setTimeout(()=>prEl.classList.remove('show'),6500);}
-prEl.onclick=()=>prEl.classList.remove('show');
+  prEl.classList.remove('show');void prEl.offsetWidth;prEl.classList.add('show');stage.classList.add('pop-on');beep(true);setTimeout(()=>beep(true),180);
+  clearTimeout(prTimer);prTimer=setTimeout(prHide,6500);}
+function prHide(){prEl.classList.remove('show');stage.classList.remove('pop-on');}   // trong lúc chúc mừng: ẩn tên nhân vật, thông báo sự kiện… để không che
+prEl.onclick=prHide;
 
 /* ================= lời mời tham gia hoạt động cả nhóm (khi có người chơi khác) ================= */
 const CONSENT={meeting:'🤝 Họp nhóm',lunch:'🍱 Ăn trưa',dance:'💃 Nhảy xả stress',break:'☕ Giải lao',birthday:'🎂 Tiệc sinh nhật',siestaall:'🛏️ Ngủ trưa',yep:'🎊 Tiệc tất niên'};
