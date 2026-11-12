@@ -4246,6 +4246,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='negwarn')return negWarn(v);
   if(n==='dayoff')return runDayoff(c,v);
   if(n==='argue')return runArgue(c);
+  if(n==='tod')return todSet(v);
   if(n==='leavereq')return leaveReq(c,v);
   if(n==='leavedec')return leaveDec(v);
   if(n==='thankmgr')return thankMgr(c);
@@ -4845,6 +4846,20 @@ function runArgue(c){if(!c)return false;if(c.manager){setStatus('🎖️ Quản 
     else{setAct(c,'🚶 Quay về chỗ');await c.goSit(c.home);end(c,'working');}},[c]);
   return true;}
 
+/* ===== ban ngày / hoàng hôn / ban đêm đồng bộ cho cả phòng ===== */
+const TOD_LBL={day:'☀️ Ban ngày',dusk:'🌇 Hoàng hôn',night:'🌙 Ban đêm',rt:'🕒 theo giờ thật'};
+function todApply(name,quiet){try{if(name==='rt'){RT.tod=true;lastMin=-1;clockTick();}else{RT.tod=false;lastMin=-1;setTOD(name,true);}}catch(e){}setTimeout(siestaLock,50);}
+function todSet(v){const [name,who]=String(v||'').split('|');if(!TOD_LBL[name])return false;todApply(name);
+  const w=who||'Một người chơi';setStatus(`🌗 ${w} đã đổi trời sang ${TOD_LBL[name]}.`);
+  if(!evBan.classList.contains('show')||evBanT.textContent.includes('đổi trời sang')){banner('🌗',`${w} đổi trời sang ${TOD_LBL[name]}`,'Áp dụng cho cả phòng',null,'boba');setTimeout(()=>{if(evBanT.textContent.includes('đổi trời sang'))bannerOff();},3500);}
+  return true;}
+setTimeout(()=>{document.querySelectorAll('[data-tod]').forEach(b=>b.onclick=()=>run('tod',null,{v:b.dataset.tod+'|'+String(ME.name||'').replace(/[|]/g,'')}));
+  const ck=$('#clk');if(ck)ck.onclick=()=>run('tod',null,{v:'rt|'+String(ME.name||'').replace(/[|]/g,'')});},0);
+// người vào sau lấy theo trời của máy chủ phòng
+{const o=roomState;roomState=()=>{const r=o();if(r){let rt=true,tn='day';try{rt=RT.tod;tn=todName;}catch(e){}r.tod=rt?'rt':tn;}return r;};}
+{const o=peerState;peerState=st=>{try{if(st&&st.tod&&!CAT_HOST){let cur='day';try{cur=RT.tod?'rt':todName;}catch(e){}if(cur!==st.tod)todApply(st.tod,true);}}catch(e){}o(st);};}
+setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.peerState=peerState;}},0);
+
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
 const CAN_DL=(()=>{try{return window.top===window;}catch(e){return false;}})();   // trang Claude (khung nhúng) chặn tải file
@@ -5032,7 +5047,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
