@@ -4463,8 +4463,10 @@ function negLetter(c,n,why,d){const mon=new Date().getMonth()+1,mg=MGR?MGR.name:
   $('#mlIcon').textContent='📄';$('#mlTitle').textContent=`⚠️ Thư nhắc nhở (lần ${n}/${NEG_MAX})`;
   $('#mlBody').textContent=`Kính gửi ${c.name},\n\nTrong tháng ${mon} KPI của bạn đã bị âm ${n} lần (hiện còn ${c.kpiMonth} KPI, lần gần nhất do: ${why||'vi phạm'} ${d} KPI).\n\n${n>=NEG_MAX?'Đây là thư nhắc nhở cuối cùng. Nếu KPI tháng bị âm thêm lần nữa, công ty sẽ chấm dứt hợp đồng và tuyển nhân viên mới thay thế.':'Mong bạn chú ý hơn: tắt màn hình khi rời bàn, giữ bàn gọn gàng, không lười khi sếp tổng ghé. Hãy kéo KPI lên lại trên 0 — bị âm quá '+NEG_MAX+' lần trong tháng sẽ bị sa thải.'}\n\n— Quản lý ${mg} 🎖️`;
   setTimeout(()=>{$('#mgrLetter').classList.add('show');beep(false);},900);}
-function negHit(c,d,why,before){if(!c||c.manager||d>=0||c.away||c._firing)return;if(!(before>=0&&(c.kpiMonth||0)<0))return;   // chỉ tính khi KPI tháng chuyển từ không âm sang âm
-  if(!CAT_HOST)return;                         // máy chủ phòng đếm và gửi thư cho cả phòng (mọi máy giống nhau)
+function negHit(c,d,why,before){if(!c||c.manager||d>=0||c.away||c._firing)return;if((c.kpiMonth||0)>=0)return;if(!(before>=0||negCount(c)===0))return;   // tính khi KPI tháng chuyển sang âm (hoặc lần đầu trong tháng thấy đang âm)
+  if(!CAT_HOST){   // máy chủ phòng đếm và gửi thư; nếu máy chủ chưa cập nhật bản mới thì sau 6 giây tự hiện thư trên máy mình
+    if(c.id===ME.id){clearTimeout(c._negFb);const n0=negCount(c)+1;c._negFb=setTimeout(()=>{if(negCount(c)<n0){const o=negStore();o.n[c.id]=n0;negSave(o);if(n0<=NEG_MAX)negLetter(c,n0,why,d);}},6000);}
+    return;}
   const o=negStore();const n=(o.n[c.id]||0)+1;o.n[c.id]=n;negSave(o);
   if(n<=NEG_MAX){run('negwarn',null,{v:[c.id,n,d,String(why||'').replace(/[|]/g,' ').slice(0,60),c.kpiMonth||0].join('|')});}
   else if(CAT_HOST&&!c._firePend){c._firePend=true;setTimeout(()=>{c._firePend=false;run('firereq',null,{v:c.id});},2000);}}   // máy chủ phòng gửi hồ sơ cho quản lý xem xét
@@ -4538,7 +4540,7 @@ function tearTick(){CHARS.forEach(c=>{if(!c.crying||!c.tears)return;const t=simT
 {const o=actFire;actFire=async c=>{if(c&&!c._firing){setCry(c,true);const iv=setInterval(()=>{if(c.root.visible&&!c.outside&&c._firing)c.think(pick(['😭','😢','😅']),1.6);},2600);
   try{const p=o(c);const chk=setInterval(()=>{if(c.outside){setCry(c,false);clearInterval(chk);clearInterval(iv);}},300);await p;clearInterval(chk);}finally{clearInterval(iv);setCry(c,false);}return;}return o(c);};}
 
-function negWarn(v){const [id,nS,dS,why,kmS]=String(v||'').split('|');const c=byId(id);if(!c)return false;const n=+nS||1;
+function negWarn(v){const [id,nS,dS,why,kmS]=String(v||'').split('|');const c=byId(id);if(!c)return false;const n=+nS||1;clearTimeout(c._negFb);
   if(!CAT_HOST){const o=negStore();o.n[id]=Math.max(o.n[id]||0,n);negSave(o);}
   const me=ME.id&&byId(ME.id);c.think('📄',2);
   if(c.id===ME.id)negLetter(c,n,why,+dS||0);
