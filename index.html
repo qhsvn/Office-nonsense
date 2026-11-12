@@ -486,6 +486,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .wbrow .crow{margin-top:7px}
 .wbbtn{display:block;width:100%;margin-top:8px;font:inherit;font-size:12.5px;font-weight:700;border:2px solid #ffd2a8;background:#fff6ec;color:#a0561a;border-radius:12px;padding:7px 9px;cursor:pointer;text-align:left}
 .kmis.ok{text-decoration:none!important;font-weight:600;border-color:#bfe8d2}
+.hrpop.ok .prtop{background:linear-gradient(135deg,#3fbf8f,#7ad3ff)}.hrpop.ok .prin{box-shadow:0 18px 50px rgba(60,170,140,.4),0 0 0 4px #a8ecd0}
+.hrpop.no .prtop{background:linear-gradient(135deg,#ff6f7f,#ffa36b)}.hrpop.no .prin{box-shadow:0 18px 50px rgba(230,90,90,.35),0 0 0 4px #ffc2c2}
 </style>
 </head>
 <body>
@@ -654,7 +656,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
         <div class="grid3">
           <button class="b mint" data-cmd="gohome">🏠 Tan làm, về nhà</button>
           <button class="b" data-cmd="ot">🌙 Ở lại tăng ca</button>
-          <button class="b pink" data-cmd="sick">🤒 Nghỉ ốm</button>
+          <button class="b pink" data-cmd="sick">📝 Đăng ký nghỉ phép</button>
           <button class="b mint" data-cmd="comein">☀️ Đi làm</button>
         </div>
       </div>
@@ -755,6 +757,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>😜 Khều, trêu đồng nghiệp</b> trong giờ làm (được trêu lúc 12:00–12:59 và sau 17:30).</li>
       <li><b>🍱 Ăn trưa, ngủ trưa ngoài giờ</b> 12:00–12:59 (theo giờ thật).</li>
       <li><b>🖥️ Rời bàn không tắt màn hình.</b></li>
+      <li><b>🥤 Làm đổ đồ uống</b> mà không tự lau trong 15 giây.</li>
       <li><b>👨‍💼 Sếp tổng bắt gặp</b> đang lười, uống trà sữa, bàn bừa bộn hoặc văn phòng còn rác.</li>
       <li><b>📄 KPI tháng âm</b> — nhắc nhở lần 1, lần 2, sau đó quản lý duyệt sa thải hoặc cho cơ hội.</li>
       <li><b>📉 KPI âm</b> thì lương bị trừ.</li>
@@ -773,6 +776,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li>📅 Có lời mời họp thì bấm <b>Tham gia</b> hoặc <b>Không tham gia</b> (ghi lý do).</li>
       <li>🙂 Vào làm và tan ca đều <b>check-in / check-out Face ID</b> ở máy cạnh cửa.</li>
       <li>💰 Ngày <b>30</b> hằng tháng nhận lương: lương theo cấp bậc + thưởng KPI + tăng ca.</li>
+      <li>📝 Nghỉ phép phải gửi đơn chờ quản lý duyệt. <b>Ngày nghỉ không được tính lương.</b></li>
     </ul>
     <button type="button" id="rOk">Đã hiểu, vào làm thôi! ✓</button>
   </div>
@@ -814,6 +818,19 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="wlogo">📋</div><h2 id="wbTitle">Theo dõi nhắc nhở</h2><p class="wsub">Số lần nhắc nhở của từng nhân viên (người chơi 👤 và NPC 🤖) trong tháng. Ai KPI dưới -20 sau 2 lần nhắc sẽ chờ bạn quyết định.</p>
   <div class="wblist" id="wbList"></div>
   <div class="crow"><button type="button" id="wbClose">Đóng</button></div></div></div>
+<div id="leaveModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="lvTitle"><div class="wcard mcardm">
+  <div class="wlogo">📝</div><h2 id="lvTitle">Đăng ký nghỉ phép</h2><p class="wsub">Chọn lý do và thời gian nghỉ rồi gửi đơn. Quản lý duyệt xong nhân vật mới thu dọn ra về. Ngày nghỉ không được tính lương.</p>
+  <div class="fltypes" id="lvWhy"></div><div class="kmt" style="margin-top:12px;font-weight:700">⏱️ Thời gian nghỉ</div><div class="fltypes" id="lvDays" style="margin-top:6px"></div>
+  <div class="crow"><button type="button" id="lvCancel" class="cghost">Hủy</button><button type="button" id="lvGo">Gửi đơn 📨</button></div></div></div>
+<div id="leaveAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="laTitle"><div class="wcard mcardm">
+  <div class="wlogo">📝</div><h2 id="laTitle"></h2><p class="wsub" id="laSub"></p><div class="bpleft" id="laLeft"></div>
+  <div class="crow"><button type="button" id="laNo" class="cghost">❌ Không duyệt</button><button type="button" id="laOk">✅ Duyệt đơn</button></div></div></div>
+<div id="leaveHub" class="welcome" role="dialog" aria-modal="true" aria-labelledby="lhTitle"><div class="wcard mcardm">
+  <div class="wlogo">📝</div><h2 id="lhTitle">Nghỉ phép</h2>
+  <div class="kmt" style="font-weight:700;text-align:left">📋 Duyệt đơn của nhân viên · <span id="lhCount"></span></div><div class="wblist" id="lhList"></div>
+  <div class="kmt" style="font-weight:700;text-align:left;margin-top:12px">🙋 Mình tự đăng ký nghỉ</div>
+  <button type="button" id="lhSelf" class="wbbtn">📝 Đăng ký nghỉ phép cho mình (sếp tổng duyệt luôn)</button>
+  <div class="crow"><button type="button" id="lhClose">Đóng</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -2674,7 +2691,7 @@ async function actWC(c){
 /* ---- attendance board, desk signs, badges ---- */
 function attState(c){
   if(c.away&&c.coming)return{t:'⏳ Đang đến',bg:'#fff4d6',fg:'#8a6420',k:''};
-  if(c.away&&c.offSick)return{t:'🤒 Nghỉ ốm',bg:'#ffe3e3',fg:'#c43d3d',k:'sick'};
+  if(c.away&&c.offSick)return{t:c.offReason!=null?LEAVE_R[c.offReason].e+' Nghỉ phép':'🤒 Nghỉ ốm',bg:'#ffe3e3',fg:'#c43d3d',k:'sick'};
   if(c.away)return{t:'🏠 Về lúc '+fmt(c.outAt),bg:'#eef1f8',fg:'#6b7590',k:''};
   if(c.ot)return{t:'🌙 Tăng ca',bg:'#2f3a66',fg:'#ffe9a8',k:'ot'};
   return{t:'🟢 Có mặt · '+fmt(c.inAt),bg:'#e3f7ef',fg:'#2f8a5f',k:'in'};
@@ -2700,9 +2717,9 @@ function awayTex(c){const tx=c.awaySp.material.map,{canvas:cv,ctx:x}=tx.userData
   x.fillStyle=sick?'#c43d3d':'#4a556a';x.textAlign='center';x.textBaseline='middle';x.font=`700 34px ${FONT}`;
   x.fillText(sick?'🤒 Nghỉ ốm':'🏠 Đã về · '+fmt(c.outAt),W/2,H/2+2);tx.needsUpdate=true;}
 function setAway(c){c.awaySp.position.set(c.home.x,1.38,c.home.z);awayTex(c);c.awaySp.visible=c.away&&!c.coming;
-  c.activity=c.offSick?'🤒 Nghỉ ốm':'🏠 Đã về nhà lúc '+fmt(c.outAt);refreshCards();drawAtt();}
+  c.activity=c.offSick?(c.offReason!=null?`${LEAVE_R[c.offReason].e} Nghỉ phép: ${LEAVE_R[c.offReason].n}`:'🤒 Nghỉ ốm'):'🏠 Đã về nhà lúc '+fmt(c.outAt);refreshCards();drawAtt();}
 function markOT(c){c.bdgEl.textContent=c.ot?'🌙 Tăng ca':'';c.bdgEl.className='bdg'+(c.ot?' on':'');drawAtt();}
-const awayMsg=c=>c.offSick?`🤒 ${c.name} đang nghỉ ốm. Bấm “☀️ Đi làm” nếu đã khỏe nhé.`:c.coming?`🚶 ${c.name} đang trên đường đến văn phòng.`:`🏠 ${c.name} đã về nhà lúc ${fmt(c.outAt)}. Bấm “☀️ Đi làm” để gọi quay lại.`;
+const awayMsg=c=>c.offSick?(c.offReason!=null?`${LEAVE_R[c.offReason].e} ${c.name} đang nghỉ phép (${LEAVE_R[c.offReason].n}). Bấm “☀️ Đi làm” để quay lại làm nhé.`:`🤒 ${c.name} đang nghỉ ốm. Bấm “☀️ Đi làm” nếu đã khỏe nhé.`):c.coming?`🚶 ${c.name} đang trên đường đến văn phòng.`:`🏠 ${c.name} đã về nhà lúc ${fmt(c.outAt)}. Bấm “☀️ Đi làm” để gọi quay lại.`;
 const myScreens=c=>SCREENS.filter(s=>c.manager?!Object.values(DESKS).includes(s.userData.desk):s.userData.desk===DESKS[c.id]);
 function screensOn(c,on){myScreens(c).forEach(s=>s.material.color.set(on?0xffffff:0x161a2a));}
 function setLamps(k){const from=lampK;return tween(.8,p=>{lampK=lerp(from,k,p);lamps.forEach(l=>{l.intensity=todCur.lamp*lampK;});});}
@@ -2721,14 +2738,14 @@ async function actOT(c){begin(c,'🌙 Ở lại tăng ca');c.ot=true;markOT(c);a
 
 async function actGoHome(c,sick){
   const wasOT=c.ot&&!sick;c.leavingNow=true;c.homeAfter=null;c.ot=false;markOT(c);
-  begin(c,sick?'🤒 Xin về nghỉ ốm':'🏠 Chuẩn bị về');
-  if(sick){c.bdgEl.textContent='🤒 Ốm';c.bdgEl.className='bdg on sick';}
+  begin(c,sick?(c.offReason!=null?LEAVE_R[c.offReason].e+' Xin nghỉ phép':'🤒 Xin về nghỉ ốm'):'🏠 Chuẩn bị về');
+  if(sick){c.bdgEl.textContent=c.offReason!=null?LEAVE_R[c.offReason].e+' Nghỉ phép':'🤒 Ốm';c.bdgEl.className='bdg on sick';}
   await c.goSit(c.home);setAct(c,'💾 Lưu file, tắt máy');c.arms='type';c.think(sick?'🤧':pick(['💾','✅','🗂️','📴']),1.5);
   await wait(sick?1:1.5);c.arms='idle';screensOn(c,false);await wait(.35);
   setAct(c,'🎒 Đeo balo');c.standUp();c.pack.visible=true;await wait(.5);
   const others=CHARS.filter(o=>o!==c&&!o.away&&!o.leavingNow);
-  if(others.length){c.arms='wave';await c.say(sick?pick(['Mình về nghỉ trước nha… 🤧','Mình về uống thuốc đây 💊']):pick(BYE),1.7);c.arms='idle';
-    const r=others.slice().sort((a,b)=>c.pos.distanceTo(a.pos)-c.pos.distanceTo(b.pos))[0];r.lookAt=c;r.say(pick(sick?SICK_REPLY:REPLY),1.6);wait(1.7).then(()=>{if(r.lookAt===c)r.lookAt=null;});}
+  if(others.length){c.arms='wave';await c.say(sick?(c.offReason!=null?LEAVE_R[c.offReason].bye:pick(['Mình về nghỉ trước nha… 🤧','Mình về uống thuốc đây 💊'])):pick(BYE),1.7);c.arms='idle';
+    const r=others.slice().sort((a,b)=>c.pos.distanceTo(a.pos)-c.pos.distanceTo(b.pos))[0];r.lookAt=c;r.say(sick&&c.offReason!=null?LEAVE_R[c.offReason].reply:pick(sick?SICK_REPLY:REPLY),1.6);wait(1.7).then(()=>{if(r.lookAt===c)r.lookAt=null;});}
   setAct(c,'🙂 Face ID check-out');setStatus(`🙂 ${c.name} quét Face ID để check-out.`);
   await c.goStand(EXIT.clock);c.yaw=EXIT.clock.face;await faceScan(c,'out');
   c.outAt=nowMin();
@@ -2742,14 +2759,14 @@ async function actGoHome(c,sick){
   c.bdgEl.className='bdg';setAway(c);
   if(wasOT)kpiEvent(c,'ot');
   if(selected===c)select(null);
-  setStatus(sick?`🤒 ${c.name} đã về nghỉ ốm — bàn có biển “Nghỉ ốm”, mai cũng nghỉ.`:`🏠 ${c.name} đã về lúc ${fmt(c.outAt)} — trên bàn hiện biển “Đã về”, màn hình tắt.`);
+  setStatus(sick?(c.offReason!=null?`${LEAVE_R[c.offReason].e} ${c.name} đã nghỉ phép (${LEAVE_R[c.offReason].n}) — bàn có biển “Nghỉ phép”.`:`🤒 ${c.name} đã về nghỉ ốm — bàn có biển “Nghỉ ốm”, mai cũng nghỉ.`):`🏠 ${c.name} đã về lúc ${fmt(c.outAt)} — trên bàn hiện biển “Đã về”, màn hình tắt.`);
   const p=CHARS.filter(o=>!o.away);
   if(!p.length)officeClosed();
   else if(p.every(o=>o.ot)&&!p.some(o=>o.leavingNow)&&todName!=='day'){setTimeout(()=>setStatus(`🌙 Trời tối rồi, chỉ còn ${p.map(o=>o.name).join(', ')} ở lại tăng ca. Đèn văn phòng vẫn sáng.`),1300);}
 }
 function officeClosed(){
   closedAt=simTime;setLamps(.08);const ns=CHARS.filter(c=>c.offSick).length;
-  $('#closedTxt').textContent=`Mọi người đã về hết${ns?` (${ns} người nghỉ ốm)`:''}. Đèn tắt, chỉ còn Mochi trông văn phòng 🐱. Bàn mỗi người có biển ghi giờ về.`;
+  $('#closedTxt').textContent=`Mọi người đã về hết${ns?` (${ns} người nghỉ phép/ốm)`:''}. Đèn tắt, chỉ còn Mochi trông văn phòng 🐱. Bàn mỗi người có biển ghi giờ về.`;
   closedBan.classList.add('show');
   setTimeout(()=>setStatus('🌙 Người cuối cùng đã về, văn phòng tắt đèn đóng cửa.'),1300);
   if(!CAT.hold){const n=CAT_NAPS[0];catGo(n.x,n.z,'toSleep');}
@@ -2767,12 +2784,12 @@ async function actComeIn(c){
   if(lampK<.5)setLamps(1);closedBan.classList.remove('show');
   await doorIn();await walkDirect(c,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();
   setAct(c,'🙂 Face ID check-in');await c.goStand(EXIT.clock);c.yaw=EXIT.clock.face;await faceScan(c,'in');
-  c.inAt=nowMin();c.away=false;c.coming=false;c.offSick=false;c.sick=0;c.ot=false;markOT(c);c.think('✅',1);
+  c.inAt=nowMin();c.away=false;c.coming=false;c.offSick=false;c.offReason=null;c.sick=0;c.ot=false;markOT(c);c.think('✅',1);
   if(wasSick)await c.say('Mình khỏe lại rồi nè! Cảm ơn mọi người 💪',2);
   // glance at an empty desk to notice who is not in
   const gone=CHARS.filter(o=>o.away&&!o.coming);
   if(gone.length){const g=pick(gone);c.faceTo(g.home);c.think('👀',1.3);await wait(.9);
-    await c.say(g.offSick?`Ủa, ${g.name} nghỉ ốm hả? Mau khỏe nha 🍵`:`À, bàn ${g.name} tắt máy rồi — về lúc ${fmt(g.outAt)} 👀`,2.4);}
+    await c.say(g.offSick?(g.offReason!=null?`${g.name} nghỉ phép ${LEAVE_R[g.offReason].n.toLowerCase()} à? 👀`:`Ủa, ${g.name} nghỉ ốm hả? Mau khỏe nha 🍵`):`À, bàn ${g.name} tắt máy rồi — về lúc ${fmt(g.outAt)} 👀`,2.4);}
   else if(!wasSick)await c.say(pick(HELLO),1.7);
   setAct(c,'💺 Về chỗ ngồi');await c.goSit(c.home);c.pack.visible=false;screensOn(c,true);c.think(pick(['💻','☕','✨']),1.4);await wait(.5);end(c,'working');drawAtt();
 }
@@ -3058,7 +3075,8 @@ function slip(c){const rows=[];
   else{const k=c.kpiMonth||0;rows.push([`Lương ${LEVELS[c.lv].n}`,payBase(c)]);
     rows.push([k>=0?`Thưởng KPI (${k} × ${vnd(KPI_RATE)})`:`Trừ KPI (${k} điểm × ${vnd(KPI_RATE)})`,k*KPI_RATE]);
     if(c.otMonth)rows.push([`Tăng ca (${c.otMonth} buổi × ${vnd(OT_RATE)})`,c.otMonth*OT_RATE]);}
-  return{rows,tot:Math.max(0,rows.reduce((s,r)=>s+r[1],0))};}
+  {const ld=window.leaveDaysOf?leaveDaysOf(c):0;if(ld)rows.push([`📝 Nghỉ phép không lương (${ld} ngày)`,-ld*Math.round(payBase(c)/26)]);}
+    return{rows,tot:Math.max(0,rows.reduce((s,r)=>s+r[1],0))};}
 function ting(){if(!MUSIC.on)return;const c=audioCtx();if(!c||c.state!=='running')return;const t=c.currentTime;
   [[1318.5,0],[1760,.14]].forEach(([f,dt])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(.22,t+dt+.01);g.gain.exponentialRampToValueAtTime(.001,t+dt+.55);o.connect(g);g.connect(c.destination);o.start(t+dt);o.stop(t+dt+.6);});}
 const payEl=$('#payModal');let payIdx=0,payData=null,payPreview=false,payRunning=false,paidMem=null,payCheckAt=0;
@@ -3091,7 +3109,7 @@ async function actPayday(preview){
     if(here.length)confetti(0,1.8,2,70);
     payData=snap;if(!preview){try{const o={};CHARS.forEach((c,i)=>o[c.id]=snap[i]);localStorage.setItem('office_lastpay',JSON.stringify({mon:monKey(d),slips:o}));}catch(e){}LASTPAY={mon:monKey(d),snap};}
     openPhone();try{mgrTargetLetter(preview);}catch(e){}
-    if(!preview){CHARS.forEach(c=>{c.kpiMonth=0;c.otMonth=0;});kpiSave();refreshCards();
+    if(!preview){try{leaveReset();}catch(e){}CHARS.forEach(c=>{c.kpiMonth=0;c.otMonth=0;});kpiSave();refreshCards();
       setStatus('💰 Đã nhận lương tháng này! KPI tháng được tính lại từ đầu để chuẩn bị cho tháng sau.');}
     else setStatus(`👀 Đây là bản xem thử. Ngày lương thật: ${payDay()}/${d.getMonth()+1} — KPI tháng này vẫn giữ nguyên.`);
   }finally{payRunning=false;}
@@ -3722,13 +3740,14 @@ const PUDDLE=mk(new THREE.CircleGeometry(.36,28),new THREE.MeshStandardMaterial(
 const SPILLCUP=new THREE.Group();scene.add(SPILLCUP);SPILLCUP.visible=false;{const m=cyl(.05,.04,.1,mat('#ffffff'),0,.05,0,SPILLCUP,12);m.rotation.z=PI/2;}
 const JAMPAPER=sph(.07,mat('#ffffff',{roughness:.9}),-11.05,.98,-1.2,scene,7,5);JAMPAPER.visible=false;JAMPAPER.scale.set(1.3,.7,1);
 function makeIncident(){const ks=Object.keys(INC_DEF).filter(k=>k!=='jam'||!printLock.owner||printLock.owner.name);const k=pick(ks);
-  if(k==='spill'){const v=present().filter(c=>!c.manager);return'spill:'+(v.length?pick(v).id:'lieu');}return k;}
+  if(k==='spill'){const v=present().filter(c=>!c.manager);return'spill:'+(v.length?pick(v).id:'lieu')+(Math.random()<.5?':e':'');}return k;}   // :e = nhân viên tự làm đổ
 function incStart(v){
   if(EV.inc){setStatus(`${INC_DEF[EV.inc.k].e} Đang có sự cố “${INC_DEF[EV.inc.k].t}” chưa xử lý xong!`);return false;}
-  const [k,who]=String(v||'').split(':');const D=INC_DEF[k];if(!D)return false;
-  const I=EV.inc={k,at:simTime,deadline:simTime+28,fixer:null,who:byId(who)||null};
+  const [k,who,src]=String(v||'').split(':');const D=INC_DEF[k];if(!D)return false;
+  const I=EV.inc={k,at:simTime,deadline:simTime+28,fixer:null,who:byId(who)||null,self:k==='spill'&&src==='e'&&!!byId(who)};
   const fixBtn={t:'🛠️ Xử lý ngay',f:()=>{const c=selected||(ME.id?byId(ME.id):null);run('fix',c);}};
-  banner(D.e,D.t,D.s,fixBtn,'inc');setStatus(`${D.e} Sự cố: ${D.t} ${D.s} (chọn một người rồi bấm “🛠️ Xử lý sự cố”)`);beep(false);
+  if(I.self){const w=I.who;banner('🥤',`${w.name} làm đổ đồ uống!`,`${w.name} phải tự lau trong 15 giây, không sẽ bị trừ KPI!`,fixBtn,'inc');setStatus(`🥤 ${w.name} làm đổ đồ uống ra sàn — phải tự lau trong 15 giây!`);beep(false);}
+  else{banner(D.e,D.t,D.s,fixBtn,'inc');setStatus(`${D.e} Sự cố: ${D.t} ${D.s} (chọn một người rồi bấm “🛠️ Xử lý sự cố”)`);beep(false);}
   const react=(lines,emo)=>present().forEach((c,i)=>{if(c.busy&&c.pose!=='sit')return;wait(.2+i*.35).then(()=>{c.think(pick(emo),2);if(i<2)c.say(pick(lines),2);});});
   if(k==='power'){I.prevLamp=lampK;PANEL.lever.position.y=1.33;setLamps(0);blackout.classList.add('show');CHARS.forEach(c=>screensOn(c,false));
     react(['Ủa ủa? Mất điện rồi! 😱','Trời ơi file chưa lưu!!! 😭','Ai bật đèn pin điện thoại giùm với 🔦','Tối thui luôn á 🙈'],['😱','🔦','😭','🙀']);PANEL.led.material.color.set(0xe0445a);
@@ -3739,8 +3758,9 @@ function incStart(v){
   else if(k==='spill'){const c=I.who||pick(present());I.who=c;const sx=c.home.x-Math.sign(c.home.x||1)*.85,sz=c.home.z+(c.home.face===0?.25:-.25);
     I.spot={x:sx,z:sz};PUDDLE.position.set(sx,.012,sz);PUDDLE.scale.setScalar(.05);PUDDLE.visible=true;tween(.8,p=>PUDDLE.scale.setScalar(.05+.95*p));
     SPILLCUP.position.set(sx+.25,0,sz-.1);SPILLCUP.visible=true;
-    if(!CAT.hold){catGo(sx+.6,sz+.3);catSay('Meo!? 🙀 Không phải Mochi đâu…',2.2);}
-    wait(.4).then(()=>{if(!c.away){c.think('😱',2);c.say('Ối! Mochi làm đổ cà phê của mình rồi! ☕😭',2.4);}});
+    if(I.self){wait(.4).then(()=>{if(!c.away){c.think('😱',2);c.say('Ối! Mình lỡ tay làm đổ ly nước rồi! 🥤😱',2.4);}});spillSelf(I);}
+    else{if(!CAT.hold){catGo(sx+.6,sz+.3);catSay('Meo!? 🙀 Không phải Mochi đâu…',2.2);}
+    wait(.4).then(()=>{if(!c.away){c.think('😱',2);c.say('Ối! Mochi làm đổ cà phê của mình rồi! ☕😭',2.4);}});}
     react(['Mochi lại phá rồi 😂','Coi chừng trơn trượt nha! ⚠️','Ai lấy giẻ lau đi 🧽'],['😂','🙀','⚠️']);}
   return true;
 }
@@ -3750,7 +3770,7 @@ function incClear(){const I=EV.inc;if(!I)return;
   if(I.k==='spill'){PUDDLE.visible=false;SPILLCUP.visible=false;}
   EV.inc=null;bannerOff();}
 async function actFix(c){
-  const I=EV.inc,D=INC_DEF[I.k];I.fixer=c;begin(c,'🛠️ '+D.fix);
+  const I=EV.inc,D=INC_DEF[I.k];I.fixer=c;I.fixAt=Date.now();begin(c,'🛠️ '+D.fix);
   banner(D.e,D.t,`${c.name} đang xử lý: ${D.fix}…`,null,'inc');setStatus(`🛠️ ${c.name} xông pha xử lý sự cố: ${D.fix}!`);
   c.say(pick(['Để mình xử lý! 💪','Bình tĩnh, có mình đây! 🦸','Chuyện nhỏ, để em lo! 😎']),1.8);
   if(I.k==='power'){await c.goStand(PANEL.spot);c.yaw=PI/2;c.arms='water';c.think('🔦',1.5);await wait(1.2);
@@ -3763,7 +3783,7 @@ async function actFix(c){
   setStatus(`✅ ${c.name} đã xử lý xong sự cố “${D.t.replace('!','')}” — được cộng ${KPI_PTS.fix} KPI!`);
   await c.say(pick(['Xong rồi nè! ✨','Ổn hết rồi mọi người ơi! 👌','Sự cố đã được dập tắt! 🚒']),1.8);
   const others=present().filter(o=>o!==c&&!o.busy);if(others.length){const o=pick(others);o.lookAt=c;await o.say(pick(['Đỉnh quá! 👏','Cảm ơn nha, cứu cả team luôn! 🙏','Siêu nhân văn phòng đây rồi! 🦸']),1.8);o.lookAt=null;}
-  kpiEvent(c,'fix');
+  if(!(I.self&&I.who===c))kpiEvent(c,'fix');
   await c.goSit(c.home);end(c,'working');
 }
 function runFix(c){
@@ -4219,6 +4239,9 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='scrfine')return scrFine(v);
   if(n==='fire')return runFire(v);
   if(n==='negwarn')return negWarn(v);
+  if(n==='dayoff')return runDayoff(c,v);
+  if(n==='leavereq')return leaveReq(c,v);
+  if(n==='leavedec')return leaveDec(v);
   if(n==='thankmgr')return thankMgr(c);
   if(n==='firereq')return fireReq(v);
   if(n==='firedec')return fireDec(v);
@@ -4238,7 +4261,7 @@ function lunchLate(n,c){if(!rtOn()||lunchHour())return;
     who.forEach(x=>{addKpi(x,-2,`${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ (12:00–12:59)`);x.think('⏰',1.6);});
     setStatus(`⏰ ${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ nghỉ trưa (12:00–12:59): ${who.map(x=>x.name).join(', ')} bị trừ 2 KPI.`);},2200);}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),sick:()=>{if(isMyMgr(selected)){openLeaveHub();return;}openLeave();},scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
@@ -4515,7 +4538,7 @@ function negHit(c,d,why){if(!c||c.manager||d>=0||c.away||c._firing)return;const 
   if(!c._firePend&&!FIRE_PEND[c.id]){c._firePend=true;setTimeout(()=>{c._firePend=false;run('firereq',null,{v:c.id});},2000);}}   // gửi hồ sơ cho quản lý xem xét
 {const o=addKpi;addKpi=(c,d,why)=>{const r=o(c,d,why);try{negHit(c,d,why);}catch(e){}return r;};}
 const hrEl=$('#hrPop');let hrT=0;
-function hrPop(kind,c,top,lv,sub){hrEl.className='promopop hrpop '+kind;hrEl.querySelector('.hrbox').textContent=kind==='warn'?'📄':'📦';hrEl.querySelector('.hrtear').textContent=kind==='warn'?'😰':'😭';setAvatar($('#hrAv'),c);$('#hrTop').textContent=top;$('#hrName').textContent=c.name;$('#hrLv').textContent=lv;$('#hrSub').textContent=sub;
+function hrPop(kind,c,top,lv,sub){hrEl.className='promopop hrpop '+kind;const IC={warn:['📄','😰'],ok:['✅','🥳'],no:['❌','😢']}[kind]||['📦','😭'];hrEl.querySelector('.hrbox').textContent=IC[0];hrEl.querySelector('.hrtear').textContent=IC[1];setAvatar($('#hrAv'),c);$('#hrTop').textContent=top;$('#hrName').textContent=c.name;$('#hrLv').textContent=lv;$('#hrSub').textContent=sub;
   void hrEl.offsetWidth;hrEl.classList.add('show');stage.classList.add('pop-on');beep(kind==='new');clearTimeout(hrT);hrT=setTimeout(hrHide,8000);}
 function hrHide(){hrEl.classList.remove('show');if(!prEl.classList.contains('show'))stage.classList.remove('pop-on');}
 hrEl.onclick=hrHide;
@@ -4680,6 +4703,93 @@ setInterval(()=>{if($('#warnBoard').classList.contains('show'))renderWarnRows($(
 {const o=updateKpiBox;updateKpiBox=()=>{o();const c=selected;if(!c||!c.manager||c.id!==ME.id)return;const mis=$('#kMis');if(!mis)return;const q=negStore(),n=CHARS.filter(x=>!x.manager&&(q.n[x.id]||0)>0).length,p=Object.keys(FIRE_PEND).length;
   const b=document.createElement('button');b.type='button';b.className='wbbtn';b.textContent=`📋 Theo dõi nhắc nhở · ${n} nhân viên${p?` · ⚠️ ${p} chờ quyết định`:''}`;b.onclick=openWarnBoard;mis.appendChild(b);};}
 window.openWarnBoard=openWarnBoard;
+
+/* ===== đăng ký nghỉ phép (thay cho nghỉ ốm): chọn lý do ===== */
+window.LEAVE_R=[
+ {e:'🤒',n:'Đau ốm',ask:'Hắt xì! 🤧 Chắc mình bị cảm rồi…',ok:'Ừ, về nghỉ đi em, nhớ uống thuốc cho khỏe nha! 🍵',bye:'Mình về nghỉ trước nha… 🤧',reply:'Mau khỏe nha! 🍵'},
+ {e:'✈️',n:'Đi du lịch',ask:'Vé máy bay đặt rồi nè! ✈️',ok:'Duyệt! Đi chơi vui vẻ, nhớ mua quà cho team nha 🎁',bye:'Đi du lịch đây, về có quà nha! 🏝️',reply:'Đi vui nha, nhớ quà đó! 🎁'},
+ {e:'👨‍👩‍👧',n:'Việc gia đình',ask:'Nhà mình có chút việc cần về gấp…',ok:'Ừ, em về lo việc nhà đi, cần gì cứ nhắn chị nhé!',bye:'Mình về lo việc nhà nha 🏠',reply:'Về cẩn thận nha!'},
+ {e:'💍',n:'Đám cưới',ask:'Mình đi ăn cưới bạn thân nè 💍',ok:'Duyệt! Chúc mừng bạn em nhé 🎉',bye:'Đi ăn cưới đây, bye cả nhà! 💍',reply:'Ăn ngon nha! 🎉'},
+ {e:'🏥',n:'Đi khám bệnh',ask:'Mình có lịch hẹn khám bệnh…',ok:'Ừ, đi khám đi em, sức khỏe là trên hết!',bye:'Mình đi khám đây nha 🏥',reply:'Khám xong báo mọi người nha!'},
+ {e:'📚',n:'Đi thi / đi học',ask:'Hôm nay mình có lịch thi 📚',ok:'Duyệt! Thi tốt nha em 💪',bye:'Đi thi đây, chúc mình may mắn! 📚',reply:'Thi tốt nha! 🍀'}];
+let lvR=0,lvD=1;const lvEl=$('#leaveModal');
+function openLeave(){const c=selected;if(!c){setStatus('📝 Chọn một nhân vật trước rồi đăng ký nghỉ phép nhé.');return;}
+  if(c.away){setStatus(`📝 ${c.name} đang không ở văn phòng.`);return;}
+  $('#lvTitle').textContent=`Đăng ký nghỉ phép · ${c.name}`;
+  const box=$('#lvWhy');box.textContent='';LEAVE_R.forEach((r,i)=>{const b=document.createElement('button');b.type='button';b.className=i===lvR?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=r.e;const t=document.createElement('span');t.textContent=r.n;b.append(e,t);b.onclick=()=>{lvR=i;openLeave();};box.appendChild(b);});
+  const dd=$('#lvDays');dd.textContent='';[[1,'Nghỉ hôm nay'],[2,'Nghỉ hôm nay + ngày mai']].forEach(([d,n])=>{const b=document.createElement('button');b.type='button';b.className=d===lvD?'on':'';b.textContent=n;b.onclick=()=>{lvD=d;openLeave();};dd.appendChild(b);});
+  lvEl.classList.add('show');}
+$('#lvCancel').onclick=()=>lvEl.classList.remove('show');
+$('#lvGo').onclick=()=>{lvEl.classList.remove('show');if(selected)run('leavereq',selected,{v:lvR+'.'+lvD});};
+async function actDayoff(c,ri,days){const R=LEAVE_R[ri]||LEAVE_R[0];c.offReason=ri;begin(c,`${R.e} Đăng ký nghỉ phép`);c.homeAfter=null;c.think(R.e,1.8);
+  await c.say(R.ask,2.2);
+  if(!MGR.away&&c!==MGR){MGR.lookAt=c;c.lookAt=MGR;await c.say(`${MGR.name} ơi, em xin nghỉ phép ${days>1?'2 ngày':'hôm nay'} vì ${R.n.toLowerCase()} ạ 📝`,2.4);await MGR.say(R.ok,2.4);MGR.lookAt=null;c.lookAt=null;}
+  setStatus(`📝 ${c.name} đăng ký nghỉ phép (${R.n}) — ${days>1?'nghỉ hôm nay và ngày mai':'nghỉ hôm nay'}. Đơn đã được duyệt ✅`);
+  leaveAdd(c,days);await actGoHome(c,true);c.sick=days>1?1:0;}
+function runDayoff(c,v){if(!c||c.away||c.leavingNow)return false;if(c.busy){setStatus(`⏳ ${c.name} đang bận, làm xong rồi đăng ký nghỉ phép nhé.`);return false;}
+  const [ri,d]=String(v||'0.1').split('.');guard(()=>actDayoff(c,(+ri||0)%LEAVE_R.length,+d===2?2:1),[c]);return true;}
+
+/* ===== đơn nghỉ phép chờ quản lý duyệt ===== */
+const LEAVE_WAIT=30000;let LEAVE_PEND={},lvaTimer=0,lvaId='';
+const lvTxt=(ri,d)=>{const R=LEAVE_R[ri]||LEAVE_R[0];return `${R.e} ${R.n} · ${d>1?'hôm nay + ngày mai':'hôm nay'}`;};
+function leaveReq(c,v){if(!c||c.away||c.leavingNow||LEAVE_PEND[c.id])return false;const [riS,dS]=String(v||'0.1').split('.');const ri=(+riS||0)%LEAVE_R.length,d=+dS===2?2:1;
+  if(c.manager){guard(()=>actDayoff(c,ri,d),[c]);return true;}            // quản lý xin nghỉ: sếp tổng duyệt luôn
+  LEAVE_PEND[c.id]={ri,d,at:Date.now()};c.think('📨',2);
+  setStatus(`📨 ${c.name} gửi đơn nghỉ phép (${lvTxt(ri,d)}) — chờ quản lý duyệt…`);
+  if(c.id===ME.id)banner('📨','Đã gửi đơn nghỉ phép',`${lvTxt(ri,d)} — chờ quản lý duyệt…`,null,'boba');
+  const mgrHuman=isHuman(MGR)&&!MGR.away;
+  if(mgrHuman&&MGR.id===ME.id)openLeaveAsk(c);
+  if(CAT_HOST){if(!mgrHuman)setTimeout(()=>{if(LEAVE_PEND[c.id])run('leavedec',null,{v:c.id+':'+(MGR.away?1:(srand(hashStr(c.id+Date.now()))()<.85?1:0))});},3500);   // quản lý NPC tự duyệt
+    else setTimeout(()=>{if(LEAVE_PEND[c.id])run('leavedec',null,{v:c.id+':1:auto'});},LEAVE_WAIT+4000);}
+  return true;}
+function openLeaveAsk(c){const P=LEAVE_PEND[c.id];if(!P)return;lvaId=c.id;const end=Date.now()+LEAVE_WAIT;
+  $('#laTitle').textContent=`Đơn nghỉ phép của ${c.name}`;$('#laSub').textContent=`Lý do: ${lvTxt(P.ri,P.d)}${isHuman(c)?' · người chơi 👤':' · NPC 🤖'}`;
+  $('#leaveAsk').classList.add('show');beep(true);clearInterval(lvaTimer);
+  const tk=()=>{const l=Math.max(0,Math.ceil((end-Date.now())/1000));$('#laLeft').textContent=`⏳ Còn ${l} giây — không trả lời sẽ tự duyệt`;if(!l||!LEAVE_PEND[c.id]){clearInterval(lvaTimer);if(!l&&LEAVE_PEND[c.id])laAns(true);}};tk();lvaTimer=setInterval(tk,250);}
+function laAns(ok){$('#leaveAsk').classList.remove('show');clearInterval(lvaTimer);if(lvaId&&LEAVE_PEND[lvaId])run('leavedec',null,{v:lvaId+':'+(ok?1:0)});}
+$('#laOk').onclick=()=>laAns(true);$('#laNo').onclick=()=>laAns(false);
+function leaveDec(v){const [id,k,auto]=String(v||'').split(':');const c=byId(id),P=LEAVE_PEND[id];if(!c||!P)return false;delete LEAVE_PEND[id];
+  if(lvaId===id){$('#leaveAsk').classList.remove('show');clearInterval(lvaTimer);}
+  if(c.id===ME.id&&evBanT.textContent==='Đã gửi đơn nghỉ phép')bannerOff();
+  if(k==='1'){setStatus(`✅ ${MGR.away?'Hệ thống':'Quản lý'} đã duyệt đơn nghỉ phép của ${c.name}${auto?' (tự duyệt vì quá giờ)':''}.`);
+    if(c.id===ME.id||!isHuman(c))hrPop('ok',c,'✅ ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT',lvTxt(P.ri,P.d),`${MGR.away?'Hệ thống':mgrLabel()} đã duyệt${auto?' (tự duyệt vì quá giờ)':''}. Nghỉ ngơi vui vẻ nhé! 🎉`);
+    if(c.busy){const t=setInterval(()=>{if(!c.busy||c.away){clearInterval(t);if(!c.away)guard(()=>actDayoff(c,P.ri,P.d),[c]);}},1000);}else guard(()=>actDayoff(c,P.ri,P.d),[c]);}
+  else{setStatus(`❌ Quản lý chưa duyệt đơn nghỉ phép của ${c.name} — ở lại làm việc nhé.`);if(!MGR.away)MGR.say(`${c.name} ơi, hôm nay team đang bận, em cố ở lại nhé!`,2.4);
+    wait(1).then(()=>c.say(pick(['Dạ vâng ạ… 😢','Dạ em hiểu rồi ạ 😅']),2));
+    if(c.id===ME.id||!isHuman(c))hrPop('no',c,'❌ ĐƠN NGHỈ PHÉP CHƯA ĐƯỢC DUYỆT',lvTxt(P.ri,P.d),`${mgrLabel()} chưa duyệt vì team đang bận. Ở lại làm việc, gửi lại đơn sau nhé!`);}
+  return true;}
+
+/* ===== quản lý: tách mục duyệt đơn nhân viên và tự đăng ký nghỉ ===== */
+const isMyMgr=c=>c&&c.manager&&(c.id===ME.id||!isHuman(c));
+function openLeaveHub(){const box=$('#lhList');box.textContent='';const ids=Object.keys(LEAVE_PEND);
+  $('#lhCount').textContent=ids.length?`${ids.length} đơn đang chờ duyệt`:'Chưa có đơn nào chờ duyệt';
+  ids.forEach(id=>{const c=byId(id),P=LEAVE_PEND[id];if(!c||!P)return;const r=document.createElement('div');r.className='wbrow n1';
+    const top=document.createElement('div');top.className='wbtop';const av=document.createElement('span');av.className='av3';setAvatar(av,c);const t=document.createElement('div');const b=document.createElement('b');b.textContent=c.name+(isHuman(c)?' 👤':' 🤖');const sm=document.createElement('small');sm.textContent=lvTxt(P.ri,P.d);t.append(b,sm);top.append(av,t);r.appendChild(top);
+    const row=document.createElement('div');row.className='crow';const no=document.createElement('button');no.type='button';no.className='cghost';no.textContent='❌ Không duyệt';const ok=document.createElement('button');ok.type='button';ok.textContent='✅ Duyệt';
+    no.onclick=()=>{run('leavedec',null,{v:id+':0'});setTimeout(openLeaveHub,200);};ok.onclick=()=>{run('leavedec',null,{v:id+':1'});setTimeout(openLeaveHub,200);};row.append(no,ok);r.appendChild(row);box.appendChild(r);});
+  $('#leaveHub').classList.add('show');}
+$('#lhClose').onclick=()=>$('#leaveHub').classList.remove('show');
+$('#lhSelf').onclick=()=>{$('#leaveHub').classList.remove('show');openLeave();};
+setInterval(()=>{if($('#leaveHub').classList.contains('show'))openLeaveHub();},2000);
+{const o=refreshCards;refreshCards=()=>{o();try{const b=document.querySelector('[data-cmd=sick]');if(b){const n=Object.keys(LEAVE_PEND).length,t=isMyMgr(selected)?`📝 Nghỉ phép · duyệt đơn${n?` (${n})`:''}`:'📝 Đăng ký nghỉ phép';if(b.textContent!==t)b.textContent=t;}}catch(e){}};}
+setInterval(()=>{try{refreshCards();}catch(e){}},3000);
+
+/* ===== ngày nghỉ phép không tính lương ===== */
+function leaveStore(){const mk=new Date().getFullYear()+'-'+(new Date().getMonth()+1);let o=null;try{o=JSON.parse(localStorage.getItem('office_leave')||'null');}catch(e){}if(!o||o.mon!==mk)o={mon:mk,n:{}};return o;}
+function leaveAdd(c,d){const o=leaveStore();o.n[c.id]=(o.n[c.id]||0)+d;try{localStorage.setItem('office_leave',JSON.stringify(o));}catch(e){}refreshCards();}
+window.leaveDaysOf=c=>leaveStore().n[c.id]||0;
+window.leaveReset=()=>{try{localStorage.removeItem('office_leave');}catch(e){}};
+
+/* ===== nhân viên làm đổ đồ uống: phải tự lau trong 15 giây ===== */
+const SPILL_WAIT=15000;let spillCd=0;
+function spillSelf(I){const w=I.who;if(!w)return;I.selfEnd=Date.now()+SPILL_WAIT;
+  if(w.id===ME.id){const T='Bạn làm đổ đồ uống!';banner('🥤',T,'',{t:'🧽 Tự lau ngay',f:()=>run('fix',w)},'inc');clearInterval(spillCd);
+    const tk=()=>{if(EV.inc!==I||I.fixer||evBanT.textContent!==T){clearInterval(spillCd);return;}const l=Math.max(0,Math.ceil((I.selfEnd-Date.now())/1000));evBanS.textContent=`⏳ Còn ${l} giây để tự lau — không lau sẽ bị trừ KPI`;if(!l)clearInterval(spillCd);};tk();spillCd=setInterval(tk,250);}
+  else if(!isHuman(w)&&CAT_HOST&&!PEERSEL[w.id])setTimeout(()=>{if(EV.inc===I&&!I.fixer&&!w.busy&&Math.random()<.75)run('fix',w);},2500+Math.random()*6000);   // NPC thường tự lau
+  setTimeout(()=>{if(I.fixer===w&&I.fixAt<=I.selfEnd)return;if(w.away)return;
+    addKpi(w,-3,'Làm đổ đồ uống không tự lau');w.think('😳',1.8);
+    setStatus(`🥤 ${w.name} làm đổ đồ uống mà không tự lau trong 15 giây — bị trừ 3 KPI!`);
+    if(w.id===ME.id&&evBanT.textContent==='Bạn làm đổ đồ uống!')bannerOff();},SPILL_WAIT+200);}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -4868,7 +4978,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
