@@ -4005,6 +4005,18 @@ function peerSel(list){const m={};list.forEach(x=>{const [id,ts]=String(x.sel).s
 {const o=select;select=c=>{if(c&&!isHuman(c)&&PEERSEL[c.id]){setStatus(`🎮 ${PEERSEL[c.id].name} đang điều khiển ${c.name} — chọn nhân vật trống khác hoặc nhân vật của bạn nhé.`);return;}
   const was=mySelId();o(c);const now=mySelId();if(now!==was){MYSEL_TS=now?Date.now():0;if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}};}
 
+/* ================= hành động liền mạch: đang đi về chỗ thì vẫn nhận lệnh mới ================= */
+const RET_RE=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/;
+{const o=Chibi.prototype.goSit;Chibi.prototype.goSit=function(seat){
+  if(seat===this.home&&this.busy&&!this.leavingNow&&!this.away&&RET_RE.test(this.activity||'')){
+    this.busy=false;this.returning=true;refreshCards();
+    return new Promise(res=>{this._retRes=res;o.call(this,seat).then(()=>{if(this._retRes===res){this._retRes=null;this.returning=false;this.busy=true;res();}});});}
+  return o.call(this,seat);};}
+// có lệnh mới lúc đang về chỗ: kết thúc phần cũ ngay (vẫn được cộng KPI), bỏ qua lệnh end() của việc cũ
+{const o=begin;begin=(c,a)=>{if(c.returning){c.returning=false;const r=c._retRes;c._retRes=null;if(r){c._skipEnds=(c._skipEnds||0)+1;r();}
+  c.doc.visible=false;c.cupG.visible=false;c.canG.visible=false;c.bagG.visible=false;c.chopG.visible=false;if(c.boba)c.boba.visible=false;if(c.mic)c.mic.visible=false;c.arms='idle';}o(c,a);};}
+{const o=end;end=(c,mode)=>{if(c._skipEnds>0){c._skipEnds--;return;}o(c,mode);};}
+
 /* ================= lệnh & đồng bộ ================= */
 const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
 {const o=run;run=evRun=(n,c,a)=>{
