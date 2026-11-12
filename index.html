@@ -4381,13 +4381,14 @@ $('#trGo').onclick=()=>{trEl.classList.remove('show');const me=ME.id&&byId(ME.id
 
 /* ================= rời bàn phải tắt màn hình (bảo mật thông tin) ================= */
 KPI_PTS.scrfine=-3;KPI_WHY.scrfine='Rời bàn không tắt màn hình';
-const SCR_GRACE=15000;
+const SCR_GRACE=15000;let scrCd=0;
 const powerOut=()=>!!(EV.inc&&EV.inc.k==='power');
 function scrSkip(c){return c.away||c.leavingNow||c.outside||!c.root.visible;}
 function scrLeave(c){c.leftAt=Date.now();c.scrOff=false;c.scrFined=false;if(scrSkip(c)||powerOut())return;
   if(c.pack&&c.pack.visible){c.scrOff=true;screensOn(c,false);return;}   // xách balo ra ngoài (team building…) thì tắt máy luôn
   if(isHuman(c)){if(c.id===ME.id){beep(false);const f={t:'🔒 Tắt màn hình',f:()=>{bannerOff();run('scroff',c);}};
-      if(!evBan.classList.contains('show'))banner('🖥️','Bạn vừa rời bàn mà chưa tắt màn hình!',`Tắt trong ${SCR_GRACE/1000} giây kẻo bị trừ ${-KPI_PTS.scrfine} KPI (nút “🖥️ Tắt màn hình”)`,f,'inc');
+      if(!evBan.classList.contains('show')){const T='Bạn vừa rời bàn mà chưa tắt màn hình!',at=c.leftAt;banner('🖥️',T,'',f,'inc');clearInterval(scrCd);
+        const tk=()=>{if(evBanT.textContent!==T||c.leftAt!==at||c.scrOff||c.scrFined){clearInterval(scrCd);return;}const l=Math.max(0,Math.ceil((at+SCR_GRACE-Date.now())/1000));evBanS.textContent=`⏳ Còn ${l} giây — không tắt sẽ bị trừ ${-KPI_PTS.scrfine} KPI`;};tk();scrCd=setInterval(tk,250);}
       else setStatus(`🖥️ Bạn vừa rời bàn — bấm “🖥️ Tắt màn hình” trong ${SCR_GRACE/1000} giây kẻo bị trừ KPI!`);}return;}
   const r=srand(hashStr(c.id+':'+Math.floor(Date.now()/15000)))();   // nhân vật trống: thỉnh thoảng quên tắt (mọi máy cùng kết quả)
   if(r>=.12){c.scrOff=true;wait(.25).then(()=>{if(!c.atHome()){screensOn(c,false);c.think('🔒',1.1);}});}}
