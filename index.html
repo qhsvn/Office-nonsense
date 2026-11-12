@@ -457,6 +457,11 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .kbm{flex:1;min-width:0}.kbm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kbm small{display:block;font-size:11px;color:var(--muted)}
 .kbm i{display:block;height:5px;border-radius:99px;background:#edf1f8;margin-top:3px;overflow:hidden}.kbm u{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#8fd9bf,#ffd45e)}.kbm u.neg{background:#ff9b9b}
 .kbv{font-size:13px;font-weight:800;color:#1f9e63;white-space:nowrap}.kbv.neg{color:#e0445a}
+.tripcard{position:absolute;left:50%;top:50px;transform:translateX(-50%);z-index:8;display:none;flex-direction:column;gap:6px;width:min(400px,calc(100% - 20px));max-height:calc(100% - 110px);overflow-y:auto;background:linear-gradient(160deg,#fffdf6,#eaf6ff);border-radius:20px;padding:12px 14px;box-shadow:0 12px 32px rgba(60,90,150,.35);border:3px solid #fff}
+.tripcard.show{display:flex;animation:fadeIn .3s ease-out}
+.tripcard b{font-size:15px}.tcl{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px}.tcs{font-size:12px;color:var(--muted)}.tcs.done{color:#2f8a5f}.tcs.on{color:var(--ink);font-weight:700}
+.tcq{font-size:13px;line-height:1.45;background:#fff;border-radius:12px;padding:7px 10px}.tcp{display:flex;gap:4px;flex-wrap:wrap}.tcp .av3{width:40px;height:40px;box-shadow:0 0 0 2px #fff}
+#trGo{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff;box-shadow:0 6px 16px rgba(143,208,255,.4)}
 </style>
 </head>
 <body>
@@ -491,6 +496,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     <div class="closedban" id="closedBan" role="status"><div class="cbi">🌙</div><b>Văn phòng đã đóng cửa</b><span id="closedTxt">Mọi người đã về hết. Đèn tắt, chỉ còn Mochi ở lại trông văn phòng 🐱</span><button type="button" data-cmd="newday">☀️ Sáng hôm sau — Vào làm</button></div>
     <div class="evban" id="evBan" role="status"><span class="ei" id="evBanI"></span><div class="et"><b id="evBanT"></b><small id="evBanS"></small></div><button type="button" id="evBanB"></button></div>
     <div class="blackout" id="blackout"></div>
+    <div class="tripcard" id="tripCard"><b id="tcT"></b><div class="tcl" id="tcL"></div><div class="tcq" id="tcQ"></div><div class="tcp" id="tcP"></div></div>
     <div class="yepcard" id="yepCard"><b id="yepT"></b><span id="yepS"></span><small id="yepB"></small></div>
     <div class="filerecv" id="fileRecv"><div><b id="frT"></b><small id="frS"></small></div><button type="button" id="frOpen">📖 Mở</button><button type="button" class="x" id="frX">✕</button></div>
     <div class="quizbox" id="quizBox"><div class="qzh"><b id="qzH"></b><button type="button" id="qzX" title="Thu nhỏ">✕</button></div><div class="qzbar"><i id="qzBar"></i></div><div class="qzq" id="qzQ"></div><div class="qzo" id="qzO"></div><div class="qzf" id="qzF"></div><div class="qzsc" id="qzSc"></div></div>
@@ -557,6 +563,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b pink big" data-cmd="yep">🎊 Tiệc tất niên<small>Karaoke &amp; bốc thăm trúng thưởng</small></button>
           <button class="b pink big" data-cmd="boss">👨‍💼 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
           <button class="b pink big" data-cmd="incident">💥 Sự cố<small>Mất điện, kẹt giấy, Mochi phá…</small></button>
+          <button class="b pink big" data-cmd="trip">🚌 Team building<small>Cả team đi du lịch, gắn kết</small></button>
         </div>
       </div>
       <div class="box">
@@ -593,6 +600,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b mint" data-cmd="meetroom">🚪 Vào phòng họp</button>
           <button class="b mint" data-cmd="clean">🧽 Dọn bàn</button>
           <button class="b mint" data-cmd="sweep">🧹 Quét văn phòng</button>
+          <button class="b mint" data-cmd="partner">💼 Gặp đối tác</button>
           <button class="b mint" data-cmd="filesend">📎 Giao file</button>
           <button class="b mint" data-cmd="inbox">📂 Hộp tài liệu</button>
           <button class="b mint" data-cmd="fix">🛠️ Xử lý sự cố</button>
@@ -727,6 +735,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
       <li>🖨️ In tài liệu <b>+6</b> · 📞 Gọi khách <b>+6</b> · 💬 Trao đổi <b>+5</b> · 🧹 Quét văn phòng <b>+5</b></li>
       <li>🛠️ Xử lý sự cố <b>+8</b> · 👨‍💼 Sếp tổng khen <b>+5</b> (bắt lười <b>−8</b>) · 🎮 Minigame top 3 <b>+20/+10/+5</b></li>
+      <li>💼 Gặp đối tác <b>+15</b> (ký được hợp đồng) / <b>+6</b> · 🚌 Team building <b>+10</b></li>
       <li>💐 Cắm hoa <b>+3</b> · 🧽 Dọn bàn <b>+4</b> · 🌱 Tưới cây, 🐟 chăm Mochi, 🧺 dọn cát <b>+3</b></li>
       <li>🎯 Mỗi ngày có <b>3 nhiệm vụ</b> (tab Cá nhân): xong mỗi cái <b>+20</b>, xong cả 3 mở <b>🎁 hộp quà KPI ngẫu nhiên (+15 đến +50)</b>.</li>
     </ul>
@@ -766,6 +775,10 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
+<div id="tripModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="trTitle"><div class="wcard mcardm">
+  <div class="wlogo">🚌</div><h2 id="trTitle">Đi team building</h2><p class="wsub">Chọn điểm đến. Cả team rời văn phòng đi chơi rồi về, mỗi người +10 KPI tinh thần đồng đội.</p>
+  <div class="fltypes" id="trDest"></div>
+  <div class="crow"><button type="button" id="trCancel" class="cghost">Hủy</button><button type="button" id="trGo">Lên đường 🚌</button></div></div></div>
 <div id="sorryModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="soTitle"><div class="wcard mcardm">
   <div class="wlogo">🙇‍♀️</div><h2 id="soTitle">Sếp tổng đang chờ bạn xin lỗi!</h2><p class="wsub">Văn phòng chưa dọn hoặc nhân viên phạm lỗi. Là quản lý, bạn phải xin lỗi sếp tổng thay cả team (25 giây).</p>
   <div class="soopts" id="soOpts"></div></div></div>
@@ -2776,13 +2789,15 @@ const DAILY_BONUS=[15,50];
 function todayKey(){const d=new Date();return ''+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 function dailyMissions(dk){let h=2166136261;for(const ch of 'mis'+dk)h=Math.imul(h^ch.charCodeAt(0),16777619);   // cùng 1 ngày = cùng 3 nhiệm vụ cho mọi người, mọi máy
   const a=MISSIONS.slice();for(let i=a.length-1;i>0;i--){h=Math.imul(h^(h>>>15),2246822507)>>>0;const j=h%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,3);}
-function newMission(c){const ks=dailyMissions(todayKey());c.ms=ks.map(m=>({k:m.k,n:m.n,p:0}));c.mday=todayKey();c.mbonus=false;}
+function newMission(c){let ks=dailyMissions(todayKey());if(c.manager){const pool=MISSIONS.filter(m=>m.k!=='report'&&!ks.some(x=>x.k===m.k));ks=ks.map(m=>m.k==='report'?pool[0]:m);}c.ms=ks.map(m=>({k:m.k,n:m.n,p:0}));c.mday=todayKey();c.mbonus=false;}
 const misDef=k=>MISSIONS.find(m=>m.k===k);
-function ensureDaily(c){if(c.manager)return;if(c.mday!==todayKey()||!Array.isArray(c.ms)||c.ms.length!==3)newMission(c);}
+function ensureDaily(c){if(c.mday!==todayKey()||!Array.isArray(c.ms)||c.ms.length!==3)newMission(c);}
 const KPI_KEY='office_kpi_v1';
-function kpiSave(){try{const o={};CHARS.forEach(c=>{if(!c.manager)o[c.id]={kpi:c.kpi,lv:c.lv,ms:c.ms,md:c.mday,mb:c.mbonus,certs:c.certs,km:c.kpiMonth||0,om:c.otMonth||0};});localStorage.setItem(KPI_KEY,JSON.stringify(o));}catch(e){}}
+function kpiSave(){try{const o={};CHARS.forEach(c=>{o[c.id]={kpi:c.kpi,lv:c.lv,ms:c.ms,md:c.mday,mb:c.mbonus,certs:c.certs,km:c.kpiMonth||0,om:c.otMonth||0};});localStorage.setItem(KPI_KEY,JSON.stringify(o));}catch(e){}}
 function kpiLoad(){let o=null;try{o=JSON.parse(localStorage.getItem(KPI_KEY)||'null');}catch(e){}
-  CHARS.forEach(c=>{c.log=[];if(c.manager)return;const s=o&&o[c.id];
+  CHARS.forEach(c=>{c.log=[];const s=o&&o[c.id];
+    if(c.manager){c.kpi=s&&typeof s.kpi==='number'?(s.kpi|0):0;c.kpiMonth=s&&typeof s.km==='number'?s.km|0:0;c.otMonth=s&&typeof s.om==='number'?s.om|0:0;
+      if(s&&Array.isArray(s.ms)&&s.md===todayKey()&&s.ms.length===3&&s.ms.every(x=>x&&misDef(x.k))){c.ms=s.ms.map(x=>({k:x.k,n:misDef(x.k).n,p:clamp(x.p|0,0,99)}));c.mday=s.md;c.mbonus=!!s.mb;}else newMission(c);return;}
     c.kpi=s&&typeof s.kpi==="number"?(s.kpi|0):0;c.lv=s&&typeof s.lv==='number'?clamp(s.lv|0,0,LEVELS.length-1):0;c.certs=c.lv;c.kpiMonth=s&&typeof s.km==='number'?s.km|0:0;c.otMonth=s&&typeof s.om==='number'?s.om|0:0;
     if(s&&Array.isArray(s.ms)&&s.md===todayKey()&&s.ms.length===3&&s.ms.every(x=>x&&misDef(x.k))){c.ms=s.ms.map(x=>({k:x.k,n:misDef(x.k).n,p:clamp(x.p|0,0,99)}));c.mday=s.md;c.mbonus=!!s.mb;}else newMission(c);
     for(let i=0;i<c.certs;i++)addDeskCert(c,i);
@@ -2793,18 +2808,18 @@ function updateLvTag(c){if(!c.lvEl){c.lvEl=document.createElement('div');c.lvEl.
   c.lvEl.textContent=c.manager?'':LEVELS[c.lv].e+' '+LEVELS[c.lv].n;c.lvEl.style.display=c.manager?'none':'';}
 function kpiPop(c,d){const e=c.popEl;if(!e)return;e.textContent=(d>0?'+':'')+d+' KPI';e.className='kpop '+(d>0?'plus':'minus');void e.offsetWidth;e.classList.add('go');}
 function addKpi(c,d,why){
-  if(c.manager||!d)return;c.kpi=c.kpi+d;c.kpiMonth=(c.kpiMonth||0)+d;kpiPop(c,d);
+  if(!d)return;c.kpi=(c.kpi||0)+d;c.kpiMonth=(c.kpiMonth||0)+d;kpiPop(c,d);
   c.log.unshift({d,why,at:fmt(nowMin())});if(c.log.length>5)c.log.pop();
   const nx=LEVELS[c.lv+1];if(nx&&c.kpi>=nx.need&&!c.promoPending){c.promoPending=true;
     setTimeout(()=>setStatus(`🎓 ${c.name} đủ ${nx.need} KPI để lên ${nx.e} ${nx.n}! Sếp sẽ gọi lên trao bằng khen khi rảnh.`),900);}
   kpiSave();refreshCards();
 }
 function kpiEvent(c,k){
-  if(!c||c.manager)return;if(k==='ot')c.otMonth=(c.otMonth||0)+1;addKpi(c,KPI_PTS[k]||0,KPI_WHY[k]||k);
+  if(!c)return;if(k==='ot')c.otMonth=(c.otMonth||0)+1;addKpi(c,KPI_PTS[k]||0,KPI_WHY[k]||k);
   ensureDaily(c);const mi=c.ms.find(x=>x.k===k&&x.p<x.n);
   if(mi){mi.p++;
     if(mi.p>=mi.n){const m=misDef(k);addKpi(c,MISSION_BONUS,'Hoàn thành nhiệm vụ: '+m.t);
-      if(!MGR.away){MGR.say(`Giỏi lắm ${c.name}! Xong nhiệm vụ “${m.t}”, thưởng +${MISSION_BONUS} KPI 👏`,3);}
+      if(!MGR.away&&c!==MGR){MGR.say(`Giỏi lắm ${c.name}! Xong nhiệm vụ “${m.t}”, thưởng +${MISSION_BONUS} KPI 👏`,3);}
       c.think('🎯',1.6);setStatus(`🎯 ${c.name} hoàn thành nhiệm vụ “${m.t}” — ${MGR.away?'':'sếp khen, '}+${MISSION_BONUS} KPI!`);
       if(!c.mbonus&&c.ms.every(x=>x.p>=x.n)){c.mbonus=true;setTimeout(()=>{const bn=Math.round(rand(DAILY_BONUS[0],DAILY_BONUS[1]));addKpi(c,bn,'🎁 Hộp quà xong cả 3 nhiệm vụ');confetti(c.pos.x,1.5,c.pos.z,60);c.say(`Mở hộp quà: +${bn} KPI! 🎁🎉`,2.4);setStatus(`🎁 ${c.name} xong cả 3 nhiệm vụ hôm nay, mở hộp quà được +${bn} KPI ngẫu nhiên! Mai có nhiệm vụ mới.`);kpiSave();},2600);}}
     kpiSave();refreshCards();}
@@ -2838,7 +2853,7 @@ const freeTime=()=>{const m=nowMin();return (m>=12*60&&m<13*60)||m>=17*60+30;}; 
 {const o=actWater;actWater=async c=>{await o(c);kpiEvent(c,'water');};}
 {const o=actFeedCat;actFeedCat=async c=>{await o(c);kpiEvent(c,'feed');};}
 {const o=actWaterCat;actWaterCat=async c=>{await o(c);kpiEvent(c,'feed');};}
-{const o=actMeeting;actMeeting=async()=>{const ppl=CHARS.filter(c=>!c.away&&!c.manager);await o();ppl.forEach(c=>kpiEvent(c,'meeting'));};}
+{const o=actMeeting;actMeeting=async()=>{const ppl=CHARS.filter(c=>!c.away&&!c.manager);const chair=!MGR.away;await o();ppl.forEach(c=>kpiEvent(c,'meeting'));if(chair)addKpi(MGR,KPI_PTS.meeting,'Chủ trì cuộc họp');};}
 // promotion ceremony
 const CERT_TEX=canvasTex(256,200,(x,W,H)=>{x.fillStyle='#fffaf0';x.fillRect(0,0,W,H);x.strokeStyle='#e6b84d';x.lineWidth=10;x.strokeRect(10,10,W-20,H-20);
   x.fillStyle='#b8862b';x.font=`700 30px ${FONT}`;x.textAlign='center';x.fillText('BẰNG KHEN',W/2,70);x.fillStyle='#7d6a52';x.font=`500 18px ${FONT}`;x.fillText('Văn phòng Pastel',W/2,105);
@@ -2894,9 +2909,12 @@ async function actPromote(c){
 function updateKpiBox(){
   const box=$('#kpiBox');if(!box)return;const c=selected;box.style.display=c?'':'none';if(!c)return;
   const lv=$('#kLv'),pts=$('#kPts'),bar=$('#kBar'),mis=$('#kMis'),log=$('#kLog');
-  if(c.manager){lv.textContent='⭐ Quản lý';pts.textContent='Giao nhiệm vụ · khen thưởng · trừ KPI';bar.parentNode.style.display='none';
-    mis.textContent='';CHARS.filter(o=>!o.manager).slice().sort((a,b)=>b.kpi-a.kpi).forEach((o,i)=>{const r=document.createElement('div');r.className='krank';r.textContent=`${['🥇','🥈','🥉','4.'][i]||'•'} ${o.name} · ${LEVELS[o.lv].e} ${LEVELS[o.lv].n} · ${o.kpi} KPI`;mis.appendChild(r);});
-    log.textContent='';return;}
+  if(c.manager){lv.textContent='⭐ Quản lý';pts.textContent=`${c.kpi||0} KPI · tháng này ${(c.kpiMonth||0)>0?'+':''}${c.kpiMonth||0}`;bar.parentNode.style.display='none';
+    mis.textContent='';ensureDaily(c);{const done=c.ms.filter(x=>x.p>=x.n).length;const h=document.createElement('div');h.className='kmt';h.textContent=`🎯 Nhiệm vụ quản lý hôm nay (${done}/3) · mỗi cái +${MISSION_BONUS}`;mis.appendChild(h);
+      c.ms.forEach(x=>{const d=misDef(x.k),r=document.createElement('div');r.className='kmis'+(x.p>=x.n?' ok':'');r.textContent=`${x.p>=x.n?'✅':'⬜'} ${d.e} ${d.t} (${Math.min(x.p,x.n)}/${x.n})`;mis.appendChild(r);});}
+    {const pd=document.createElement('div');pd.className='kmt';pd.textContent=`💰 Nhận lương ngày ${payDay()}/${new Date().getMonth()+1}`+(c.id===ME.id?` · dự kiến ${vnd(slip(c).tot)} (chỉ bạn thấy 🔒)`:' · mức lương là thông tin riêng 🔒');mis.appendChild(pd);}
+    {const h=document.createElement('div');h.className='kmt';h.textContent='👥 KPI nhân viên';mis.appendChild(h);}CHARS.filter(o=>!o.manager).slice().sort((a,b)=>b.kpi-a.kpi).forEach((o,i)=>{const r=document.createElement('div');r.className='krank';r.textContent=`${['🥇','🥈','🥉','4.'][i]||'•'} ${o.name} · ${LEVELS[o.lv].e} ${LEVELS[o.lv].n} · ${o.kpi} KPI`;mis.appendChild(r);});
+    log.textContent='';c.log.forEach(l=>{const r=document.createElement('div');r.className=l.d>0?'plus':'minus';r.textContent=`${l.at} · ${l.d>0?'+':''}${l.d} · ${l.why}`;log.appendChild(r);});return;}
   bar.parentNode.style.display='';
   const cur=LEVELS[c.lv],nx=LEVELS[c.lv+1];lv.textContent=cur.e+' '+cur.n;
   pts.textContent=nx?`${c.kpi} / ${nx.need} KPI → ${nx.e} ${nx.n}`:`${c.kpi} KPI · cấp cao nhất`;
@@ -2985,7 +3003,9 @@ const payDay=(d=new Date())=>Math.min(30,new Date(d.getFullYear(),d.getMonth()+1
 const monKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 function slip(c){const rows=[];
   if(c.manager){const team=CHARS.filter(o=>!o.manager).reduce((s,o)=>s+Math.max(0,o.kpiMonth||0),0);
-    rows.push(['Lương sếp',payBase(c)],['Phụ cấp trách nhiệm',MGR_ALLOW],[`Thưởng team (${team} KPI × ${vnd(TEAM_RATE)})`,team*TEAM_RATE]);}
+    const mk=c.kpiMonth||0;
+    rows.push(['Lương sếp',payBase(c)],['Phụ cấp trách nhiệm',MGR_ALLOW],[`Thưởng team (${team} KPI × ${vnd(TEAM_RATE)})`,team*TEAM_RATE],[mk>=0?`Thưởng KPI quản lý (${mk} × ${vnd(KPI_RATE)})`:`Trừ KPI quản lý (${mk} điểm × ${vnd(KPI_RATE)})`,mk*KPI_RATE]);
+    if(c.otMonth)rows.push([`Tăng ca (${c.otMonth} buổi × ${vnd(OT_RATE)})`,c.otMonth*OT_RATE]);}
   else{const k=c.kpiMonth||0;rows.push([`Lương ${LEVELS[c.lv].n}`,payBase(c)]);
     rows.push([k>=0?`Thưởng KPI (${k} × ${vnd(KPI_RATE)})`:`Trừ KPI (${k} điểm × ${vnd(KPI_RATE)})`,k*KPI_RATE]);
     if(c.otMonth)rows.push([`Tăng ca (${c.otMonth} buổi × ${vnd(OT_RATE)})`,c.otMonth*OT_RATE]);}
@@ -3489,7 +3509,7 @@ function run(name,c,arg){
 
 /* ================= v5: trà sữa, sự cố, sếp tổng, tất niên, minigame, giao file ================= */
 const EV={inc:null,boss:false,yep:false,boba:false,quiz:null,nextRand:150,lastBoss:-999,rand:true};
-const evBusy=()=>!!(EV.inc||EV.boss||EV.yep||EV.boba||(EV.quiz&&EV.quiz.on));
+const evBusy=()=>!!(EV.inc||EV.boss||EV.yep||EV.boba||EV.trip||(EV.quiz&&EV.quiz.on));
 const freeEmp=()=>CHARS.filter(c=>!c.busy&&!c.away&&!c.homeAfter&&!c.leavingNow);
 const present=()=>CHARS.filter(c=>!c.away&&!c.leavingNow);
 const isHuman=c=>!!(c&&(c.id===ME.id||c.claimName));
@@ -3500,7 +3520,7 @@ function bannerOff(){evBan.className='evban';}
 // seeded random (same result on every machine)
 function srand(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
 const hashStr=s=>{let h=2166136261;for(const ch of String(s))h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0;};
-Object.assign(KPI_PTS,{fix:8,bossok:5,bossbad:-8,bossmess:-5,bossdirty:-3});Object.assign(KPI_WHY,{fix:'Xử lý sự cố',bossok:'Sếp tổng khen',bossbad:'Sếp tổng bắt lười',bossmess:'Bàn bừa bộn khi sếp tổng ghé',bossdirty:'Văn phòng còn rác khi sếp tổng ghé'});
+Object.assign(KPI_PTS,{fix:8,bossok:5,bossbad:-8,bossmess:-5,bossdirty:-3,mgrteamok:10,mgrteambad:-5,mgrnosorry:-10});Object.assign(KPI_WHY,{mgrteamok:'Team được sếp tổng khen',mgrteambad:'Team bị sếp tổng nhắc nhở',mgrnosorry:'Không xin lỗi sếp tổng'});Object.assign(KPI_WHY,{fix:'Xử lý sự cố',bossok:'Sếp tổng khen',bossbad:'Sếp tổng bắt lười',bossmess:'Bàn bừa bộn khi sếp tổng ghé',bossdirty:'Văn phòng còn rác khi sếp tổng ghé'});
 
 /* ---- khách (shipper, sếp tổng): nhân vật chibi riêng, không chọn được ---- */
 const VISITORS=[];
@@ -3693,7 +3713,7 @@ async function actFix(c){
   setStatus(`✅ ${c.name} đã xử lý xong sự cố “${D.t.replace('!','')}” — được cộng ${KPI_PTS.fix} KPI!`);
   await c.say(pick(['Xong rồi nè! ✨','Ổn hết rồi mọi người ơi! 👌','Sự cố đã được dập tắt! 🚒']),1.8);
   const others=present().filter(o=>o!==c&&!o.busy);if(others.length){const o=pick(others);o.lookAt=c;await o.say(pick(['Đỉnh quá! 👏','Cảm ơn nha, cứu cả team luôn! 🙏','Siêu nhân văn phòng đây rồi! 🦸']),1.8);o.lookAt=null;}
-  if(!c.manager)kpiEvent(c,'fix');
+  kpiEvent(c,'fix');
   await c.goSit(c.home);end(c,'working');
 }
 function runFix(c){
@@ -3738,7 +3758,7 @@ async function actBoss(){
         text=r>=0?opts[r%opts.length]:null;}
       if(text){setStatus(`🙇‍♀️ ${MGR.name} cúi đầu xin lỗi sếp tổng thay cả team.`);await MGR.say(text,2.8);MGR.gesture('bow',1.8);await wait(1.2);
         await B.say(pick(['Lần sau anh không muốn thấy nữa đâu nhé!','Ừ, nhớ chấn chỉnh ngay đấy!','Được, anh cho cơ hội sửa sai!']),2);}
-      else{setStatus(`😠 ${MGR.name} không xin lỗi sếp tổng!`);B.gesture('think',1.6);await B.say(`${MGR.name} không nói gì à?! Quản lý mà để team thế này, anh sẽ ghi nhận đấy! 😠`,3);}
+      else{setStatus(`😠 ${MGR.name} không xin lỗi sếp tổng! Quản lý bị trừ ${-KPI_PTS.mgrnosorry} KPI.`);B.gesture('think',1.6);await B.say(`${MGR.name} không nói gì à?! Quản lý mà để team thế này, trừ ${-KPI_PTS.mgrnosorry} KPI! 😠`,3);addKpi(MGR,KPI_PTS.mgrnosorry,KPI_WHY.mgrnosorry);}
       MGR.lookAt=null;B.lookAt=null;};
     const emps=EMP.filter(c=>!c.away).sort((a,b)=>b.home.x-a.home.x||b.home.z-a.home.z);
     for(const e of emps){
@@ -3770,6 +3790,7 @@ async function actBoss(){
     const all=bad===0;
     await B.say(all?'Cả team làm việc tốt lắm! Cuối tháng anh duyệt thưởng thêm nhé! 💰':`Phần lớn làm tốt, nhưng ${bad} lỗi cần chấn chỉnh nha. Cố lên cả team! 💪`,3);
     if(!all&&!sorry)await mgrSorry('Dạ em xin lỗi anh, là em quản lý chưa tốt. Em sẽ chấn chỉnh lại team ngay ạ 🙇‍♀️');
+    if(!MGR.away){if(all&&good){addKpi(MGR,KPI_PTS.mgrteamok,KPI_WHY.mgrteamok);MGR.think('🥺',1.6);}else if(!all)addKpi(MGR,KPI_PTS.mgrteambad,KPI_WHY.mgrteambad);}
     if(all&&good)present().forEach(c=>{if(!c.busy||c.atHome())c.gesture('cheer',1.6);});
     setStatus(all?`👨‍💼 Sếp tổng rất hài lòng: ${good} người được khen, không ai bị bắt lười!`:`👨‍💼 Sếp tổng kiểm tra xong: ${good} người được khen, ${bad} người bị trừ KPI.`);
     if(mgrFree){await MGR.say('Dạ em cảm ơn anh, em tiễn anh ạ!',1.8);}
@@ -3964,9 +3985,9 @@ function quizTick(){const Q=EV.quiz;if(!Q||!Q.on)return;const now=Date.now(),el=
 function rankOf(Q){return Q.players.slice().sort((a,b)=>Q.score[b.id]-Q.score[a.id]);}
 function quizEnd(){const Q=EV.quiz;Q.on=false;Q.phase='end';const rk=rankOf(Q);renderQuiz();
   const bonus=[20,10,5];let k=0;
-  rk.forEach(c=>{if(k<3&&Q.score[c.id]>0&&!c.manager){addKpi(c,bonus[k],`🎮 Minigame: hạng ${k+1}`);}if(Q.score[c.id]>0)k++;});
+  rk.forEach(c=>{if(k<3&&Q.score[c.id]>0){addKpi(c,bonus[k],`🎮 Minigame: hạng ${k+1}`);}if(Q.score[c.id]>0)k++;});
   const w=rk[0];
-  if(w&&Q.score[w.id]>0){setStatus(`🏆 ${w.name} vô địch minigame với ${Q.score[w.id]} điểm!${w.manager?'':' +20 KPI'}`);confetti(w.pos.x,2,w.pos.z,80);w.gesture('jump',2.2);w.say(pick(['Yeah! Vô địch rồi! 🏆','Ai chơi lại không? 😎','Kiến thức là sức mạnh! 💪']),2.4);
+  if(w&&Q.score[w.id]>0){setStatus(`🏆 ${w.name} vô địch minigame với ${Q.score[w.id]} điểm! +20 KPI`);confetti(w.pos.x,2,w.pos.z,80);w.gesture('jump',2.2);w.say(pick(['Yeah! Vô địch rồi! 🏆','Ai chơi lại không? 😎','Kiến thức là sức mạnh! 💪']),2.4);
     rk.slice(1).forEach((c,i)=>wait(.6+i*.4).then(()=>c.think(pick(['👏','😆','😅']),1.6)));}
   else setStatus('🎮 Minigame kết thúc — chưa ai ghi điểm, chơi lại nhé!');
   setTimeout(()=>{if(EV.quiz===Q&&!Q.on)qzHide();},14000);}
@@ -4001,7 +4022,7 @@ function prHide(){prEl.classList.remove('show');stage.classList.remove('pop-on')
 prEl.onclick=prHide;
 
 /* ================= lời mời tham gia hoạt động cả nhóm (khi có người chơi khác) ================= */
-const CONSENT={meeting:'🤝 Họp nhóm',lunch:'🍱 Ăn trưa',dance:'💃 Nhảy xả stress',break:'☕ Giải lao',birthday:'🎂 Tiệc sinh nhật',siestaall:'🛏️ Ngủ trưa',yep:'🎊 Tiệc tất niên'};
+const CONSENT={trip:'🚌 Team building',meeting:'🤝 Họp nhóm',lunch:'🍱 Ăn trưa',dance:'💃 Nhảy xả stress',break:'☕ Giải lao',birthday:'🎂 Tiệc sinh nhật',siestaall:'🛏️ Ngủ trưa',yep:'🎊 Tiệc tất niên'};
 const GRP_WAIT=15000;let GRP_REQ=null,GRP_ASKED=null,IN_GRPGO=false,evRun=null;
 const gaEl=$('#grpAsk');let gaTimer=0;
 // tạm coi người không tham gia là "vắng" trong lúc hoạt động chọn người, rồi trả lại như cũ
@@ -4070,7 +4091,7 @@ const RET_RE=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/;
 {const o=end;end=(c,mode)=>{if(c._skipEnds>0){c._skipEnds--;return;}o(c,mode);};}
 
 /* ================= lệnh & đồng bộ ================= */
-const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
+const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
 {const o=run;run=evRun=(n,c,a)=>{
   const v=a&&typeof a.v==='string'?a.v:'';
   if(n==='grpask')return v?grpAsk(v):false;
@@ -4091,6 +4112,9 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
   if(n==='quizans'){if(!c||!v)return false;const [qi,op,t]=v.split(':').map(Number);quizAnswer(c.id,qi,op,t);return true;}
   if(n==='fix')return runFix(c);
   if(n==='flowers')return runFlowers(c,v);
+  if(n==='partner')return runPartner(c,v);
+  if(n==='trip'){if(EV.trip){setStatus('🚌 Cả team đang đi team building rồi!');return false;}if(EV.yep||EV.boss||danceRunning){setStatus('⏳ Đợi xong hoạt động hiện tại rồi đi team building nhé!');return false;}
+    if(!v)return false;guard(()=>actTrip(v),[]);return true;}
   if(n==='quiz'){if(!v)return false;return quizStart(v);}
   if(n==='incident'){if(!v)return false;return incStart(v);}
   if(n==='boba'){if(EV.boba){setStatus('🥤 Trà sữa đang được giao rồi!');return false;}if(!v)return false;guard(()=>actBoba(v),[]);return true;}
@@ -4100,7 +4124,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz'];
     if(freeEmp().length<3){setStatus('⏳ Cần ít nhất 3 người rảnh để mở tiệc tất niên.');return false;}if(!v)return false;guard(()=>actYep(v),[]);return true;}
   return o(n,c,a);};}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),flowers:()=>openFlowers()};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
@@ -4208,19 +4232,88 @@ $('#flGo').onclick=()=>{const c=byId(flEl.dataset.c);if(!c||!flPick.s)return;flE
 
 /* ================= 9. Bảng KPI cả team (tab Mọi người) ================= */
 const kbEl=$('#kpiBoard');let kbKey='';
-function renderBoard(){if(!kbEl)return;const emp=EMP.slice().sort((a,b)=>(b.kpi||0)-(a.kpi||0));
-  const key=emp.map(c=>c.id+(c.kpi||0)+c.lv+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
+function renderBoard(){if(!kbEl)return;const emp=CHARS.slice().sort((a,b)=>(b.kpi||0)-(a.kpi||0));
+  const key=emp.map(c=>c.id+(c.kpi||0)+(c.lv||0)+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
   const tot=emp.reduce((s,c)=>s+(c.kpi||0),0);kbEl.textContent='';
   const h=document.createElement('div');h.className='kbh';const t=document.createElement('b');t.textContent='🏆 Bảng KPI cả team';const sm=document.createElement('span');sm.textContent=`Tổng: ${tot} KPI`;h.append(t,sm);kbEl.appendChild(h);
   const max=Math.max(1,...emp.map(c=>Math.abs(c.kpi||0)));
   emp.forEach((c,i)=>{const r=document.createElement('div');r.className='kbr'+(c.id===ME.id?' me':'');
     const rk=document.createElement('span');rk.className='kbk';rk.textContent=['🥇','🥈','🥉'][i]||String(i+1);
     const av=document.createElement('span');av.className='av3';setAvatar(av,c);
-    const mid=document.createElement('div');mid.className='kbm';const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');const lv=document.createElement('small');lv.textContent=LEVELS[c.lv].e+' '+LEVELS[c.lv].n+(c.away?' · vắng':'');
+    const mid=document.createElement('div');mid.className='kbm';const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');const lv=document.createElement('small');lv.textContent=(c.manager?'⭐ Quản lý':LEVELS[c.lv].e+' '+LEVELS[c.lv].n)+(c.away?' · vắng':'');
     const bar=document.createElement('i');const fill=document.createElement('u');fill.style.width=Math.max(4,Math.abs(c.kpi||0)/max*100)+'%';if((c.kpi||0)<0)fill.className='neg';bar.appendChild(fill);mid.append(nm,lv,bar);
     const v=document.createElement('span');v.className='kbv'+((c.kpi||0)<0?' neg':'');v.textContent=(c.kpi||0)+' KPI';
     r.append(rk,av,mid,v);r.onclick=()=>select(c);kbEl.appendChild(r);});}
 {const o=refreshCards;refreshCards=()=>{o();try{renderBoard();}catch(e){}};}
+
+/* ================= 10. Ra ngoài văn phòng: gặp đối tác, team building ================= */
+KPI_PTS.partner=15;KPI_PTS.partnertry=6;KPI_PTS.trip=10;Object.assign(KPI_WHY,{partner:'Ký hợp đồng với đối tác',partnertry:'Đi gặp đối tác',trip:'Team building gắn kết'});
+function outSign(c,text){const tx=c.awaySp.material.map,{canvas:cv,ctx:x}=tx.userData,W=cv.width,H=cv.height;x.clearRect(0,0,W,H);
+  x.fillStyle='#fff8e6';rr(x,4,4,W-8,H-8,(H-8)/2);x.fill();x.lineWidth=4;x.strokeStyle='#f5c56b';x.stroke();
+  x.fillStyle='#8a6420';x.textAlign='center';x.textBaseline='middle';x.font=`700 30px ${FONT}`;x.fillText(text,W/2,H/2+2);tx.needsUpdate=true;
+  c.awaySp.position.set(c.home.x,1.38,c.home.z);c.awaySp.visible=true;}
+async function goOut(c,sign){c.pack.visible=true;setAct(c,'🚶 Ra cửa');await c.goStand(EXIT.in);c.yaw=PI/2;await doorIn();
+  c.arms='wave';await walkDirect(c,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();c.arms='idle';c.root.visible=false;c.outside=true;if(selected===c)ring.visible=false;outSign(c,sign);screensOn(c,false);}
+async function comeBack(c){c.awaySp.visible=false;c.pos.set(EXIT.out.x,0,EXIT.out.z);c.pose='stand';c.seat=null;c.cur.rootY=0;c.yaw=-PI/2;c.root.visible=true;
+  await doorIn();await walkDirect(c,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();c.outside=false;c.pack.visible=false;screensOn(c,true);}
+
+/* ---- gặp đối tác ---- */
+const PARTNERS=['Công ty Bánh Mì Vui Vẻ','Tập đoàn Trà Sữa Mây Hồng','Startup Mèo Ú','Công ty In Ấn Sao Mai','Chuỗi Cà Phê Gác Mái','Công ty Du Lịch Mây Trắng'];
+async function actPartner(c,v){
+  const [ok,pi]=String(v||'1:0').split(':').map(Number),P=PARTNERS[(pi|0)%PARTNERS.length];
+  begin(c,'💼 Chuẩn bị đi gặp đối tác');setStatus(`💼 ${c.name} chuẩn bị tài liệu đi gặp ${P}.`);
+  await c.goSit(c.home);c.arms='type';c.think('📂',1.4);await wait(1.2);c.standUp();c.doc.visible=true;c.arms='hold';
+  await c.say(pick([`Em đi gặp ${P} nha, chiều em về! 💼`,`Đi chốt hợp đồng với ${P} đây, chúc mình may mắn! 🍀`,`Mình ra ngoài gặp đối tác chút nhé 🚕`]),2.2);
+  c.doc.visible=false;c.arms='idle';await goOut(c,'💼 Đi gặp đối tác');
+  setAct(c,`💼 Đang họp với ${P} ở ngoài`);setStatus(`🚕 ${c.name} đã ra ngoài gặp ${P} — bàn có biển “Đi gặp đối tác”.`);
+  const others=present().filter(o=>o!==c&&!o.busy&&!o.outside);if(others.length)wait(2).then(()=>{const o=pick(others);o.think('💼',1.6);o.say(pick(['Chúc chốt deal thành công nha! 🍀','Nhớ mua bánh về nha! 🥐']),1.8);});
+  await wait(40);
+  setAct(c,'🚶 Về văn phòng');await comeBack(c);c.doc.visible=true;c.arms='hold';
+  if(ok){c.gesture('cheer',2);c.think('🎉',1.8);confetti(c.pos.x,1.8,c.pos.z,50);setStatus(`🎉 ${c.name} ký được hợp đồng với ${P}! +${KPI_PTS.partner} KPI`);
+    await c.say(pick(['Ký được hợp đồng rồi cả nhà ơi! 🎉','Chốt deal thành công! Tối nay ăn mừng nha 🥳']),2.4);addKpi(c,KPI_PTS.partner,KPI_WHY.partner+': '+P);
+    if(!MGR.away&&MGR!==c){MGR.lookAt=c;MGR.say(`Giỏi quá ${c.name}! Hợp đồng này lớn đó 👏`,2.2).then(()=>{if(MGR.lookAt===c)MGR.lookAt=null;});}}
+  else{c.think('😅',1.8);setStatus(`📅 ${P} hẹn ${c.name} gặp lại lần sau. +${KPI_PTS.partnertry} KPI vì đã cố gắng.`);
+    await c.say(pick(['Đối tác hẹn tuần sau bàn tiếp 😅','Chưa chốt được, nhưng họ rất quan tâm! Lần sau nhất định 💪']),2.4);addKpi(c,KPI_PTS.partnertry,KPI_WHY.partnertry+': '+P);}
+  c.doc.visible=false;c.arms='idle';setAct(c,'🚶 Quay về chỗ');await c.goSit(c.home);end(c,'working');}
+function runPartner(c,v){if(!c){setStatus('👆 Chọn một người (hoặc nhân vật của bạn) để đi gặp đối tác nhé.');return false;}
+  if(c.away){setStatus(awayMsg(c));return false;}if(c.busy){busyMsg(c);return false;}
+  guard(()=>actPartner(c,v||'1:0'),[c]);return true;}
+const makePartner=()=>(Math.random()<.65?1:0)+':'+Math.floor(Math.random()*PARTNERS.length);
+
+/* ---- team building ---- */
+const TRIP_DEST=[{n:'Đà Lạt',e:'🌲'},{n:'Vũng Tàu',e:'🏖️'},{n:'Phú Quốc',e:'🏝️'},{n:'Sa Pa',e:'🏔️'},{n:'Hội An',e:'🏮'},{n:'Nha Trang',e:'🌊'}];
+const TRIP_STEPS=[['🚌','Lên xe xuất phát','Đi thôi cả nhà ơi! {d} thẳng tiến! 🚌'],['🎤','Hát karaoke trên xe','Mic đâu, để mình hát một bài! 🎤'],['🏨','Nhận phòng khách sạn','Phòng view đẹp quá trời luôn! 😍'],
+  ['🏃','Trò chơi kéo co','Kéo mạnh lên! Đội mình thắng chắc! 💪'],['🍖','Tiệc BBQ buổi tối','Thịt nướng thơm quá, cho mình xiên nữa! 🍢'],['🔥','Đốt lửa trại','Năm sau mình lại đi chung nha! 🥰'],
+  ['📸','Chụp ảnh kỷ niệm','Mọi người cười lên nào! 1, 2, 3… 📸'],['🛍️','Mua quà về cho Mochi','Mua cá khô cho Mochi nữa nè 🐟'],['🚌','Lên xe về văn phòng','Vui quá mà hết nhanh ghê 😅']];
+const tcEl=$('#tripCard');let TRIP_ON=false;
+function tripRender(dest,i,line,ppl){$('#tcT').textContent=`${dest.e} Team building · ${dest.n}`;const L=$('#tcL');L.textContent='';
+  TRIP_STEPS.forEach((s,k)=>{const r=document.createElement('div');r.className='tcs'+(k<i?' done':k===i?' on':'');r.textContent=`${k<i?'✅':s[0]} ${s[1]}`;L.appendChild(r);});
+  $('#tcQ').textContent=line||'';const P=$('#tcP');P.textContent='';if(i===6||i>=TRIP_STEPS.length){ppl.forEach(c=>{const a=document.createElement('span');a.className='av3';setAvatar(a,c);P.appendChild(a);});}
+  tcEl.classList.add('show');stage.classList.add('card-on');}
+function tripOff(){tcEl.classList.remove('show');stage.classList.remove('card-on');}
+async function actTrip(v){
+  const dest=TRIP_DEST[(parseInt(v,10)||0)%TRIP_DEST.length];
+  const ppl=present().filter(c=>!c.busy&&!c.outside);if(ppl.length<2){setStatus('🚌 Cần ít nhất 2 người rảnh để đi team building.');return;}
+  EV.trip=true;TRIP_ON=true;ppl.forEach(c=>begin(c,`🚌 Đi team building ${dest.n}`));
+  const host=ppl.includes(MGR)?MGR:ppl[0];
+  try{
+    banner('🚌',`Team building · ${dest.n} ${dest.e}`,'Cả team xách balo lên đường!',null,'yep');setStatus(`🚌 Cả team đi team building ở ${dest.n}! Văn phòng tạm vắng, chỉ còn Mochi ở nhà.`);
+    ppl.forEach(c=>{c.pack.visible=true;});await host.say(`Xách balo lên, mình đi ${dest.n} thôi cả nhà! ${dest.e}`,2.4);
+    await Promise.all(ppl.map((c,i)=>wait(i*.9).then(()=>goOut(c,`🚌 Team building · ${dest.n}`))));bannerOff();
+    if(!CAT.hold){catSay('Meo… mọi người đi đâu hết vậy? 😿',2.4);}
+    for(let i=0;i<TRIP_STEPS.length;i++){const s=TRIP_STEPS[i],who=pick(ppl);tripRender(dest,i,`${who.name}: “${s[2].replace('{d}',dest.n)}”`,ppl);setStatus(`${s[0]} Team building ${dest.n}: ${s[1]}`);await wait(4.5);}
+    tripRender(dest,TRIP_STEPS.length,`📸 Ảnh kỷ niệm cả team tại ${dest.n} — mỗi người +${KPI_PTS.trip} KPI tinh thần đồng đội!`,ppl);await wait(3);tripOff();
+    await Promise.all(ppl.map((c,i)=>wait(i*.9).then(async()=>{await comeBack(c);c.say(pick(['Về rồi đây! 😆','Nhớ văn phòng ghê 🥰','Mệt mà vui quá! 😴']),1.8);addKpi(c,KPI_PTS.trip,`${KPI_WHY.trip} · ${dest.n}`);})));
+    if(!CAT.hold){catGo(EXIT.in.x-1.2,EXIT.in.z+.3);catSay('Meo meo! Quà của Mochi đâu? 😻',2.4);}
+    setStatus(`🎉 Cả team đi ${dest.n} về rồi! Ai cũng được +${KPI_PTS.trip} KPI, Mochi được cá khô 🐟`);
+  }finally{EV.trip=false;TRIP_ON=false;tripOff();bannerOff();ppl.forEach(c=>{if(c.outside){c.root.visible=true;c.outside=false;c.awaySp.visible=false;c.pack.visible=false;screensOn(c,true);}});}
+  ppl.forEach(c=>setAct(c,'🚶 Quay về chỗ'));await Promise.all(ppl.map(async c=>{await c.goSit(c.home);end(c,'working');}));}
+const trEl=$('#tripModal');let trPick=0;
+function openTrip(){if(EV.trip){setStatus('🚌 Cả team đang đi team building rồi!');return;}const box=$('#trDest');box.textContent='';
+  TRIP_DEST.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className=i===trPick?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=d.e;const n=document.createElement('span');n.textContent=d.n;b.append(e,n);b.onclick=()=>{trPick=i;openTrip();};box.appendChild(b);});
+  trEl.classList.add('show');}
+$('#trCancel').onclick=()=>trEl.classList.remove('show');
+$('#trGo').onclick=()=>{trEl.classList.remove('show');run('trip',null,{v:String(trPick)});};
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -4409,7 +4502,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null;
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   MY_ACT={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
@@ -4599,7 +4692,7 @@ const whoOf=c=>c.id===ME.id?'🎭 Đây là bạn':c.claimName?'🟢 Có ngườ
 let hdrKey='';
 function refreshCards(){if(!uiReady)return;CHARS.forEach(c=>{const el=c.card;el.classList.toggle('sel',c===selected);el.classList.toggle('busy',c.busy);
   setAvatar(el.querySelector('.cav'),c);el.querySelector('.cname').textContent=c.name;
-  el.querySelector('.crole').textContent=(c.claimName?c.slot+' · ':'')+roleOf(c)+(c.manager?'':' · '+c.kpi+' KPI');
+  el.querySelector('.crole').textContent=(c.claimName?c.slot+' · ':'')+roleOf(c)+' · '+(c.kpi||0)+' KPI';
   el.querySelector('.cact').textContent=c.activity;el.querySelector('.cloc').textContent='📍 '+zoneOf(c.pos.x,c.pos.z);el.querySelector('.cwho').textContent=whoOf(c);});
   const free=CHARS.filter(c=>!c.busy).length,k=free+'|'+ME.id+'|'+ME.name;
   if(k!==hdrKey){hdrKey=k;hdrStats.textContent='';
@@ -4726,7 +4819,7 @@ function openRules(){
     const sm=document.createElement('small');sm.textContent=(i?`từ ${L.need} KPI`:'khởi đầu')+` · lương ${pay[i]||''}`;r.append(e,n,sm);box.appendChild(r);});
   const me=$('#rMe');
   if(!c)me.textContent='🎭 Chọn nhân vật để bắt đầu tích KPI và lên cấp!';
-  else if(c.manager)me.textContent=`⭐ Bạn là Quản lý (${c.name}) — người giao nhiệm vụ, khen thưởng và trừ KPI của cả team.`;
+  else if(c.manager)me.textContent=`⭐ Bạn là Quản lý (${c.name}) — có KPI riêng: làm việc, chủ trì họp, nhiệm vụ ngày, team được sếp tổng khen thì cộng; team phạm lỗi thì quản lý bị trừ.`;
   else{const nx=LEVELS[c.lv+1];me.textContent=`🙋 ${c.name}: bạn đang là ${LEVELS[c.lv].e} ${LEVELS[c.lv].n} (cấp ${c.lv+1}) với ${c.kpi} KPI.`+(nx?` Cần thêm ${Math.max(0,nx.need-c.kpi)} KPI để lên ${nx.e} ${nx.n}.`:' Bạn đã ở cấp cao nhất! 👑');}
   $('#rulesModal').classList.add('show');}
 let customNext=false;
