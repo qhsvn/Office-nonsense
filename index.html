@@ -711,6 +711,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="wcard ccard">
     <div class="cprev"><span class="av3" id="cAv"></span><div style="text-align:left;min-width:0"><h2 id="cTitle">🎨 Tùy chỉnh ngoại hình</h2><div class="csub" id="cSub"></div></div></div>
     <div class="wstep">Giới tính</div><div class="copts" id="cGender"></div>
+    <div class="wstep">Trang phục</div><div class="copts" id="cBottom"></div>
     <div class="wstep">Kiểu tóc</div><div class="copts" id="cHair"></div>
     <div class="wstep">Màu tóc</div><div class="sw" id="cHairC"></div>
     <div class="wstep" id="cShirtT">Màu áo</div><div class="sw" id="cShirt"></div>
@@ -1555,7 +1556,11 @@ class Chibi{
     if(!this.manager){const tm=soft(cfg.tagColor||'#ff8fb8',{roughness:.5});bx(.036,.12,.012,tm,0,.212,.142,MG);sph(.022,tm,0,.28,.128,MG,8,6);}hem.rotation.x=PI/2;hem.castShadow=false;
     cyl(.045,.05,.06,SKIN,0,.34,0,B,14);
     {const OG=this.officeG=new THREE.Group();B.add(OG);
-      cyl(.152,.168,.2,this.mSkirt,0,-.005,0,OG,28);cyl(.155,.155,.026,soft('#3a3030',{roughness:.5}),0,.085,0,OG,28);bx(.03,.022,.012,mat('#d9dee8',{metalness:.5,roughness:.3}),0,.085,.156,OG).castShadow=false;
+      const TG=this.trTopG=new THREE.Group();OG.add(TG);
+      cyl(.152,.168,.2,this.mSkirt,0,-.005,0,TG,28);cyl(.155,.155,.026,soft('#3a3030',{roughness:.5}),0,.085,0,TG,28);bx(.03,.022,.012,mat('#d9dee8',{metalness:.5,roughness:.3}),0,.085,.156,TG).castShadow=false;
+      const KG=this.skirtG=new THREE.Group();OG.add(KG);KG.visible=false;
+      cyl(.148,.262,.23,this.mSkirt,0,-.025,0,KG,32);cyl(.151,.151,.032,this.mSkirt,0,.085,0,KG,28);
+      {const pm=mat('#000000',{transparent:true,opacity:.16,roughness:1});for(let i=0;i<18;i++){const pg=new THREE.Group();pg.rotation.y=i/18*TAU;KG.add(pg);const b=bx(.007,.232,.004,pm,0,-.025,.207,pg);b.rotation.x=-.46;b.castShadow=false;}}
       const colM=this.manager?soft('#ffffff'):this.mShirt;
       for(const s of [1,-1]){const cl=bx(.07,.05,.014,colM,s*.04,.322,.108,OG);cl.rotation.set(-.55,s*.35,s*.55);cl.castShadow=false;}
       const lan=mat('#2f5fb3',{roughness:.5});
@@ -1643,7 +1648,7 @@ class Chibi{
     this.bdgEl=document.createElement('div');this.bdgEl.className='bdg';
     this.tagEl.append(this.bubEl,this.nameEl,this.bdgEl);overlay.appendChild(this.tagEl);
   }
-  applyGender(){if(this.watchG)this.watchG.visible=this.gender==='m';this.femG.visible=false;this.maleG.visible=false;this.sb.forEach(o=>o.visible=false);this.mLeg.color.set('#'+this.mSkirt.color.getHexString());this.mLeg.emissive.copy(this.mLeg.color);}
+  applyGender(){if(this.watchG)this.watchG.visible=this.gender==='m';const sk=this.bottom==='skirt';if(this.skirtG){this.skirtG.visible=sk;this.trTopG.visible=!sk;(this.trLegs||[]).forEach(l=>l.visible=!sk);}this.femG.visible=false;this.maleG.visible=false;this.sb.forEach(o=>o.visible=false);this.mLeg.color.set(this.bottom==='skirt'?'#fde0d1':'#'+this.mSkirt.color.getHexString());this.mLeg.emissive.copy(this.mLeg.color);}
   buildGlasses(g,color,rect){
     const m=mat(color,{roughness:.4});
     for(const s of [1,-1]){
@@ -1706,7 +1711,7 @@ class Chibi{
   }
   colorHex(){return '#'+(this.manager?this.mVest:this.mShirt).color.getHexString();}
   accOptions(){return (this.gender==='m'?['none','roundGlasses','headband','earrings']:ACCS.concat(['glassPearl'])).filter(a=>!(this.manager&&(a==='roundGlasses'||a==='glassPearl')));}
-  look(){return{hair:this.hairStyle,hairColor:'#'+this.mHair.color.getHexString(),shirt:this.colorHex(),skirt:'#'+this.mSkirt.color.getHexString(),acc:this.acc,accColor:this.accColor||'',gender:this.gender||'f',of:1};}
+  look(){return{hair:this.hairStyle,hairColor:'#'+this.mHair.color.getHexString(),shirt:this.colorHex(),skirt:'#'+this.mSkirt.color.getHexString(),acc:this.acc,accColor:this.accColor||'',gender:this.gender||'f',bt:this.bottom==='skirt'?'skirt':'pants',of:1};}
   applyLook(L){
     if(!L||typeof L!=='object')return false;
     const hex=v=>typeof v==='string'&&/^#[0-9a-fA-F]{6}$/.test(v),setM=(m,v)=>{m.color.set(v);m.emissive.copy(m.color);};
@@ -1716,6 +1721,7 @@ class Chibi{
     if(hex(L.hairColor))setM(this.mHair,L.hairColor);
     if(hex(L.shirt)&&L.of===1)setM(this.manager?this.mVest:this.mShirt,L.shirt);
     if(hex(L.skirt)&&L.of===1)setM(this.mSkirt,L.skirt);
+    if(L.of===1&&(L.bt==='skirt'||L.bt==='pants'))this.bottom=L.bt;
     if(this.accOptions().includes(L.acc)&&L.acc!==this.acc){this.acc=L.acc;acc=true;}
     if(hex(L.accColor)&&L.accColor!==this.accColor){this.accColor=L.accColor;acc=true;}
     if(!stylesOf(this).includes(this.hairStyle)){this.hairStyle=stylesOf(this)[0];hair=true;}
@@ -1833,8 +1839,8 @@ class Chibi{
 
 const PEOPLE=[
   {id:'thanh',slot:'Quản lý',manager:true,hairStyle:'bob',hairColor:'#2f2328',shirt:'#ffffff',vest:'#8e86c9',skirt:'#2a2f45',acc:'earrings',accColor:'#ffd45e'},
-  {id:'lieu',slot:'Nhân viên 1',hairStyle:'lowtail',hairColor:'#4a1424',eyeColor:'#5b3a2e',shirt:'#ffffff',skirt:'#262b3a',acc:'glassPearl',accColor:'#fff6ee',necklace:true,bracelet:true,tagColor:'#ff8fb8'},
-  {id:'nhung',slot:'Nhân viên 2',hairStyle:'ponytail',hairColor:'#6b3e2e',shirt:'#ffffff',skirt:'#3a4256',acc:'bow',accColor:'#ff6f9f',tagColor:'#f7b955'},
+  {id:'lieu',slot:'Nhân viên 1',hairStyle:'lowtail',hairColor:'#4a1424',eyeColor:'#5b3a2e',shirt:'#ffffff',skirt:'#262b3a',bottom:'skirt',acc:'glassPearl',accColor:'#fff6ee',necklace:true,bracelet:true,tagColor:'#ff8fb8'},
+  {id:'nhung',slot:'Nhân viên 2',hairStyle:'ponytail',hairColor:'#6b3e2e',shirt:'#ffffff',skirt:'#1f2a44',bottom:'skirt',acc:'bow',accColor:'#ff6f9f',tagColor:'#f7b955'},
   {id:'an',slot:'Nhân viên 3',gender:'m',hairStyle:'fluffy',hairColor:'#3a2620',shirt:'#ffffff',skirt:'#1f222c',acc:'roundGlasses',accColor:'#2a2a33',tagColor:'#3f8be0'},
   {id:'linh',slot:'Nhân viên 4',hairStyle:'topbun',hairColor:'#5b3427',shirt:'#ffffff',skirt:'#1f222c',acc:'roundGlasses',accColor:'#2a2a33',tagColor:'#a996ff'},
 ];
@@ -4648,7 +4654,8 @@ function renderCustom(){
   swatches($('#cHairC'),HAIR_COLORS,L.hairColor,v=>set({hairColor:v}));
   $('#cShirtT').textContent=c.manager?'Màu áo vest':'Màu áo';
   swatches($('#cShirt'),c.manager?VESTS.concat(['#5a5f7a','#d9a1b8']):SHIRTS,L.shirt,v=>set({shirt:v}));
-  $('#cSkirtT').textContent='Màu quần';
+  chips($('#cBottom'),['pants','skirt'],L.bt||'pants',{pants:'👖 Quần âu',skirt:'👗 Chân váy'},v=>set({bt:v}));
+  $('#cSkirtT').textContent=L.bt==='skirt'?'Màu chân váy':'Màu quần';
   swatches($('#cSkirt'),PANTS,L.skirt,v=>set({skirt:v}));
   chips($('#cAcc'),c.accOptions(),L.acc,ACC_LABEL,v=>set({acc:v}));
   const noAccColor=L.acc==='none'||L.acc==='glassPearl';$('#cAccCT').style.display=$('#cAccC').style.display=noAccColor?'none':'';
