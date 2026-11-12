@@ -4276,18 +4276,21 @@ $('#flGo').onclick=()=>{const c=byId(flEl.dataset.c);if(!c||!flPick.s)return;flE
 
 /* ================= 9. Bảng KPI cả team (tab Mọi người) ================= */
 const kbEl=$('#kpiBoard');let kbKey='';
-function renderBoard(){if(!kbEl)return;const emp=CHARS.slice().sort((a,b)=>(b.manager&&b.id!==ME.id?-1e9:(b.kpi||0))-(a.manager&&a.id!==ME.id?-1e9:(a.kpi||0)));
-  const key=(ME.id||'')+emp.map(c=>c.id+(c.kpi||0)+(c.lv||0)+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
-  const hideM=c=>c.manager&&c.id!==ME.id;const tot=emp.reduce((s,c)=>s+(hideM(c)?0:(c.kpi||0)),0);kbEl.textContent='';
-  const h=document.createElement('div');h.className='kbh';const t=document.createElement('b');t.textContent='🏆 Bảng KPI cả team';const sm=document.createElement('span');sm.textContent=`Tổng: ${tot} KPI`;h.append(t,sm);kbEl.appendChild(h);
+function renderBoard(){if(!kbEl)return;const emp=CHARS.filter(c=>!c.manager).sort((a,b)=>(b.kpi||0)-(a.kpi||0)),mgr=CHARS.find(c=>c.manager&&c.id===ME.id);   // quản lý không thi đua, chỉ chính quản lý thấy KPI của mình
+  const key=(ME.id||'')+emp.concat(mgr?[mgr]:[]).map(c=>c.id+(c.kpi||0)+(c.lv||0)+c.name+(c.away?1:0)).join('|');if(key===kbKey)return;kbKey=key;
+  const tot=emp.reduce((s,c)=>s+(c.kpi||0),0);kbEl.textContent='';
+  const h=document.createElement('div');h.className='kbh';const t=document.createElement('b');t.textContent='🏆 Bảng KPI nhân viên';const sm=document.createElement('span');sm.textContent=`Tổng: ${tot} KPI`;h.append(t,sm);kbEl.appendChild(h);
   const max=Math.max(1,...emp.map(c=>Math.abs(c.kpi||0)));
-  emp.forEach((c,i)=>{const r=document.createElement('div');r.className='kbr'+(c.id===ME.id?' me':'');
-    const rk=document.createElement('span');rk.className='kbk';rk.textContent=['🥇','🥈','🥉'][i]||String(i+1);
+  const row=(c,rkTxt,mx)=>{const r=document.createElement('div');r.className='kbr'+(c.id===ME.id?' me':'');
+    const rk=document.createElement('span');rk.className='kbk';rk.textContent=rkTxt;
     const av=document.createElement('span');av.className='av3';setAvatar(av,c);
-    const mid=document.createElement('div');mid.className='kbm';const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');const lv=document.createElement('small');lv.textContent=(c.manager?'⭐ Quản lý':LEVELS[c.lv].e+' '+LEVELS[c.lv].n)+(c.away?' · vắng':'');
-    const bar=document.createElement('i');const fill=document.createElement('u');fill.style.width=Math.max(4,Math.abs(c.kpi||0)/max*100)+'%';if((c.kpi||0)<0)fill.className='neg';bar.appendChild(fill);mid.append(nm,lv,bar);
-    if(hideM(c))bar.style.visibility='hidden';const v=document.createElement('span');v.className='kbv'+((c.kpi||0)<0&&!hideM(c)?' neg':'');v.textContent=hideM(c)?'🔒':(c.kpi||0)+' KPI';
-    r.append(rk,av,mid,v);r.onclick=()=>select(c);kbEl.appendChild(r);});}
+    const mid=document.createElement('div');mid.className='kbm';const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');const lv=document.createElement('small');lv.textContent=(c.manager?'⭐ Quản lý · chỉ bạn thấy 🔒':LEVELS[c.lv].e+' '+LEVELS[c.lv].n)+(c.away?' · vắng':'');
+    const bar=document.createElement('i');const fill=document.createElement('u');fill.style.width=Math.max(4,Math.min(100,Math.abs(c.kpi||0)/mx*100))+'%';if((c.kpi||0)<0)fill.className='neg';bar.appendChild(fill);mid.append(nm,lv,bar);
+    const v=document.createElement('span');v.className='kbv'+((c.kpi||0)<0?' neg':'');v.textContent=(c.kpi||0)+' KPI';
+    r.append(rk,av,mid,v);r.onclick=()=>select(c);return r;};
+  emp.forEach((c,i)=>kbEl.appendChild(row(c,['🥇','🥈','🥉'][i]||String(i+1),max)));
+  if(mgr){const hm=document.createElement('div');hm.className='kbh';hm.style.marginTop='10px';const tm=document.createElement('b');tm.textContent='⭐ KPI quản lý (không thi đua)';hm.appendChild(tm);kbEl.appendChild(hm);
+    kbEl.appendChild(row(mgr,'⭐',Math.max(1,Math.abs(mgr.kpi||0),max)));}}
 {const o=refreshCards;refreshCards=()=>{o();try{renderBoard();const rb=document.querySelector('[data-cmd=report]');if(rb){const t=selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)?'📋 Yêu cầu báo cáo':'📄 Báo cáo sếp';if(rb.textContent!==t)rb.textContent=t;}}catch(e){}};}
 
 /* ================= 10. Ra ngoài văn phòng: gặp đối tác, team building ================= */
