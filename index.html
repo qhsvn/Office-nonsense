@@ -5312,24 +5312,29 @@ window.OFFICE={hooks:[],say:(id,text)=>{const c=CHARS.find(x=>x.id===id);if(!c||
     NET.client.publish(netTopics().chat,JSON.stringify(m));netIngest(m);return{id:mid};}};}
   async function netConnect(){
     const gen=++NET.gen;
-    if(NET.client){try{NET.client.end(true);}catch(e){}NET.client=null;}
+    (NET.clients||[]).forEach(c=>{try{c.end(true);}catch(e){}});NET.clients=[];NET.client=null;
     clearTimeout(NET.retry);
     if(!NET.offline){NET.msgs=[];NET.knownMid=new Set();NET.peers=new Map();names={};setComposer(false);render([]);netRenderPeers();setNote('Đang kết nối…');}
     try{await loadMqtt();if(!window.mqtt)throw 0;}catch(e){goOffline(gen);return;}
     if(gen!==NET.gen)return;
-    const tp=netTopics(),url=BROKERS[NET.brokerIdx%BROKERS.length];
-    let c=null;try{c=mqtt.connect(url,{clientId:'lin-'+NET.cid+'-'+rnd(4),clean:true,reconnectPeriod:3000,connectTimeout:8000,will:{topic:tp.pres,payload:'',retain:true,qos:0}});}catch(e){c=null;}
-    if(!c){NET.fails++;NET.brokerIdx++;if(NET.fails>=BROKERS.length)goOffline(gen);else netConnect();return;}
-    NET.client=c;let ok=false;
-    c.on('connect',()=>{if(gen!==NET.gen)return;ok=true;NET.fails=0;clearTimeout(NET.retry);if(NET.offline){NET.offline=false;NET.peers=new Map();}c.subscribe([tp.chat,tp.presAll]);netPresence();
-      netRenderPeers();setComposer(true);setNote('🟢 Đã kết nối · Phòng “'+NET.room+'”. Gửi mã phòng cho bạn bè để vào cùng phòng.');});
-    c.on('message',(topic,payload)=>{if(gen!==NET.gen)return;const str=payload.toString();
+    const tp=netTopics();let ok=false;
+    // nối cùng lúc cả 2 máy chủ, gửi lên cả 2 và gộp tin (lọc trùng) — để máy dùng mạng chặn 1 máy chủ vẫn gặp được nhau
+    const cs=[];NET.clients=cs;
+    NET.client={get connected(){return cs.some(c=>c.connected);},publish(t,pl,o){cs.forEach(c=>{if(c.connected)try{c.publish(t,pl,o);}catch(e){}});},end(){cs.forEach(c=>{try{c.end(true);}catch(e){}});}};
+    const onMsg=(topic,payload)=>{if(gen!==NET.gen)return;const str=payload.toString();
       if(topic===tp.chat){let m;try{m=JSON.parse(str);}catch(e){return;}netIngest(m);}
       else if(topic.indexOf('/p/')>0){const k=topic.split('/p/')[1];if(!k)return;
-        if(!str)NET.peers.delete(k);else{try{const o=JSON.parse(str);NET.peers.set(k,{name:String(o.name||'Khách').slice(0,24),ch:typeof o.ch==='string'?o.ch.slice(0,12):'',look:o.look&&typeof o.look==='object'?o.look:null,at:typeof o.at==='number'?o.at:0,mu:o.mu&&typeof o.mu==='object'?o.mu:null,act:o.act&&typeof o.act==='object'?o.act:null,cat:o.cat&&typeof o.cat==='object'?o.cat:null,sel:typeof o.sel==='string'?o.sel.slice(0,40):''});}catch(e){}}netRenderPeers();}});
-    c.on('offline',()=>{if(gen===NET.gen&&ok)setNote('Mất kết nối, đang thử lại…');});
-    c.on('error',()=>{});
-    setTimeout(()=>{if(!ok&&gen===NET.gen){NET.fails++;NET.brokerIdx++;if(NET.fails>=BROKERS.length){try{c.end(true);}catch(e){}NET.client=null;goOffline(gen);}else netConnect();}},9000);
+        if(!str)NET.peers.delete(k);else{try{const o=JSON.parse(str);NET.peers.set(k,{name:String(o.name||'Khách').slice(0,24),ch:typeof o.ch==='string'?o.ch.slice(0,12):'',look:o.look&&typeof o.look==='object'?o.look:null,at:typeof o.at==='number'?o.at:0,mu:o.mu&&typeof o.mu==='object'?o.mu:null,act:o.act&&typeof o.act==='object'?o.act:null,cat:o.cat&&typeof o.cat==='object'?o.cat:null,sel:typeof o.sel==='string'?o.sel.slice(0,40):''});}catch(e){}}netRenderPeers();}};
+    BROKERS.forEach(url=>{let c=null;try{c=mqtt.connect(url,{clientId:'lin-'+NET.cid+'-'+rnd(4),clean:true,reconnectPeriod:4000,connectTimeout:8000,will:{topic:tp.pres,payload:'',retain:true,qos:0}});}catch(e){c=null;}
+      if(!c)return;cs.push(c);
+      c.on('connect',()=>{if(gen!==NET.gen)return;c.subscribe([tp.chat,tp.presAll]);const first=!ok;ok=true;NET.fails=0;clearTimeout(NET.retry);
+        if(first){if(NET.offline){NET.offline=false;NET.peers=new Map();}setComposer(true);setNote('🟢 Đã kết nối · Phòng “'+NET.room+'”. Gửi mã phòng cho bạn bè để vào cùng phòng.');}
+        netPresence();netRenderPeers();});
+      c.on('message',onMsg);
+      c.on('offline',()=>{if(gen===NET.gen&&ok&&!NET.client.connected)setNote('Mất kết nối, đang thử lại…');});
+      c.on('error',()=>{});});
+    if(!cs.length){goOffline(gen);return;}
+    setTimeout(()=>{if(!ok&&gen===NET.gen){cs.forEach(c=>{try{c.end(true);}catch(e){}});NET.client=null;goOffline(gen);}},10000);
   }
   /* ===== room codes (both modes) ===== */
   const RESERVED=/^(settings|sidebar|customize|upgrade|downloads|comment-.*)$/;
