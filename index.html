@@ -3961,10 +3961,24 @@ const QN=5,QT=12000,QR=3500,QLEAD=4500;
 const qzEl=$('#quizBox');
 function qzShow(){qzEl.classList.add('show');stage.classList.add('quiz-on');}   // bảng minigame hiện thì ẩn tên/bong bóng thoại cho khỏi chồng
 function qzHide(){qzEl.classList.remove('show');stage.classList.remove('quiz-on');}
-function makeQuiz(){const idx=shuffle(QBANK.map((_,i)=>i)).slice(0,QN);return `${Date.now()+QLEAD}|${idx.join('.')}|${Math.floor(Math.random()*1e9)}`;}
+function makeQuiz(){const idx=shuffle(QBANK.map((_,i)=>i)).slice(0,QN),lead=present().some(c=>isHuman(c)&&c.id!==ME.id)?14000:QLEAD;return `${Date.now()+lead}|${idx.join('.')}|${Math.floor(Math.random()*1e9)}|${ME.id||''}`;}
+const QUIZ_NO=['📊 Đang chạy deadline','📞 Đang nghe điện thoại khách','🤯 Hôm nay hơi mệt','🙈 Ngại thua lắm','🍜 Đang ăn dở'];
+// người chơi khác được hỏi có tham gia minigame không (nhân vật trống mặc định tham gia)
+function quizAsk(Q,by){const me=ME.id&&byId(ME.id);if(!me||!Q.players.includes(me)||me.id===by)return;
+  const bc=byId(by);GRP_ASKED={quiz:Q.start,until:Q.start,n:'quiz'};$('#gaWhy').style.display='none';$('#gaWhy').textContent='';$('#gaNo').style.display='';
+  $('#gaIcon').textContent='🎮';$('#gaTitle').textContent=`${bc?bc.name:'Một người chơi'} mời cả nhóm: 🎮 Minigame đố vui`;
+  $('#gaSub').textContent='Tham gia để giành KPI (top 3: +20/+10/+5). Không tham gia thì chọn lý do — cả phòng sẽ thấy.';
+  gaEl.classList.add('show');clearInterval(gaTimer);
+  const tk=()=>{const left=Math.max(0,Math.ceil((Q.start-Date.now())/1000));$('#gaLeft').textContent=`Còn ${left} giây — không trả lời thì vẫn được tính là tham gia`;if(left<=0||EV.quiz!==Q){clearInterval(gaTimer);if(GRP_ASKED&&GRP_ASKED.quiz===Q.start){gaEl.classList.remove('show');GRP_ASKED=null;}}};tk();gaTimer=setInterval(tk,500);beep(true);}
+function quizJoin(c,v){const [st,y,ri]=String(v||'').split(':');const Q=EV.quiz;if(!c)return false;
+  if(y==='1'){c.think('🙋',1.6);return true;}
+  c.say(`Mình xin phép không chơi minigame: ${QUIZ_NO[(+ri||0)%QUIZ_NO.length]} 🙏`,3);
+  if(Q&&Q.on&&String(Q.start)===st&&Q.players.includes(c)){Q.players=Q.players.filter(x=>x!==c);delete Q.ans[c.id];delete Q.score[c.id];
+    if(c.id===ME.id){qzHide();setStatus('🙅 Bạn không tham gia minigame lần này.');}else renderQuiz();}
+  return true;}
 function quizStart(v){
   if(EV.quiz&&EV.quiz.on){qzShow();setStatus('🎮 Minigame đang diễn ra rồi — vào chơi cùng nhé!');return false;}
-  const [st,ids,sd]=String(v||'').split('|');const start=+st,seed=+sd|0;if(!start||!ids)return false;
+  const [st,ids,sd,by]=String(v||'').split('|');const start=+st,seed=+sd|0;if(!start||!ids)return false;
   const rng=srand(seed);
   const qs=ids.split('.').map(i=>QBANK[i|0]).filter(Boolean).map(([q,o])=>{const ord=[0,1,2,3];for(let i=3;i>0;i--){const j=Math.floor(rng()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]];}return{q,opts:ord.map(k=>o[k]),correct:ord.indexOf(0)};});
   const players=present();
@@ -3972,7 +3986,7 @@ function quizStart(v){
   players.forEach(c=>{Q.ans[c.id]={};Q.score[c.id]=0;});
   // nhân vật chưa có người chơi: tự trả lời (giống nhau trên mọi máy)
   players.forEach(c=>{if(isHuman(c))return;const r=srand(seed^hashStr(c.id));Q.npc[c.id]=qs.map(q=>{const ok=r()<(c.manager?.7:.58);let o=q.correct;if(!ok){o=Math.floor(r()*3);if(o>=q.correct)o++;}return{o,t:Math.round(2200+r()*8000)};});});
-  qzShow();renderQuiz();
+  qzShow();renderQuiz();quizAsk(Q,by||'');
   setStatus('🎮 Minigame “Đố vui công sở” bắt đầu! Trả lời nhanh và đúng để ghi điểm.');
   players.forEach((c,i)=>wait(i*.2).then(()=>{c.think('🎮',2);}));
   return true;}
@@ -4069,11 +4083,12 @@ function grpAsk(v){const [gid,n,by,askS,untilS,star,dS]=String(v||'').split('|')
   setTimeout(()=>{if(evBanT.textContent===`Lời mời: ${lbl}`)bannerOff();},until-Date.now()+6000);
   return true;}
 function grpAnswer(yes,ri){const A=GRP_ASKED;GRP_ASKED=null;clearInterval(gaTimer);gaEl.classList.remove('show');const c=ME.id&&byId(ME.id);
-  if(!A||!c)return;run('grpans',c,{v:A.gid+':'+(yes?1:0)+(ri!=null?':'+ri:'')});setStatus(yes?'✅ Bạn đã đồng ý tham gia!':'🙅 Bạn không tham gia lần này — nhân vật ở lại làm việc.');}
+  if(!A||!c)return;if(A.quiz){run('quizjoin',c,{v:A.quiz+':'+(yes?1:0)+(ri!=null?':'+ri:'')});if(yes)setStatus('🎮 Bạn tham gia minigame — chuẩn bị nhé!');return;}
+  run('grpans',c,{v:A.gid+':'+(yes?1:0)+(ri!=null?':'+ri:'')});setStatus(yes?'✅ Bạn đã đồng ý tham gia!':'🙅 Bạn không tham gia lần này — nhân vật ở lại làm việc.');}
 $('#gaYes').onclick=()=>grpAnswer(true);
-$('#gaNo').onclick=()=>{const A=GRP_ASKED;if(!A||A.n!=='trip'){grpAnswer(false);return;}   // team building tự nguyện: chọn lý do từ chối, cả phòng đều thấy
+$('#gaNo').onclick=()=>{const A=GRP_ASKED;if(!A||(A.n!=='trip'&&A.n!=='quiz')){grpAnswer(false);return;}   // team building tự nguyện: chọn lý do từ chối, cả phòng đều thấy
   const box=$('#gaWhy');box.textContent='';const h=document.createElement('div');h.className='bpleft';h.textContent='Chọn lý do không tham gia:';box.appendChild(h);
-  TRIP_NO.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>grpAnswer(false,i);box.appendChild(b);});
+  (A.n==='quiz'?QUIZ_NO:TRIP_NO).forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>grpAnswer(false,i);box.appendChild(b);});
   box.style.display='';$('#gaNo').style.display='none';};
 function grpAns(c,v){const [gid,y,ri]=String(v||'').split(':');const R=GRP_REQ;
   if(c&&y==='0'&&ri!=null&&typeof tripWhy==='function')c.say(`Mình xin phép không đi team building: ${tripWhy(ri)} 🙏`,3);
@@ -4150,6 +4165,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(c&&AUTO_EXEC&&(isHuman(c)||PEERSEL[c.id]||c===selected))return false;      // chế độ Tự động không điều khiển nhân vật có người chơi / đang có người chọn
   if(c&&!REMOTE_EXEC&&!AUTO_EXEC&&!isHuman(c)&&PEERSEL[c.id]&&!['birthday','restyle'].includes(n)){setStatus(`🎮 ${PEERSEL[c.id].name} đang điều khiển ${c.name} — bạn không ra lệnh cho nhân vật này được.`);return false;}
   if(n==='mgrsorry')return mgrSorryAns(c,v);
+  if(n==='quizjoin')return quizJoin(c,v);
   if(n==='quizans'){if(!c||!v)return false;const [qi,op,t]=v.split(':').map(Number);quizAnswer(c.id,qi,op,t);return true;}
   if(n==='fix')return runFix(c);
   if(n==='flowers')return runFlowers(c,v);
@@ -4598,7 +4614,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null;
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   MY_ACT={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
