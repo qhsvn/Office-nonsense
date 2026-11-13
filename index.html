@@ -510,17 +510,23 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .pbflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:40}.pbflash.go{animation:pbFl .45s ease-out}
 @keyframes pbFl{0%{opacity:.95}100%{opacity:0}}
 .pbook{position:absolute;inset:0;z-index:35;display:none;pointer-events:none}.pbook.show{display:block}
-.pbstack{position:absolute;left:50%;top:46%;width:0;height:0}
-.pbph{position:absolute;left:0;top:0;width:min(62vw,250px);transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r));background:#fff;padding:8px 8px 6px;border:0;border-radius:6px;box-shadow:0 10px 28px rgba(40,50,80,.35);pointer-events:auto;cursor:pointer;animation:pbDrop .9s cubic-bezier(.2,.8,.25,1.15) both;font:inherit}
+.pbstack{position:absolute;inset:0}
+.pbph{position:absolute;width:44%;transform:rotate(var(--r));background:#fff;padding:6px 6px 5px;border:0;border-radius:6px;box-shadow:0 10px 24px rgba(40,50,80,.35);pointer-events:auto;cursor:pointer;animation:pbZig 1.6s cubic-bezier(.3,.6,.3,1) both;font:inherit}
 .pbph img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:3px;background:#dfefff}
 .pbph span{display:block;font-size:11.5px;font-weight:700;color:#5b4632;margin-top:5px;text-align:center;font-family:"Comic Sans MS","Segoe Print",cursive,sans-serif}
-.pbph.zoom{z-index:99!important;width:min(86vw,420px);transform:translate(-50%,-50%) rotate(0deg);transition:all .3s}
-@keyframes pbDrop{0%{transform:translate(calc(-50% + var(--x)),-180%) rotate(calc(var(--r) * -3));opacity:0}60%{opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r));opacity:1}}
+.pbph.zoom{z-index:99!important;width:86%;left:7%!important;top:12%!important;transform:rotate(0deg);transition:all .3s}
+@keyframes pbZig{0%{transform:translate(var(--sw),-160%) rotate(calc(var(--r) * -3));opacity:0}15%{opacity:1}35%{transform:translate(calc(var(--sw) * -1),-95%) rotate(calc(var(--r) * 2))}60%{transform:translate(calc(var(--sw) * .5),-40%) rotate(calc(var(--r) * -1))}82%{transform:translate(calc(var(--sw) * -.2),-8%) rotate(var(--r))}100%{transform:translate(0,0) rotate(var(--r));opacity:1}}
 .pbtitle{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:linear-gradient(135deg,#ff9a3d,#ffcf4d);color:#fff;font-weight:800;font-size:15px;padding:7px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(230,140,40,.35);white-space:nowrap}
 .pbclose{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);pointer-events:auto;font:inherit;font-weight:800;border:0;border-radius:999px;padding:9px 22px;background:#fff;color:var(--ink);box-shadow:0 6px 18px rgba(60,80,120,.3);cursor:pointer}
 .beachbar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:20;display:none;gap:6px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:94%}.beachbar.show{display:flex}
 .beachbar button{font:inherit;font-size:12.5px;font-weight:800;border:0;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 3px 10px rgba(60,90,140,.25);cursor:pointer}
 #stage.beach-on .tod,#stage.beach-on .dancefab,#stage.beach-on .jtpill,#stage.beach-on .views{display:none!important}
+#stage.beach-on .cattag,#stage.beach-on .cathud{display:none!important}
+.bwrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.bwsw{min-width:38px;height:38px;border-radius:12px;border:3px solid #fff;box-shadow:0 0 0 2px #e3e9f4;cursor:pointer;font:inherit;font-size:12.5px;font-weight:700;padding:0 10px;background:#f8fbff}
+.bwsw.on{box-shadow:0 0 0 3px #4dabf7}
+
+#stage.pb-on .tag{display:none!important}
+.pbph span{font-size:10.5px!important}
 </style>
 </head>
 <body>
@@ -898,6 +904,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="jtStart" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtStTitle"><div class="wcard mcardm">
   <div class="wlogo">📝</div><h2 id="jtStTitle">Đến giờ thi Job Test!</h2><p class="wsub" id="jtStartSub"></p>
   <div class="crow"><button type="button" id="jtGo">▶️ Bắt đầu làm bài</button></div></div></div>
+<div id="bwModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="bwTitle"><div class="wcard mcardm">
+  <div class="wlogo">🏖️</div><h2 id="bwTitle">Đổi đồ đi biển</h2><div id="bwOpts"></div>
+  <div class="crow"><button type="button" id="bwCancel" class="cghost">Hủy</button><button type="button" id="bwOk">Mặc luôn 😎</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -4310,6 +4319,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='argue')return runArgue(c);
   if(n==='tod')return todSet(v);
   if(n==='beachdo')return beachDo(c,v);
+  if(n==='bwear')return bwearSet(c,v);
   if(n==='jtsched')return jtSched(v);
   if(n==='jtans')return jtAns(c,v);
   if(n==='jtend')return jtEnd(v);
@@ -5077,12 +5087,12 @@ setInterval(()=>{const b=document.querySelector('[data-cmd=jobtest] small');if(!
 
 /* ================= 🏖️ Bãi biển team building (Phú Quốc · Nha Trang) + photobook check-in ================= */
 const BEACH={on:false,photo:false,scene:null,dest:null,ppl:[],t:0};
-const BEACH_DEST={'Phú Quốc':{sea:'#27c2d3',deep:'#139bb8',pier:true},'Nha Trang':{sea:'#1f86d6',deep:'#125fb0',mountains:true}};
+const BEACH_DEST={'Phú Quốc':{sea:'#27c2d3',deep:'#139bb8',pier:true},'Nha Trang':{sea:'#1f86d6',deep:'#125fb0',mountains:true},'Vũng Tàu':{sea:'#3a9ec4',deep:'#23779f',cape:true}};
 const BL={loungers:[],bar:{x:6.2,z:1.4},row:2.6};
 function bMat(c,o){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.8,metalness:0},o||{}));}
 function bMk(geo,m,x,y,z,p){const me=new THREE.Mesh(geo,m);me.position.set(x||0,y||0,z||0);me.castShadow=true;me.receiveShadow=true;p.add(me);return me;}
 function buildBeach(key){
-  const S=new THREE.Scene(),D=BEACH_DEST[key]||BEACH_DEST['Phú Quốc'];
+  const S=new THREE.Scene(),D=BEACH_DEST[key]||BEACH_DEST['Phú Quốc'];BEACH.boats=[];
   S.background=canvasTex(512,256,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,'#5fb4ff');g.addColorStop(.62,'#bfe6ff');g.addColorStop(1,'#fff3dc');x.fillStyle=g;x.fillRect(0,0,w,h);
     const sg=x.createRadialGradient(w*.78,h*.24,4,w*.78,h*.24,60);sg.addColorStop(0,'rgba(255,250,210,1)');sg.addColorStop(.25,'rgba(255,240,170,.9)');sg.addColorStop(1,'rgba(255,240,170,0)');x.fillStyle=sg;x.fillRect(0,0,w,h);});
   S.fog=new THREE.Fog('#d9f0ff',40,95);
@@ -5094,11 +5104,20 @@ function buildBeach(key){
   const sand=bMk(new THREE.PlaneGeometry(70,34),bMat('#ffffff',{map:sandTex,roughness:1}),0,0,7,S);sand.rotation.x=-PI/2;sand.castShadow=false;
   const wet=bMk(new THREE.PlaneGeometry(70,3.2),bMat('#d6b06a',{roughness:.6}),0,.004,-8.4,S);wet.rotation.x=-PI/2;wet.castShadow=false;
   // biển xanh có sóng
-  const seaG=new THREE.PlaneGeometry(110,46,55,23);const seaM=bMat(D.sea,{roughness:.25,metalness:.05,flatShading:true,transparent:true,opacity:.95});
-  const sea=bMk(seaG,seaM,0,-.05,-32.6,S);sea.rotation.x=-PI/2;sea.castShadow=false;
+  const ripTex=canvasTex(512,512,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,D.deep);g.addColorStop(1,D.sea);x.fillStyle=D.sea;x.fillRect(0,0,w,h);
+    x.lineCap='round';for(let i=0;i<70;i++){const y=Math.random()*h,x0=Math.random()*w,len=40+Math.random()*90;x.strokeStyle=`rgba(255,255,255,${.12+Math.random()*.2})`;x.lineWidth=2+Math.random()*3;x.beginPath();x.moveTo(x0,y);x.quadraticCurveTo(x0+len/2,y-6-Math.random()*6,x0+len,y);x.stroke();}
+    for(let i=0;i<40;i++){x.strokeStyle=`rgba(0,60,120,${.06+Math.random()*.08})`;x.lineWidth=3;const y=Math.random()*h,x0=Math.random()*w;x.beginPath();x.moveTo(x0,y);x.quadraticCurveTo(x0+40,y+6,x0+90,y);x.stroke();}});
+  ripTex.wrapS=ripTex.wrapT=THREE.RepeatWrapping;ripTex.repeat.set(9,4);
+  const seaG=new THREE.PlaneGeometry(110,46,90,36);const seaM=new THREE.MeshStandardMaterial({map:ripTex,color:'#ffffff',roughness:.18,metalness:.08,transparent:true,opacity:.96});
+  const sea=bMk(seaG,seaM,0,-.04,-32.6,S);sea.rotation.x=-PI/2;sea.castShadow=false;sea.receiveShadow=false;
   const base=seaG.attributes.position.array.slice();
+  const shallow=bMk(new THREE.PlaneGeometry(110,3.4),new THREE.MeshStandardMaterial({color:'#8ff0e8',transparent:true,opacity:.5,roughness:.2}),0,-.01,-11.2,S);shallow.rotation.x=-PI/2;shallow.castShadow=false;
   const deep=bMk(new THREE.PlaneGeometry(220,120),bMat(D.deep,{roughness:.4}),0,-.25,-90,S);deep.rotation.x=-PI/2;deep.castShadow=false;
-  const foamM=bMat('#ffffff',{transparent:true,opacity:.8,roughness:.6});const foam=bMk(new THREE.PlaneGeometry(70,.55),foamM,0,.03,-9.7,S);foam.rotation.x=-PI/2;foam.castShadow=false;
+  const foamTex=canvasTex(512,64,(x,w,h)=>{x.clearRect(0,0,w,h);x.fillStyle='rgba(255,255,255,.95)';x.beginPath();x.moveTo(0,h);for(let i=0;i<=w;i+=8)x.lineTo(i,h*.45+Math.sin(i*.05)*8+Math.sin(i*.13)*5);x.lineTo(w,h);x.closePath();x.fill();
+    for(let i=0;i<120;i++){x.fillStyle=`rgba(255,255,255,${Math.random()*.7})`;x.beginPath();x.arc(Math.random()*w,h*.3+Math.random()*h*.3,1+Math.random()*2.5,0,TAU);x.fill();}});
+  foamTex.wrapS=THREE.RepeatWrapping;foamTex.repeat.set(6,1);
+  const foams=[0,1,2].map(k=>{const m=new THREE.MeshBasicMaterial({map:foamTex,transparent:true,opacity:0,depthWrite:false});const f=bMk(new THREE.PlaneGeometry(80,.9),m,0,.035,-12,S);f.rotation.x=-PI/2;f.castShadow=false;f.receiveShadow=false;return{f,m,ph:k/3};});
+  const foamM=new THREE.MeshBasicMaterial({map:foamTex,transparent:true,opacity:.85,depthWrite:false});const foam=bMk(new THREE.PlaneGeometry(80,.7),foamM,0,.03,-9.75,S);foam.rotation.x=-PI/2;foam.castShadow=false;foam.receiveShadow=false;
   // cây dừa
   const palms=[];const trunkM=bMat('#a8763f'),ringM=bMat('#8a5c2c'),leafM=bMat('#38a852',{side:THREE.DoubleSide}),cocoM=bMat('#6b4a24');
   [[-9.5,-2.5,.25],[-7.2,3.6,-.2],[9.8,-1.6,-.3],[11.5,4.2,.2],[-12.5,6.5,.15]].forEach(([px,pz,lean],k)=>{const g=new THREE.Group();g.position.set(px,0,pz);S.add(g);let y=0,x=0;
@@ -5109,7 +5128,7 @@ function buildBeach(key){
     palms.push({top,ph:k*1.3});});
   // ghế nằm + dù che nắng
   BL.loungers=[];const umb=['#ff6b6b','#ffd166','#4dabf7','#ff8fab','#63e6be'];
-  for(let i=0;i<5;i++){const lx=-5+i*2.5,lz=-1.2;const g=new THREE.Group();g.position.set(lx,0,lz);S.add(g);
+  for(let i=0;i<5;i++){const lx=-5+i*2.5,lz=-1.2;const g=new THREE.Group();g.position.set(lx,0,lz);g.rotation.y=PI;S.add(g);   // lưng ghế phía đất liền, chân ghế hướng ra biển
     const wood=bMat('#f8f9fa'),pad=bMat(i%2?'#4dabf7':'#ff8787');
     bMk(new THREE.BoxGeometry(.7,.08,1.8),wood,0,.26,0,g);bMk(new THREE.BoxGeometry(.62,.06,1.3),pad,0,.32,.2,g);
     const back=bMk(new THREE.BoxGeometry(.62,.06,.7),pad,0,.52,-.82,g);back.rotation.x=.75;
@@ -5134,17 +5153,25 @@ function buildBeach(key){
   for(let i=0;i<7;i++){const g=new THREE.Group();g.position.set(-40+i*13+Math.random()*4,9+Math.random()*4,-34-Math.random()*16);S.add(g);for(let j=0;j<5;j++){const s=bMk(new THREE.SphereGeometry(1.4+Math.random(),12,10),cm,j*1.5-3,Math.random()*.8,Math.random()*.8,g);s.scale.y=.6;s.castShadow=false;}clouds.push(g);}
   // Phú Quốc: cầu gỗ ra biển · Nha Trang: núi và đảo xa
   if(D.pier){const g=new THREE.Group();g.position.set(14,0,-8);S.add(g);const pw=bMat('#9c6b3c');for(let i=0;i<22;i++)bMk(new THREE.BoxGeometry(1.6,.08,.5),pw,0,.42,-i*.6,g);for(let i=0;i<6;i++)for(const sx of[-.75,.75])bMk(new THREE.CylinderGeometry(.08,.08,1.4,8),pw,sx,.0,-i*2.4,g);}
+  if(D.cape){ // mũi đất + ngọn hải đăng + thuyền đánh cá
+    const hm=[bMat('#4b8a52'),bMat('#5d9c5f'),bMat('#6f8f5a')];[[-26,-34,12,7],[-36,-40,14,10],[-18,-44,9,5]].forEach(([x,z,r,h],i)=>{const m=bMk(new THREE.SphereGeometry(r,16,10),hm[i%3],x,-1,z,S);m.scale.y=h/r;m.castShadow=false;});
+    const lh=new THREE.Group();lh.position.set(-34,8.6,-40);S.add(lh);bMk(new THREE.CylinderGeometry(.9,1.2,6,14),bMat('#f4f4ef'),0,3,0,lh);bMk(new THREE.CylinderGeometry(1.25,1.25,.35,14),bMat('#c8362c'),0,6.1,0,lh);
+    bMk(new THREE.CylinderGeometry(.7,.7,1,12),new THREE.MeshBasicMaterial({color:'#ffe27a'}),0,6.8,0,lh);bMk(new THREE.ConeGeometry(.95,1,12),bMat('#c8362c'),0,7.8,0,lh);
+    [[6,-24,'#d8452f'],[16,-30,'#2f6fd8'],[-4,-36,'#e0a21f']].forEach(([x,z,col],i)=>{const b=new THREE.Group();b.position.set(x,.15,z);b.rotation.y=i*1.3;S.add(b);bMk(new THREE.BoxGeometry(2.6,.5,.9),bMat(col),0,0,0,b);bMk(new THREE.BoxGeometry(.9,.6,.7),bMat('#f2efe4'),-.3,.5,0,b);BEACH.boats=(BEACH.boats||[]).concat([b]);});}
   if(D.mountains){const mm=[bMat('#3d7a5a'),bMat('#4f8f6b'),bMat('#5e7fa8')];[[-30,-58,10,9],[-12,-64,13,12],[8,-60,9,8],[26,-56,11,10],[40,-66,14,13]].forEach(([x,z,r,h],i)=>{const m=bMk(new THREE.ConeGeometry(r,h,7),mm[i%3],x,h/2-1,z,S);m.castShadow=false;});
     [[-6,-30,2.6],[12,-36,3.2]].forEach(([x,z,r])=>{const is=bMk(new THREE.SphereGeometry(r,14,10),bMat('#4c9a5e'),x,-r*.45,z,S);is.scale.y=.55;is.castShadow=false;});}
-  return{S,sea,base,foam,foamM,palms,clouds};
+  return{S,sea,base,foam,foamM,foams,ripTex,palms,clouds,nf:0};
 }
 let BW=null;
-function beachTick(){if(!BEACH.on||!BW)return;const t=simTime;BEACH.t=t;
-  const p=BW.sea.geometry.attributes.position,a=p.array,b=BW.base;for(let i=0;i<a.length;i+=3){const x=b[i],y=b[i+1];a[i+2]=Math.sin(x*.35+t*1.6)*.12+Math.cos(y*.5+t*1.1)*.1;}p.needsUpdate=true;
-  BW.foam.position.z=-9.7+Math.sin(t*1.2)*.35;BW.foamM.opacity=.55+Math.sin(t*1.2)*.3;
+function beachTick(){if(!BEACH.on||!BW)return;const t=simTime;BEACH.t=t;(BEACH.boats||[]).forEach((b,i)=>{b.position.y=.15+Math.sin(t*1.3+i*2)*.08;b.rotation.z=Math.sin(t*1.1+i)*.05;});
+  const p=BW.sea.geometry.attributes.position,a=p.array,b=BW.base;for(let i=0;i<a.length;i+=3){const x=b[i],y=b[i+1];a[i+2]=Math.sin(y*.42+t*1.3)*.06+Math.sin(x*.18+y*.2+t*.8)*.035;}p.needsUpdate=true;   // sóng lăn tăn mịn
+  if((BW.nf=(BW.nf+1)%4)===0)BW.sea.geometry.computeVertexNormals();
+  BW.ripTex.offset.set(t*.004,-t*.012);
+  BW.foams.forEach(F=>{const u=((t*.16+F.ph)%1);F.f.position.z=-13.2+u*3.6;F.m.opacity=Math.sin(u*PI)*.85;F.f.scale.y=.6+u*.6;});   // sóng bọt trắng xô vào bờ
+  BW.foam.position.z=-9.75+Math.sin(t*.9)*.18;BW.foamM.opacity=.65+Math.sin(t*.9)*.2;
   BW.palms.forEach(pl=>{pl.top.rotation.z=Math.sin(t*1.1+pl.ph)*.06;pl.top.rotation.x=Math.cos(t*.9+pl.ph)*.04;});
   BW.clouds.forEach((g,i)=>{g.position.x+=.004+i*.0006;if(g.position.x>55)g.position.x=-55;});
-  BEACH.ppl.forEach((c,i)=>{if(c._swim){c.pos.y=-.42+Math.sin(t*2.2+i)*.05;c.pos.x+=Math.sin(t*.4+i)*.002;}else if(c._jumpT){const u=(t-c._jumpT)/.55;if(u>=1){c._jumpT=0;c.pos.y=c._baseY||0;}else c.pos.y=(c._baseY||0)+Math.sin(u*PI)*.55;}});}
+  BEACH.ppl.forEach((c,i)=>{c.root.rotation.x=c._sunbathe?PI/2*.92:0;if(c._swim){c.pos.y=-.42+Math.sin(t*2.2+i)*.05;c.pos.x+=Math.sin(t*.4+i)*.002;}else if(c._jumpT){const u=(t-c._jumpT)/.55;if(u>=1){c._jumpT=0;c.pos.y=c._baseY||0;}else c.pos.y=(c._baseY||0)+Math.sin(u*PI)*.55;}});}
 {const o=scrTick;scrTick=()=>{o();try{beachTick();}catch(e){}};}
 // đồ đi biển
 const BEACH_SHIRT=['#ff8fab','#74c0fc','#ffd43b','#8ce99a','#ffa94d','#b197fc'],BEACH_SHORT=['#1c7ed6','#f76707','#2b8a3e','#e64980','#0b7285'];
@@ -5162,13 +5189,13 @@ function beachWear(c,on,i){
   else{const s=c._bw;if(!s)return;c._bw=null;const set=(m,v)=>{m.color.setHex(v);m.emissive&&m.emissive.copy(m.color);};set(c.mShirt,s.sh);set(c.mSkirt,s.sk);if(c.mVest&&s.v!=null)set(c.mVest,s.v);
     s.hide.forEach(o=>o.visible=true);if(c._bAcc)c._bAcc.g.visible=false;if(c._bCup)c._bCup.visible=false;}}
 // hoạt động trên biển
-function bReset(c){c._swim=false;c.lying=false;c.pos.y=0;c.arms='idle';if(c._bCup)c._bCup.visible=false;c.cur&&(c.cur.rootY=0);}
+function bReset(c){c._swim=false;c.lying=false;c._sunbathe=false;c.root.rotation.x=0;c.pos.y=0;c.arms='idle';if(c._bCup)c._bCup.visible=false;c.cur&&(c.cur.rootY=0);}
 function bWalk(c,x,z,tok){c.pose='stand';c.seat=null;return new Promise(res=>{c.path=[{x,z}];c.walking=true;c.onArrive=()=>res(true);const iv=setInterval(()=>{if(c._bTok!==tok||!BEACH.on||(BEACH.photo&&!c._toRow)){clearInterval(iv);res(false);}else if(!c.path.length){clearInterval(iv);res(true);}},200);});}
 async function bWait(sec,c,tok){const end=simTime+sec;while(simTime<end){if(!BEACH.on||BEACH.photo||c._bTok!==tok)return false;await wait(.25);}return true;}
 const B_LINES={swim:['Nước mát quá trời luôn! 🌊','Ai bơi thi với mình không? 🏊','Sóng êm ghê, thích quá! 😆'],sun:['Phơi nắng chút cho da nâu khỏe 😎','Nằm đây ngủ một giấc thôi… 😴','Gió biển mát ghê 🍃'],drink:['Cocktail ngon xỉu! 🍹','Một ly dừa tươi cho mát 🥥','Cạn ly nào cả nhà! 🥂'],walk:['Biển đẹp quá trời! 🌅','Đi dạo nhặt vỏ sò nè 🐚','Chụp hình sống ảo chỗ này đẹp nè 📸']};
 async function bAct(c,act,i,tok){bReset(c);const r=srand(hashStr(BEACH.key+c.id+act+Math.floor(simTime/5)));
   if(act==='swim'){if(!await bWalk(c,-6+i*2.6+r()*.8,-11.4-r()*1.8,tok))return;c._swim=true;c.arms='wave';c.think('🏊',1.6);if(r()<.6)c.say(pick(B_LINES.swim),2.2);await bWait(16,c,tok);c._swim=false;c.pos.y=0;}
-  else if(act==='sun'){const L=BL.loungers[i%BL.loungers.length];if(!await bWalk(c,L.x,L.z+1.2,tok))return;c.pos.set(L.x,.36,L.z+.05);c.yaw=0;c.lying=true;c.think('😎',1.8);if(r()<.6)wait(1).then(()=>c.say(pick(B_LINES.sun),2.2));await bWait(16,c,tok);c.lying=false;c.pos.y=0;}
+  else if(act==='sun'){const L=BL.loungers[i%BL.loungers.length];if(!await bWalk(c,L.x+.9,L.z,tok))return;c.pos.set(L.x,.4,L.z-.78);c.yaw=PI;c.root.rotation.y=PI;c._sunbathe=true;c.think('😎',1.8);if(r()<.6)wait(1).then(()=>c.say(pick(B_LINES.sun),2.2));await bWait(16,c,tok);c._sunbathe=false;c.root.rotation.x=0;c.pos.y=0;}
   else if(act==='drink'){if(!await bWalk(c,BL.bar.x-1+((i*.55)%2.2),BL.bar.z+.3,tok))return;c.yaw=PI;await wait(.6);c.yaw=0;c.arms='cup';if(c._bCup)c._bCup.visible=true;c.think(pick(['🍹','🥥']),1.6);if(r()<.7)c.say(pick(B_LINES.drink),2.2);await bWait(14,c,tok);}
   else{for(let k=0;k<3;k++){if(!await bWalk(c,-11+r()*22,-7.6+r()*2.4,tok))return;c.yaw=PI;if(k===1){c.think(pick(['🌅','🐚']),1.6);if(r()<.5)c.say(pick(B_LINES.walk),2.2);}if(!await bWait(2.5,c,tok))return;}}
   bReset(c);}
@@ -5186,7 +5213,8 @@ function pbShot(n,cap){let url='';
     x.font='64px serif';x.fillText('🌴',18,200);x.fillText('🌴',396,190);x.font='34px serif';x.fillText(['👋','✌️','🍹','🤸','❤️'][n],222,120);
     x.font='bold 18px '+FONT;x.fillStyle='#5a3b12';x.textAlign='center';x.fillText(BEACH.ppl.map(c=>c.name).join(' · ').slice(0,46),240,280);url=cv.toDataURL('image/jpeg',.82);}
   const flash=$('#pbFlash');flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go');try{beep(true);}catch(e){}
-  const ph=document.createElement('button');ph.type='button';ph.className='pbph';const r=(n%2?1:-1)*(3+n*1.7);ph.style.setProperty('--r',r+'deg');ph.style.setProperty('--x',((n-2)*14)+'px');ph.style.setProperty('--y',((n%3)*8-6)+'px');ph.style.zIndex=10+n;
+  const ph=document.createElement('button');ph.type='button';ph.className='pbph';const POS=[[4,7],[52,15],[6,38],[50,46],[27,68]],r=(n%2?1:-1)*(4+(n*1.3)%3);
+  ph.style.left=POS[n%5][0]+'%';ph.style.top=POS[n%5][1]+'%';ph.style.setProperty('--r',r+'deg');ph.style.setProperty('--sw',(n%2?-1:1)*46+'px');ph.style.zIndex=10+n;
   const im=document.createElement('img');im.src=url;im.alt=cap;const t=document.createElement('span');t.textContent=cap;ph.append(im,t);ph.onclick=()=>ph.classList.toggle('zoom');
   $('#pbStack').appendChild(ph);pbEl.classList.add('show');PB.push(ph);}
 function pbEnd(){$('#pbTitle').style.display='';$('#pbClose').style.display='';}
@@ -5202,33 +5230,63 @@ async function beachTrip(ppl,dest,v,rp){
   window.__altScene=BW.S;BEACH.on=true;stage.classList.add('beach-on');if(meIn)$('#beachBar').classList.add('show');
   camera.position.set(0,7.5,16);controls.target.set(0,.6,-2);controls.update();
   ppl.forEach((c,i)=>{BW.S.add(c.root);c.root.visible=true;c.awaySp.visible=false;c.pack.visible=false;c.pose='stand';c.seat=null;c.lying=false;c.pos.set(-14+i*.8,0,6+i*.4);c.yaw=PI/2;c._bAct='walk';beachWear(c,true,i);});
-  banner('🏝️',`Cả team đã tới ${dest.n}!`,'Tắm biển, phơi nắng, uống cocktail thôi! 🌊🍹',null,'yep');setStatus(`🏝️ Cả team đã tới bãi biển ${dest.n}! Cát vàng, biển xanh, cocktail mát lạnh 🍹`);setTimeout(()=>{if(evBanT.textContent.startsWith('Cả team đã tới'))bannerOff();},4000);
+  banner(dest.e,`Cả team đã tới ${dest.n}!`,'Tắm biển, phơi nắng, uống cocktail thôi! 🌊🍹',null,'yep');setStatus(`${dest.e} Cả team đã tới bãi biển ${dest.n}! Cát vàng, biển xanh, cocktail mát lạnh 🍹`);setTimeout(()=>{if(evBanT.textContent.startsWith('Cả team đã tới'))bannerOff();},4000);
   const host=ppl.includes(MGR)?MGR:ppl[0];
   await Promise.all(ppl.map((c,i)=>{const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,-6+i*2.4,3+((i%2)*.8),tok);}));
   host.say(`Tới ${dest.n} rồi! Chơi hết mình đi cả nhà! 🏖️`,2.4);
   ppl.forEach((c,i)=>bLife(c,i));
   await wait(100);
   // check-in chụp ảnh chung
-  BEACH.photo=true;$('#beachBar').classList.remove('show');setStatus(`📸 Check-in chụp ảnh kỷ niệm cả team tại ${dest.n} trước khi về!`);
+  BEACH.photo=true;stage.classList.add('pb-on');$('#beachBar').classList.remove('show');setStatus(`📸 Check-in chụp ảnh kỷ niệm cả team tại ${dest.n} trước khi về!`);
   host.say('Tập trung chụp ảnh kỷ niệm nào cả nhà! 📸',2.4);
   const order=ppl.slice().sort((a,b)=>(a===MGR)-(b===MGR));const mid=order.indexOf(MGR);if(mid>=0){order.splice(mid,1);order.splice(Math.floor(order.length/2),0,MGR);}
   await Promise.race([Promise.all(order.map((c,i)=>{bReset(c);c._toRow=true;const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,(i-(order.length-1)/2)*.95,BL.row,tok);})),wait(9)]);
   order.forEach((c,i)=>{c.path=[];c.walking=false;c.pos.set((i-(order.length-1)/2)*.95,0,BL.row);c.yaw=0;c._toRow=false;c._baseY=0;});
-  camera.position.set(0,2.4,9.2);controls.target.set(0,1,BL.row);controls.update();
   const d=new Date(),day=`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
-  const POSES=[['👋','Cả team vẫy tay chào',c=>c.gesture('wave',2.6)],['✌️','Giơ tay chữ V',c=>{c.gesture('cheer',2.6);c.think('✌️',2);}],['🍹','Cùng nâng ly',c=>{c.arms='cup';if(c._bCup)c._bCup.visible=true;}],['🤸','Nhảy lên nào',c=>{c._jumpT=simTime+(c.seed||0)%1*.05;c.gesture('jump',1.2);}],['❤️','Thả tim cho team',c=>c.gesture('heart',2.6)]];
-  const CAPS=['Cả team vui quá! 🥰','Team mình là số 1 ✌️','Cạn ly vì team! 🍹','Bay lên nào! 🤸','Yêu team nhiều lắm ❤️'];
-  for(let n=0;n<POSES.length;n++){const P=POSES[n];order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;P[2](c);});
-    host.say(n===0?'1, 2, 3… cười lên nào! 📸':`${P[1]}! 1, 2, 3… 📸`,1.6);await wait(1.7);
-    pbShot(n,`${dest.e} ${dest.n} · ${day} · ${CAPS[n]}`);await wait(2.6);}
+  const N=order.length,mi=Math.max(0,order.indexOf(MGR));
+  const FORM=[
+    i=>({x:(i-(N-1)/2)*.95,z:BL.row}),
+    i=>({x:(i-(N-1)/2)*.9,z:BL.row-Math.abs(i-(N-1)/2)*.45}),
+    i=>({x:(i%2?1:-1)*(Math.floor((i+1)/2))*.75,z:BL.row+(i%2?.55:-.1)}),
+    i=>({x:(i-(N-1)/2)*1.05,z:BL.row+(i%2)*.3}),
+    i=>{const a=(i/(Math.max(1,N-1))-.5)*1.9;return{x:Math.sin(a)*1.9,z:BL.row-Math.cos(a)*.9+.3};}];
+  const CAM=[[0,2.4,9.2],[-3.2,2.9,8.6],[3,2.2,8.8],[0,1.6,8.4],[0,3.6,9.6]];
+  const MIX=[['wave','cheer','wave','clap','wave'],['cheer','heart','think','cheer','clap'],['cup','cup','cup','cup','cup'],['jump','jump','jump','jump','jump'],['heart','clap','heart','cheer','heart']];
+  const TH=[['😆','😁','🥰'],['✌️','😎','🤙'],['🍹','🥥','🥂'],['🤸','🙌','✨'],['❤️','💕','🥰']];
+  const NAME=['Cả team vẫy tay chào','Tạo dáng tự do','Cùng nâng ly','Nhảy lên nào','Thả tim cho team'];
+  const CAPS=['Cả team vui quá! 🥰','Ai cũng sống ảo 😎','Cạn ly vì team! 🍹','Bay lên nào! 🤸','Yêu team nhiều lắm ❤️'];
+  for(let n=0;n<5;n++){
+    order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;});
+    await Promise.race([Promise.all(order.map((c,i)=>{const f=FORM[n](i);const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,f.x,f.z,tok);})),wait(2.2)]);
+    order.forEach((c,i)=>{const f=FORM[n](i);c.path=[];c.walking=false;c.pos.set(f.x,0,f.z);c.yaw=Math.atan2(CAM[n][0]-f.x,CAM[n][2]-f.z)*.7;c.root.rotation.y=c.yaw;});
+    camera.position.set(...CAM[n]);controls.target.set(0,1,BL.row-.3);controls.update();
+    order.forEach((c,i)=>{const g=MIX[n][(i+n)%5];if(g==='cup'){c.arms='cup';if(c._bCup)c._bCup.visible=true;if(i%2)c.gesture('cheer',2.4);}else if(g==='jump'){c._jumpT=simTime+i*.06;c.gesture('jump',1.4);}else c.gesture(g,2.8);
+      if(i===mi&&n===4)c.gesture('heart',2.8);if((i+n)%2)c.think(TH[n][(i+n)%3],2);});
+    host.say(n===0?'1, 2, 3… cười lên nào! 📸':`${NAME[n]}! 1, 2, 3… 📸`,1.6);await wait(1.7);
+    pbShot(n,`${dest.e} ${dest.n} · ${day} · ${CAPS[n]}`);await wait(2.4);}
   order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;});pbEnd();setStatus(`📔 Kỷ niệm team building ${dest.n} — bấm vào ảnh để phóng to.`);
   await wait(7);
 }
-function beachLeave(){if(!BEACH.on&&!window.__altScene)return;BEACH.on=false;BEACH.photo=false;stage.classList.remove('beach-on');$('#beachBar').classList.remove('show');pbOff();
+function beachLeave(){if(!BEACH.on&&!window.__altScene)return;BEACH.on=false;BEACH.photo=false;stage.classList.remove('beach-on','pb-on');$('#beachBar').classList.remove('show');pbOff();
   BEACH.ppl.forEach(c=>{bReset(c);c._toRow=false;c.path=[];c.walking=false;beachWear(c,false);scene.add(c.root);c.root.visible=false;});
   window.__altScene=null;if(B_CAM){camera.position.copy(B_CAM.p);controls.target.copy(B_CAM.t);controls.update();}
   if(BW){BW.S.traverse(o=>{if(o.geometry&&o.geometry.dispose)o.geometry.dispose();});BW=null;}BEACH.ppl=[];}
 {const o=goView;goView=n=>{if(BEACH.on)return;o(n);};}
+// Mochi ở nhà: không hiện trên bãi biển
+try{CAT.tagEl.classList.add('cattag');}catch(e){}
+// đổi đồ khi đang đi biển: chọn đồ đi biển (áo, quần short, mũ, kính)
+let BWP={s:0,k:0,h:1,g:1};
+function openBeachWear(){const me=ME.id&&byId(ME.id);if(!me||!me._bw)return;const box=$('#bwOpts');box.textContent='';
+  const sec=(t,arr,key,isColor)=>{const h=document.createElement('div');h.className='kmt';h.style.cssText='font-weight:700;text-align:left;margin-top:8px';h.textContent=t;box.appendChild(h);const r=document.createElement('div');r.className='bwrow';
+    arr.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.className='bwsw'+(BWP[key]===i?' on':'');if(isColor){b.style.background=v;b.title=v;}else b.textContent=v;b.onclick=()=>{BWP[key]=i;openBeachWear();};r.appendChild(b);});box.appendChild(r);};
+  sec('👕 Áo đi biển',BEACH_SHIRT,'s',true);sec('🩳 Quần short',BEACH_SHORT,'k',true);sec('👒 Mũ cói',['Không đội','Đội mũ'],'h',false);sec('🕶️ Kính râm',['Không đeo','Đeo kính'],'g',false);
+  $('#bwModal').classList.add('show');}
+$('#bwCancel').onclick=()=>$('#bwModal').classList.remove('show');
+$('#bwOk').onclick=()=>{$('#bwModal').classList.remove('show');const me=ME.id&&byId(ME.id);if(me)run('bwear',me,{v:[BWP.s,BWP.k,BWP.h,BWP.g].join('.')});};
+function bwearSet(c,v){if(!c||!c._bw)return false;const [s,k,h,g]=String(v||'').split('.').map(Number);const set=(m,x)=>{m.color.set(x);m.emissive&&m.emissive.copy(m.color);};
+  set(c.mShirt,BEACH_SHIRT[(s|0)%BEACH_SHIRT.length]);if(c.mVest)set(c.mVest,BEACH_SHIRT[(s|0)%BEACH_SHIRT.length]);set(c.mSkirt,BEACH_SHORT[(k|0)%BEACH_SHORT.length]);
+  if(c._bAcc){c._bAcc.hat.visible=h===1;c._bAcc.g.children.forEach(o=>{if(o!==c._bAcc.hat)o.visible=g===1;});}c.think('✨',1.4);return true;}
+setTimeout(()=>{['#selCustom','#soloCustom'].forEach(sel=>{const b=$(sel);if(!b)return;const o=b.onclick;b.onclick=e=>{const me=ME.id&&byId(ME.id);if(BEACH.on&&me&&me._bw){openBeachWear();return;}o&&o.call(b,e);};});},0);
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
@@ -5417,7 +5475,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue','jtans','beachdo'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod','jtsched','jtend']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue','jtans','beachdo','bwear'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod','jtsched','jtend']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
