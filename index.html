@@ -4944,7 +4944,7 @@ const jtMine=()=>{const me=ME.id&&byId(ME.id);return me&&!me.manager?me:null;};
 function jtQs(){if(!JT)return[];const r=srand(hashStr('jt'+JT.id));return JT.qs.map(i=>{const [q,o,k,ex]=JT_BANK[i];const ord=[0,1,2,3];for(let a=3;a>0;a--){const b=Math.floor(r()*(a+1));[ord[a],ord[b]]=[ord[b],ord[a]];}return{q,opts:ord.map(j=>o[j]),ok:ord.indexOf(k),ex};});}
 /* --- quản lý gửi thư --- */
 function openJtSched(){const me=ME.id&&byId(ME.id);const live=JT&&!JT.ended&&Date.now()<JT.at+JT_WIN;
-  if(!(me&&me.manager)){if(live){openJtLetter();return;}if(isHuman(MGR)){setStatus('📝 Chưa có lịch Job Test — chờ quản lý gửi thư nhé.');return;}}   // nhân viên: nút Job Test để xem lại thư
+  if(!(me&&me.manager)){if(live)openJtLetter();else setStatus('📝 Chưa có thư mời Job Test — chỉ quản lý mới gửi thư mời được.');return;}   // nhân viên: chỉ xem lại thư mời
   if(JT&&!JT.ended&&Date.now()<JT.at+JT_WIN){setStatus(`📝 Đã có lịch Job Test lúc ${jtWhen(JT.at)} rồi.`);return;}
   const d=new Date(Date.now()+5*60000);$('#jtAt').value=isoOf(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');$('#jtAt').min=isoOf(new Date())+'T00:00';jtSchedInfo();$('#jtSched').classList.add('show');}
 function jtSchedInfo(){const t=new Date($('#jtAt').value).getTime();const ok=t>Date.now()+30000;$('#jtInfo').textContent=ok?`📅 Thi lúc ${jtWhen(t)} · còn ${jtFmt(t-Date.now())}`:'⚠️ Chọn thời gian sau hiện tại ít nhất 1 phút';$('#jtSend').disabled=!ok;}
