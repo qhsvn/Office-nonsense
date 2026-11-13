@@ -5136,7 +5136,7 @@ function buildBeach(key){
     for(let i=0;i<3;i++)bMk(new THREE.SphereGeometry(.14,10,8),cocoM,Math.cos(i*2.1)*.18,-.2,Math.sin(i*2.1)*.18,top);
     palms.push({top,ph:k*1.3});});
   // ghế nằm + dù che nắng
-  BL.loungers=[];B_OBS=[];B_PLAN=[];[[-9.5,-2.5],[-7.2,3.6],[9.8,-1.6],[11.5,4.2],[-12.5,6.5]].forEach(([x,z])=>{B_OBS.push({x,z,r:.26});B_PLAN.push({x,z,r:.3});});
+  BL.loungers=[];B_OBS=[];B_PLAN=[];BG.blk=null;[[-9.5,-2.5],[-7.2,3.6],[9.8,-1.6],[11.5,4.2],[-12.5,6.5]].forEach(([x,z])=>{B_OBS.push({x,z,r:.26});B_PLAN.push({x,z,r:.3});});
   for(const x of[5,5.7,6.4,7.1])B_OBS.push({x,z:0,r:.5});B_PLAN.push({x:6.05,z:0,r:1.6});
   const umb=['#ff6b6b','#ffd166','#4dabf7','#ff8fab','#63e6be'];
   for(let i=0;i<5;i++){const lx=-5+i*2.5,lz=-1.2;const g=new THREE.Group();g.position.set(lx,0,lz);g.rotation.y=PI;S.add(g);   // lưng ghế phía đất liền, chân ghế hướng ra biển
@@ -5231,19 +5231,39 @@ function bLie(c,L){c.pos.set(L.x,0,L.z+.16);c.yaw=PI;c.root.rotation.set(B_LIE,P
   c._lieY=Math.max(lift,.2)+.01;c.pos.y=c._lieY;c._lounger=L;c._sunbathe=true;}
 // hoạt động trên biển
 function bHold(c,k){if(c._bCup)c._bCup.visible=k==='cocktail';if(c._bCoco)c._bCoco.visible=k==='coco';c._bHold=k||null;if(k)c._bLast=k;}
+// vừa uống vừa đi dạo, xoay nhìn nhiều hướng (ngẫu nhiên cố định theo nhân vật → mọi máy giống nhau)
+async function bSip(c,kind,tok,dur){const end=simTime+dur;let k=0;if(!await bWait(1.2,c,tok))return;
+  while(simTime<end){if(c._bTok!==tok||!BEACH.on||BEACH.photo)return;const r=srand(hashStr(BEACH.key+c.id+'sip'+(k++)));
+    if(r()<.6){if(!await bWalk(c,-9.5+r()*19,-6.8+r()*9.4,tok))return;c.arms='cup';bHold(c,kind);}
+    c.yaw=r()*TAU;if(r()<.55)c.think(kind==='coco'?'🥥':'🍹',1.4);else if(r()<.25)c.say(pick(B_LINES.drink),2);
+    if(!await bWait(2+r()*3,c,tok))return;if(r()<.5){c.yaw+=(r()-.5)*2.4;if(!await bWait(1.5+r()*2,c,tok))return;}}}
 function bReset(c){if(c._sunbathe&&c._lounger)c.pos.set(c._lounger.x+.9,0,c._lounger.z);c._swim=false;c.lying=false;c._sunbathe=false;c.root.rotation.x=0;c.pos.y=0;c.arms='idle';bHold(c,null);c.cur&&(c.cur.rootY=0);}
-function bRoute(a,b,d){d=d||0;if(d<4)for(const o of B_PLAN){const vx=b.x-a.x,vz=b.z-a.z,L2=vx*vx+vz*vz;if(L2<1e-4)break;let t=((o.x-a.x)*vx+(o.z-a.z)*vz)/L2;if(t<=.02||t>=.98)continue;
-    const px=a.x+vx*t,pz=a.z+vz*t,dx=px-o.x,dz=pz-o.z,dd=Math.hypot(dx,dz),R=o.r+.22;if(dd>=R)continue;
-    let nx,nz;if(dd>1e-3){nx=dx/dd;nz=dz/dd;}else{const L=Math.sqrt(L2);nx=-vz/L;nz=vx/L;}const w={x:o.x+nx*(R+.2),z:o.z+nz*(R+.2)};return bRoute(a,w,d+1).concat(bRoute(w,b,d+1));}
-  return[{x:b.x,z:b.z}];}
+// tìm đường trên lưới (A*) để đi vòng qua ghế, dù, quầy bar, cây dừa
+const BG={x0:-15,z0:-12,n:.25,W:124,H:84,blk:null};
+function bGridBuild(){const g=new Uint8Array(BG.W*BG.H);for(let gz=0;gz<BG.H;gz++)for(let gx=0;gx<BG.W;gx++){const x=BG.x0+gx*BG.n,z=BG.z0+gz*BG.n;for(const o of B_OBS)if(Math.hypot(x-o.x,z-o.z)<o.r+.24){g[gz*BG.W+gx]=1;break;}}BG.blk=g;}
+function bCell(p){return[Math.max(0,Math.min(BG.W-1,Math.round((p.x-BG.x0)/BG.n))),Math.max(0,Math.min(BG.H-1,Math.round((p.z-BG.z0)/BG.n)))];}
+function bLos(a,b){const d=Math.hypot(b.x-a.x,b.z-a.z),n=Math.ceil(d/.1);for(let i=1;i<n;i++){const t=i/n,[gx,gz]=bCell({x:a.x+(b.x-a.x)*t,z:a.z+(b.z-a.z)*t});if(BG.blk[gz*BG.W+gx])return false;}return true;}
+function bRoute(a,b){if(!BG.blk)bGridBuild();if(bLos(a,b))return[{x:b.x,z:b.z}];
+  const W=BG.W,[sx,sz]=bCell(a),[tx,tz]=bCell(b),S=sz*W+sx,T=tz*W+tx,N=W*BG.H,gs=new Float32Array(N).fill(1e9),from=new Int32Array(N).fill(-1),open=[S];gs[S]=0;const done=new Uint8Array(N);
+  const h=k=>Math.hypot(k%W-tx,Math.floor(k/W)-tz);let it=0;
+  while(open.length&&it++<20000){let bi=0,bf=1e9;for(let q=0;q<open.length;q++){const f=gs[open[q]]+h(open[q]);if(f<bf){bf=f;bi=q;}}const cur=open.splice(bi,1)[0];if(cur===T)break;done[cur]=1;
+    const cx=cur%W,cz=Math.floor(cur/W);for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dz)continue;const nx=cx+dx,nz=cz+dz;if(nx<0||nz<0||nx>=W||nz>=BG.H)continue;const k=nz*W+nx;if(done[k]||(BG.blk[k]&&k!==T))continue;
+      const ng=gs[cur]+(dx&&dz?1.414:1);if(ng<gs[k]){if(gs[k]>=1e9)open.push(k);gs[k]=ng;from[k]=cur;}}}
+  if(from[T]<0)return[{x:b.x,z:b.z}];const pts=[];for(let k=T;k!==S&&k>=0;k=from[k])pts.push({x:BG.x0+(k%W)*BG.n,z:BG.z0+Math.floor(k/W)*BG.n});pts.reverse();pts[pts.length-1]={x:b.x,z:b.z};
+  const out=[];let cur={x:a.x,z:a.z},q=0;while(q<pts.length){let far=q;for(let m=pts.length-1;m>q;m--)if(bLos(cur,pts[m])){far=m;break;}out.push(pts[far]);cur=pts[far];q=far+1;}return out;}
 function bPush(c){if(c._sunbathe||c._swim)return;for(const o of B_OBS){const dx=c.pos.x-o.x,dz=c.pos.z-o.z,d=Math.hypot(dx,dz),R=o.r+.2;if(d<R){if(d<1e-3){c.pos.x+=R;continue;}c.pos.x=o.x+dx/d*R;c.pos.z=o.z+dz/d*R;}}}
-function bWalk(c,x,z,tok){c.pose='stand';c.seat=null;return new Promise(res=>{c.path=bRoute({x:c.pos.x,z:c.pos.z},{x,z});c.walking=true;c.onArrive=()=>res(true);const iv=setInterval(()=>{if(c._bTok!==tok||!BEACH.on||(BEACH.photo&&!c._toRow)){clearInterval(iv);res(false);}else if(!c.path.length){clearInterval(iv);res(true);}},200);});}
+function bFree(p){for(let k=0;k<4;k++)for(const o of B_OBS){const dx=p.x-o.x,dz=p.z-o.z,d=Math.hypot(dx,dz),R=o.r+.28;if(d<R){if(d<1e-3){p.x+=R;continue;}p.x=o.x+dx/d*R;p.z=o.z+dz/d*R;}}return p;}
+function bWalk(c,x,z,tok){c.pose='stand';c.seat=null;const T=bFree({x,z});return new Promise(res=>{c.path=bRoute({x:c.pos.x,z:c.pos.z},T).map(bFree);c.walking=true;c.onArrive=()=>res(true);
+  let lx=c.pos.x,lz=c.pos.z,lt=simTime;
+  const iv=setInterval(()=>{if(c._bTok!==tok||!BEACH.on||(BEACH.photo&&!c._toRow)){clearInterval(iv);res(false);return;}if(!c.path.length){clearInterval(iv);res(true);return;}
+    if(Math.hypot(c.pos.x-lx,c.pos.z-lz)>.12){lx=c.pos.x;lz=c.pos.z;lt=simTime;}
+    else if(simTime-lt>1.6){lt=simTime;if(c.path.length>1)c.path.shift();else{c.path=[];c.walking=false;const r=c.onArrive;c.onArrive=null;r&&r();}}},200);});}
 async function bWait(sec,c,tok){const end=simTime+sec;while(simTime<end){if(!BEACH.on||BEACH.photo||c._bTok!==tok)return false;await wait(.25);}return true;}
 const B_LINES={swim:['Nước mát quá trời luôn! 🌊','Ai bơi thi với mình không? 🏊','Sóng êm ghê, thích quá! 😆'],sun:['Phơi nắng chút cho da nâu khỏe 😎','Nằm đây ngủ một giấc thôi… 😴','Gió biển mát ghê 🍃'],drink:['Cocktail ngon xỉu! 🍹','Một ly dừa tươi cho mát 🥥','Cạn ly nào cả nhà! 🥂'],walk:['Biển đẹp quá trời! 🌅','Đi dạo nhặt vỏ sò nè 🐚','Chụp hình sống ảo chỗ này đẹp nè 📸']};
 async function bAct(c,act,i,tok){bReset(c);const r=srand(hashStr(BEACH.key+c.id+act+Math.floor(simTime/5)));
   if(act==='swim'){if(!await bWalk(c,-6+i*2.6+r()*.8,-11.4-r()*1.8,tok))return;c._swim=true;c.arms='wave';c.think('🏊',1.6);if(r()<.6)c.say(pick(B_LINES.swim),2.2);await bWait(isHuman(c)?1e6:16,c,tok);c._swim=false;c.pos.y=0;}
   else if(act==='sun'){const L=BL.loungers[i%BL.loungers.length];if(!await bWalk(c,L.x+.9,L.z,tok))return;bLie(c,L);c.think('😎',1.8);if(r()<.6)wait(1).then(()=>c.say(pick(B_LINES.sun),2.2));await bWait(isHuman(c)?1e6:16,c,tok);if(c._sunbathe){c._sunbathe=false;c.root.rotation.x=0;c.pos.set(L.x+.9,0,L.z);}}
-  else if(act.startsWith('drink')){const kind=act==='drink:coco'?'coco':act==='drink:cocktail'?'cocktail':(r()<.5?'coco':'cocktail');if(!await bWalk(c,BL.bar.x-1+((i*.55)%2.2),BL.bar.z+.3,tok))return;c.yaw=PI;await bServe(c,kind);if(c._bTok!==tok||!BEACH.on||BEACH.photo)return;c.yaw=0;c.arms='cup';bHold(c,kind);c.think(kind==='coco'?'🥥':'🍹',1.6);if(r()<.7)c.say(pick(B_LINES.drink),2.2);await bWait(isHuman(c)?1e6:14,c,tok);}
+  else if(act.startsWith('drink')){const kind=act==='drink:coco'?'coco':act==='drink:cocktail'?'cocktail':(r()<.5?'coco':'cocktail');if(!await bWalk(c,BL.bar.x-1+((i*.55)%2.2),BL.bar.z+.3,tok))return;c.yaw=PI;await bServe(c,kind);if(c._bTok!==tok||!BEACH.on||BEACH.photo)return;c.arms='cup';bHold(c,kind);c.think(kind==='coco'?'🥥':'🍹',1.6);if(r()<.7)c.say(pick(B_LINES.drink),2.2);await bSip(c,kind,tok,isHuman(c)?1e6:16);}
   else{for(let k=0;k<3;k++){if(!await bWalk(c,-11+r()*22,-7.6+r()*2.4,tok))return;c.yaw=PI;if(k===1){c.think(pick(['🌅','🐚']),1.6);if(r()<.5)c.say(pick(B_LINES.walk),2.2);}if(!await bWait(2.5,c,tok))return;}}
   bReset(c);}
 async function bLife(c,i){let slot=0;while(BEACH.on&&!BEACH.photo){const tok=c._bTok=(c._bTok||0)+1;
