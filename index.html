@@ -492,6 +492,15 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .lvdates input{font:inherit;font-size:14px;font-weight:600;color:var(--ink);border:2px solid #e3e9f4;background:#f8fbff;border-radius:12px;padding:7px 8px}
 .hrpop .prlv{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
 .hrpop.argue .prtop{background:linear-gradient(135deg,#ff5f6d,#ffc371)}.hrpop.argue .prin{box-shadow:0 18px 50px rgba(240,90,80,.4),0 0 0 4px #ffc7b0}
+.jtpill{position:absolute;right:8px;top:84px;z-index:6;font:inherit;font-size:11.5px;font-weight:700;border:0;border-radius:999px;padding:6px 11px;background:#fff6e0;color:#9a5b00;box-shadow:0 2px 8px rgba(160,110,30,.25);cursor:pointer;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jtpill.live{background:linear-gradient(135deg,#ff8a5b,#ffbf47);color:#fff;animation:jtPulse 1.2s ease-in-out infinite}.jtpill.done{background:#e8f8ef;color:#1d7a4a}
+@keyframes jtPulse{50%{transform:scale(1.05)}}
+.jtgq{border:2px solid #e3e9f4;background:#f8fbff;border-radius:14px;padding:9px 11px;text-align:left}
+.jtgq b{display:block;font-size:13.5px;line-height:1.4}.jtga{font-size:13px;color:#1d7a4a;font-weight:700;margin-top:4px}.jtgq small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.jxo{display:block;width:100%;text-align:left;font:inherit;font-size:13px;margin-top:5px;padding:7px 10px;border-radius:10px;border:2px solid #e3e9f4;background:#fff;cursor:pointer;color:var(--ink)}
+.jxo.on{border-color:#7fb4ff;background:#eaf3ff;font-weight:700}
+.jxtop{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;margin-top:6px}.jxtop #jxLeft{color:#d0472f}
+.jtquick{display:flex;gap:6px;margin-top:6px}.jtquick button{flex:1;font:inherit;font-size:12px;font-weight:700;border:2px solid #e3e9f4;background:#f8fbff;border-radius:10px;padding:6px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -533,6 +542,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     <div class="promopop" id="promoPop" role="status"><div class="prfx" id="prFx"></div><div class="prin"><div class="prtop">🎉 CHÚC MỪNG THĂNG CHỨC! 🎉</div><span class="av3" id="prAv"></span><b id="prName"></b><div class="prlv" id="prLv"></div><small id="prSub"></small></div></div>
     <div class="promopop hrpop" id="hrPop" role="status"><div class="prin"><div class="prtop" id="hrTop"></div><div class="hrav"><span class="av3" id="hrAv"></span><span class="hrbox">📦</span><span class="hrtear">😭</span></div><b id="hrName"></b><div class="prlv" id="hrLv"></div><small id="hrSub"></small></div></div>
     <button type="button" class="dancefab" data-cmd="dance" title="Nhảy múa xả stress">💃<span>Xả stress</span></button>
+    <button type="button" class="jtpill" id="jtPill" style="display:none"></button>
     <button type="button" class="clk" id="clk" title="Giờ thật của máy bạn — bấm để trời sáng/tối theo giờ thật">🕗 --:--</button>
     <div class="tod" id="tod">
       <button data-tod="day" class="on">☀️ Ban ngày</button>
@@ -594,6 +604,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b pink big" data-cmd="boss">👨‍💼 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
           <button class="b pink big" data-cmd="incident">💥 Sự cố<small>Mất điện, kẹt giấy, Mochi phá…</small></button>
           <button class="b pink big" data-cmd="trip">🚌 Team building<small>Cả team đi du lịch, gắn kết</small></button>
+          <button class="b pink big" data-cmd="jobtest">📝 Job Test<small>Quản lý gửi thư hẹn ngày thi</small></button>
         </div>
       </div>
       <div class="box">
@@ -782,6 +793,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li>🙂 Vào làm và tan ca đều <b>check-in / check-out Face ID</b> ở máy cạnh cửa.</li>
       <li>💰 Ngày <b>30</b> hằng tháng nhận lương: lương theo cấp bậc + thưởng KPI + tăng ca.</li>
       <li>📝 Nghỉ phép phải gửi đơn chờ quản lý duyệt. <b>Ngày nghỉ không được tính lương.</b></li>
+      <li>📝 <b>Job Test</b> do quản lý hẹn lịch, bắt buộc mọi nhân viên: 10 câu, đúng 8/10 là đậu, rớt trừ 1 KPI. Cao điểm nhất và nhanh nhất được thưởng nóng 2 triệu. Ôn bài ở nút 📚 Đề cương.</li>
     </ul>
     <button type="button" id="rOk">Đã hiểu, vào làm thôi! ✓</button>
   </div>
@@ -836,6 +848,24 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="kmt" style="font-weight:700;text-align:left;margin-top:12px">🙋 Mình tự đăng ký nghỉ</div>
   <button type="button" id="lhSelf" class="wbbtn">📝 Đăng ký nghỉ phép cho mình (sếp tổng duyệt luôn)</button>
   <div class="crow"><button type="button" id="lhClose">Đóng</button></div></div></div>
+<div id="jtSched" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtSTitle"><div class="wcard mcardm">
+  <div class="wlogo">📧</div><h2 id="jtSTitle">Gửi thư Job Test</h2><p class="wsub">Bắt buộc toàn bộ nhân viên (người chơi và NPC) tham gia. Đề thi 10 câu về lĩnh vực Đào tạo, đúng 8/10 là đậu, rớt trừ 1 KPI. Điểm cao nhất và làm nhanh nhất được trao bằng khen + thưởng nóng 2.000.000đ.</p>
+  <div class="kmt" style="font-weight:700;text-align:left">📅 Chọn ngày giờ thi</div><div class="lvdates"><label>Ngày giờ<input type="datetime-local" id="jtAt"></label></div>
+  <div class="jtquick"><button type="button" data-jtq="2">+2 phút</button><button type="button" data-jtq="5">+5 phút</button><button type="button" data-jtq="15">+15 phút</button><button type="button" data-jtq="60">+1 giờ</button></div>
+  <div class="bpleft" id="jtInfo"></div>
+  <div class="crow"><button type="button" id="jtCancel" class="cghost">Hủy</button><button type="button" id="jtSend">Gửi thư 📨</button></div></div></div>
+<div id="jtGuide" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtGTitle"><div class="wcard mcardm">
+  <div class="wlogo">📚</div><h2 id="jtGTitle">Đề cương ôn tập Job Test</h2><p class="wsub" id="jtGSub"></p>
+  <div class="wblist" id="jtGList"></div>
+  <div class="crow"><button type="button" id="jtGClose">Đóng</button></div></div></div>
+<div id="jtExam" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtXTitle"><div class="wcard mcardm">
+  <div class="wlogo">📝</div><h2 id="jtXTitle">Bài thi Job Test</h2><div class="jxtop"><span id="jxDone"></span><span id="jxLeft"></span></div>
+  <div class="wblist" id="jxList"></div>
+  <div class="crow"><button type="button" id="jxSubmit">Nộp bài ✅</button></div></div></div>
+<div id="jtRes" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtRTitle"><div class="wcard mcardm">
+  <div class="wlogo">📊</div><h2 id="jtRTitle">Kết quả Job Test</h2><p class="wsub" id="jtRSub"></p>
+  <div class="wblist" id="jtRList"></div>
+  <div class="crow"><button type="button" id="jtRClose">Đóng</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -3080,7 +3110,7 @@ function slip(c){const rows=[];
   else{const k=c.kpiMonth||0;rows.push([`Lương ${LEVELS[c.lv].n}`,payBase(c)]);
     rows.push([k>=0?`Thưởng KPI (${k} × ${vnd(KPI_RATE)})`:`Trừ KPI (${k} điểm × ${vnd(KPI_RATE)})`,k*KPI_RATE]);
     if(c.otMonth)rows.push([`Tăng ca (${c.otMonth} buổi × ${vnd(OT_RATE)})`,c.otMonth*OT_RATE]);}
-  {const ld=window.leaveDaysOf?leaveDaysOf(c):0;if(ld)rows.push([`📝 Nghỉ phép không lương (${ld} ngày)`,-ld*Math.round(payBase(c)/26)]);}
+  {const bo=window.bonusOf?bonusOf(c):0;if(bo)rows.push(['🏆 Thưởng nóng Job Test',bo]);}{const ld=window.leaveDaysOf?leaveDaysOf(c):0;if(ld)rows.push([`📝 Nghỉ phép không lương (${ld} ngày)`,-ld*Math.round(payBase(c)/26)]);}
     return{rows,tot:Math.max(0,rows.reduce((s,r)=>s+r[1],0))};}
 function ting(){if(!MUSIC.on)return;const c=audioCtx();if(!c||c.state!=='running')return;const t=c.currentTime;
   [[1318.5,0],[1760,.14]].forEach(([f,dt])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+dt);g.gain.linearRampToValueAtTime(.22,t+dt+.01);g.gain.exponentialRampToValueAtTime(.001,t+dt+.55);o.connect(g);g.connect(c.destination);o.start(t+dt);o.stop(t+dt+.6);});}
@@ -4247,6 +4277,9 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='dayoff')return runDayoff(c,v);
   if(n==='argue')return runArgue(c);
   if(n==='tod')return todSet(v);
+  if(n==='jtsched')return jtSched(v);
+  if(n==='jtans')return jtAns(c,v);
+  if(n==='jtend')return jtEnd(v);
   if(n==='leavereq')return leaveReq(c,v);
   if(n==='leavedec')return leaveDec(v);
   if(n==='thankmgr')return thankMgr(c);
@@ -4268,7 +4301,7 @@ function lunchLate(n,c){if(!rtOn()||lunchHour())return;
     who.forEach(x=>{addKpi(x,-2,`${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ (12:00–12:59)`);x.think('⏰',1.6);});
     setStatus(`⏰ ${n==='lunch'?'Ăn trưa':'Ngủ trưa'} ngoài giờ nghỉ trưa (12:00–12:59): ${who.map(x=>x.name).join(', ')} bị trừ 2 KPI.`);},2200);}
 const EVCMD={boba:()=>openBoba(),incident:()=>run('incident',null,{v:makeIncident()}),boss:()=>run('boss',null,{v:'1'}),yep:()=>run('yep',null,{v:makeYep()}),
-  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),argue:()=>{if(!selected){setStatus('😤 Chọn nhân vật trước nhé.');return;}run('argue',selected);},sick:()=>{if(isMyMgr(selected)){openLeaveHub();return;}openLeave();},scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
+  quiz:()=>{if(EV.quiz&&EV.quiz.on){qzShow();return;}run('quiz',null,{v:makeQuiz()});},fix:()=>run('fix',selected||(ME.id?byId(ME.id):null)),filesend:()=>openFileSend(),inbox:()=>openInbox(),jobtest:()=>openJtSched(),argue:()=>{if(!selected){setStatus('😤 Chọn nhân vật trước nhé.');return;}run('argue',selected);},sick:()=>{if(isMyMgr(selected)){openLeaveHub();return;}openLeave();},scroff:()=>{if(!selected){setStatus('🖥️ Chọn một nhân vật trước nhé.');return;}run('scroff',selected);},report:()=>{if(selected&&selected.manager&&(!isHuman(selected)||selected.id===ME.id)){openReqReport();return;}run('report',selected);},flowers:()=>openFlowers(),trip:()=>openTrip(),partner:()=>{const c=selected||(ME.id?byId(ME.id):null);run('partner',c,{v:makePartner()});}};
 // sự kiện ngẫu nhiên: chỉ máy "chủ phòng" tung xúc xắc, rồi gửi cho mọi người
 function evRandTick(){
   if(!EV.rand||!CAT_HOST||simTime<EV.nextRand)return;EV.nextRand=simTime+rand(150,280);
@@ -4863,6 +4896,124 @@ setTimeout(()=>{document.querySelectorAll('[data-tod]').forEach(b=>b.onclick=()=
 {const o=peerState;peerState=st=>{try{if(st&&st.tod&&!CAT_HOST){let cur='day';try{cur=RT.tod?'rt':todName;}catch(e){}if(cur!==st.tod)todApply(st.tod,true);}}catch(e){}o(st);};}
 setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.peerState=peerState;}},0);
 
+/* ================= Job Test: quản lý gửi thư hẹn ngày thi, đề cương 20 câu, đề thi 10 câu (8/10 đậu) ================= */
+const JT_BANK=[
+ ['Mô hình ADDIE trong thiết kế đào tạo gồm các bước nào?',['Phân tích – Thiết kế – Phát triển – Triển khai – Đánh giá','Lập kế hoạch – Tuyển dụng – Đào tạo – Thăng chức – Đánh giá','Học – Hỏi – Hiểu – Hành – Hay','Định hướng – Dạy – Duyệt – Đo – Điều chỉnh'],0,'ADDIE = Analysis, Design, Development, Implementation, Evaluation.'],
+ ['Theo mô hình Kirkpatrick, cấp độ 1 đánh giá điều gì?',['Phản ứng – mức độ hài lòng của học viên','Kết quả kinh doanh','Hành vi khi làm việc','Chi phí khóa học'],0,'4 cấp độ: Phản ứng → Học tập → Hành vi → Kết quả.'],
+ ['Cấp độ 3 trong mô hình Kirkpatrick đo lường gì?',['Hành vi – việc áp dụng kiến thức vào công việc','Điểm bài kiểm tra cuối khóa','Cảm nhận về giảng viên','Doanh thu công ty'],0,'Cấp độ 3 xem học viên có thay đổi cách làm việc sau đào tạo không.'],
+ ['TNA trong đào tạo là viết tắt của?',['Phân tích nhu cầu đào tạo (Training Needs Analysis)','Kiểm tra năng lực nhân viên','Kế hoạch đào tạo năm','Đánh giá giảng viên'],0,'TNA giúp xác định khoảng trống năng lực cần đào tạo.'],
+ ['Mô hình 70-20-10: 70% việc học đến từ đâu?',['Trải nghiệm thực tế trong công việc','Các khóa học chính thức','Đọc sách ở nhà','Học từ đồng nghiệp, sếp'],0,'70% trải nghiệm, 20% học từ người khác, 10% khóa học chính thức.'],
+ ['Microlearning là gì?',['Bài học ngắn 3–10 phút, tập trung một mục tiêu','Khóa học kéo dài nhiều tháng','Học bằng kính hiển vi','Hội thảo đông người'],0,'Microlearning chia nhỏ nội dung để dễ học, dễ nhớ.'],
+ ['LMS là hệ thống gì?',['Hệ thống quản lý học tập trực tuyến','Hệ thống chấm công','Phần mềm kế toán','Hệ thống tuyển dụng'],0,'LMS (Learning Management System) quản lý khóa học, học viên, kết quả.'],
+ ['Mục tiêu chính của chương trình onboarding là?',['Giúp nhân viên mới hòa nhập và nắm công việc nhanh','Đánh giá cuối năm','Cắt giảm nhân sự','Tổ chức tiệc công ty'],0,'Onboarding tốt giúp giữ chân nhân viên mới.'],
+ ['Blended learning là hình thức học nào?',['Kết hợp học trực tuyến và học trực tiếp','Chỉ học qua video','Chỉ học trên lớp','Học nhóm vào cuối tuần'],0,'Blended = kết hợp nhiều hình thức học.'],
+ ['OJT (On-the-Job Training) là gì?',['Đào tạo tại chỗ ngay trong công việc','Đào tạo ở nước ngoài','Đào tạo qua sách','Đào tạo sau giờ làm'],0,'Học viên vừa làm vừa học dưới sự hướng dẫn.'],
+ ['Trong mục tiêu SMART, chữ M nghĩa là?',['Measurable – đo lường được','Motivated – có động lực','Modern – hiện đại','Major – quan trọng'],0,'SMART: Cụ thể, Đo lường được, Khả thi, Liên quan, Có thời hạn.'],
+ ['Điểm khác nhau chính giữa coaching và mentoring?',['Coaching tập trung kỹ năng, mục tiêu ngắn hạn; mentoring định hướng phát triển dài hạn','Coaching miễn phí, mentoring tốn phí','Không khác gì nhau','Mentoring chỉ dành cho sếp'],0,'Coach giúp đạt mục tiêu cụ thể, mentor chia sẻ kinh nghiệm dài hạn.'],
+ ['Bậc thấp nhất trong thang Bloom là?',['Ghi nhớ','Sáng tạo','Đánh giá','Phân tích'],0,'Thứ tự: Ghi nhớ → Hiểu → Vận dụng → Phân tích → Đánh giá → Sáng tạo.'],
+ ['Theo Knowles (andragogy), người lớn học tốt nhất khi?',['Nội dung gắn với kinh nghiệm và công việc thực tế','Học thuộc lòng lý thuyết','Bị kiểm tra liên tục','Học một mình không trao đổi'],0,'Người lớn cần thấy ngay giá trị áp dụng của bài học.'],
+ ['Bài kiểm tra trước và sau đào tạo (pre/post-test) dùng để?',['So sánh kiến thức trước và sau khóa học','Chọn người nghỉ việc','Tính lương','Xếp chỗ ngồi'],0,'Chênh lệch điểm cho thấy hiệu quả khóa học.'],
+ ['Công thức ROI đào tạo là?',['(Lợi ích – Chi phí) / Chi phí × 100%','Chi phí / Số học viên','Số giờ học × Số người','Lợi ích × Chi phí'],0,'ROI cho biết mỗi đồng chi cho đào tạo mang lại bao nhiêu lợi ích.'],
+ ['IDP trong phát triển nhân sự là gì?',['Kế hoạch phát triển cá nhân','Mã số nhân viên','Bảng chấm công','Quy trình nghỉ phép'],0,'IDP (Individual Development Plan) do nhân viên và quản lý cùng xây dựng.'],
+ ['Khung năng lực (competency framework) dùng để?',['Xác định kiến thức, kỹ năng, thái độ cần cho từng vị trí','Chấm điểm thi đua','Sắp xếp phòng làm việc','Tính thuế'],0,'Là nền tảng cho tuyển dụng, đào tạo và đánh giá.'],
+ ['Chương trình Train-the-Trainer nhằm mục đích?',['Đào tạo nhân viên trở thành giảng viên nội bộ','Đào tạo lái tàu hỏa','Tuyển giảng viên bên ngoài','Đánh giá học viên'],0,'Giúp công ty tự chủ nguồn giảng viên.'],
+ ['Gamification trong đào tạo là?',['Áp dụng yếu tố trò chơi (điểm, huy hiệu, bảng xếp hạng) để tăng hứng thú','Cho nhân viên chơi game trong giờ làm','Mua máy chơi game cho văn phòng','Tổ chức giải đấu thể thao'],0,'Yếu tố trò chơi giúp học viên chủ động và nhớ lâu hơn.']];
+const JT_N=10,JT_PASS=8,JT_EXAM=180000,JT_WIN=240000,JT_PRIZE=2000000;
+let JT=null;try{JT=JSON.parse(localStorage.getItem('office_jt')||'null');}catch(e){}
+const jtSave=()=>{try{localStorage.setItem('office_jt',JSON.stringify(JT));}catch(e){}};
+const jtFmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
+const jtWhen=at=>{const d=new Date(at);return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} ${d.getDate()}/${d.getMonth()+1}`;};
+const jtEmp=()=>CHARS.filter(c=>!c.manager&&!c.away);
+const jtMine=()=>{const me=ME.id&&byId(ME.id);return me&&!me.manager?me:null;};
+// đề thi: 10 câu lấy ngẫu nhiên từ đề cương, xáo đáp án (mọi máy giống nhau theo mã kỳ thi)
+function jtQs(){if(!JT)return[];const r=srand(hashStr('jt'+JT.id));return JT.qs.map(i=>{const [q,o,k,ex]=JT_BANK[i];const ord=[0,1,2,3];for(let a=3;a>0;a--){const b=Math.floor(r()*(a+1));[ord[a],ord[b]]=[ord[b],ord[a]];}return{q,opts:ord.map(j=>o[j]),ok:ord.indexOf(k),ex};});}
+/* --- quản lý gửi thư --- */
+function openJtSched(){const me=ME.id&&byId(ME.id);if(!(me&&me.manager)&&isHuman(MGR)){setStatus('📝 Chỉ quản lý mới tổ chức Job Test được.');return;}
+  if(JT&&!JT.ended&&Date.now()<JT.at+JT_WIN){setStatus(`📝 Đã có lịch Job Test lúc ${jtWhen(JT.at)} rồi.`);return;}
+  const d=new Date(Date.now()+5*60000);$('#jtAt').value=isoOf(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');$('#jtAt').min=isoOf(new Date())+'T00:00';jtSchedInfo();$('#jtSched').classList.add('show');}
+function jtSchedInfo(){const t=new Date($('#jtAt').value).getTime();const ok=t>Date.now()+30000;$('#jtInfo').textContent=ok?`📅 Thi lúc ${jtWhen(t)} · còn ${jtFmt(t-Date.now())}`:'⚠️ Chọn thời gian sau hiện tại ít nhất 1 phút';$('#jtSend').disabled=!ok;}
+$('#jtAt').addEventListener('input',jtSchedInfo);
+document.querySelectorAll('[data-jtq]').forEach(b=>b.onclick=()=>{const d=new Date(Date.now()+(+b.dataset.jtq)*60000);$('#jtAt').value=isoOf(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');jtSchedInfo();});
+$('#jtCancel').onclick=()=>$('#jtSched').classList.remove('show');
+$('#jtSend').onclick=()=>{const t=new Date($('#jtAt').value).getTime();if(!(t>Date.now()+30000))return;$('#jtSched').classList.remove('show');
+  const qs=shuffle(JT_BANK.map((_,i)=>i)).slice(0,JT_N);run('jtsched',null,{v:[Date.now().toString(36),t,qs.join('.'),String((ME.id&&byId(ME.id)||MGR).name).replace(/[|]/g,'')].join('|')});};
+function jtSched(v,quiet){const [id,atS,qsS,by]=String(v||'').split('|');const at=+atS;if(!id||!at||!qsS)return false;if(JT&&JT.id===id)return true;
+  JT={id,at,qs:qsS.split('.').map(Number).filter(i=>JT_BANK[i]),by:by||'Quản lý',ans:{},ended:false,rem:false,opened:false};jtSave();
+  setStatus(`📧 ${JT.by} gửi thư: Job Test bắt buộc cho toàn bộ nhân viên lúc ${jtWhen(at)}. Bấm “📚 Đề cương” để ôn tập!`);
+  if(quiet)return true;
+  const me=ME.id&&byId(ME.id);
+  if(me&&me.manager)hrPop('ok',me,'📧 ĐÃ GỬI THƯ JOB TEST',`Thi lúc ${jtWhen(at)}`,`Toàn bộ ${jtEmp().length} nhân viên đã nhận thư, bắt buộc tham gia.`);
+  else if(me){$('#mlIcon').textContent='📧';$('#mlTitle').textContent='Thư mời Job Test';
+    $('#mlBody').textContent=`Kính gửi ${me.name},\n\nCông ty tổ chức Job Test về lĩnh vực Đào tạo, bắt buộc toàn bộ nhân viên tham gia.\n\n📅 Thời gian: ${jtWhen(at)}\n📝 Đề thi: ${JT_N} câu, làm trong ${JT_EXAM/60000} phút, đúng từ ${JT_PASS}/${JT_N} câu là đậu\n⚠️ Thi rớt hoặc bỏ thi: trừ 1 KPI\n🏆 Điểm cao nhất và làm nhanh nhất: được sếp trao bằng khen + thưởng nóng 2.000.000đ\n\nBấm “📚 Đề cương” trên màn hình để ôn tập trước nhé!\n\n— ${JT.by} 🎖️`;
+    $('#mgrLetter').classList.add('show');beep(true);}
+  return true;}
+/* --- đề cương --- */
+function openJtGuide(){const box=$('#jtGList');box.textContent='';JT_BANK.forEach(([q,o,k,ex],i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`${i+1}. ${q}`;
+    const a=document.createElement('div');a.className='jtga';a.textContent='✅ '+o[k];const e=document.createElement('small');e.textContent='💡 '+ex;r.append(b,a,e);box.appendChild(r);});
+  $('#jtGSub').textContent=JT&&!JT.ended?`Kỳ thi lúc ${jtWhen(JT.at)} · đề thi ${JT_N} câu lấy ngẫu nhiên từ ${JT_BANK.length} câu dưới đây`:`Đề thi ${JT_N} câu lấy ngẫu nhiên từ ${JT_BANK.length} câu dưới đây`;
+  $('#jtGuide').classList.add('show');}
+$('#jtGClose').onclick=()=>$('#jtGuide').classList.remove('show');
+/* --- bài thi --- */
+let JX=null,jxT=0;
+function openJtExam(){const me=jtMine();if(!JT||JT.ended||!me||JT.ans[me.id]||Date.now()<JT.at)return;
+  if(!JX||JX.id!==JT.id){JX={id:JT.id,qs:jtQs(),pick:{},t0:Date.now()};}
+  const box=$('#jxList');box.textContent='';JX.qs.forEach((q,i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`Câu ${i+1}. ${q.q}`;r.appendChild(b);
+    q.opts.forEach((o,j)=>{const bt=document.createElement('button');bt.type='button';bt.className='jxo'+(JX.pick[i]===j?' on':'');bt.textContent=`${'ABCD'[j]}. ${o}`;bt.onclick=()=>{JX.pick[i]=j;r.querySelectorAll('.jxo').forEach((x,k)=>x.classList.toggle('on',k===j));jxCount();};r.appendChild(bt);});box.appendChild(r);});
+  jxCount();$('#jtExam').classList.add('show');clearInterval(jxT);
+  const tk=()=>{const l=JX.t0+JT_EXAM-Date.now();$('#jxLeft').textContent=`⏳ ${jtFmt(l)}`;if(l<=0){clearInterval(jxT);jtSubmit();}};tk();jxT=setInterval(tk,250);}
+function jxCount(){const n=Object.keys(JX.pick).length;$('#jxDone').textContent=`Đã làm ${n}/${JX.qs.length} câu`;}
+function jtSubmit(){const me=jtMine();if(!JX||!me||!JT||JT.ans[me.id])return;clearInterval(jxT);$('#jtExam').classList.remove('show');
+  const sc=JX.qs.reduce((s,q,i)=>s+(JX.pick[i]===q.ok?1:0),0),t=Math.max(1,Math.round((Date.now()-JX.t0)/1000));
+  run('jtans',me,{v:`${JT.id}|${sc}|${t}`});
+  hrPop(sc>=JT_PASS?'ok':'no',me,sc>=JT_PASS?'🎉 BẠN ĐÃ ĐẬU JOB TEST':'😢 CHƯA ĐẠT JOB TEST',`${sc}/${JT_N} câu · ${t} giây`,sc>=JT_PASS?'Chờ mọi người thi xong để công bố người được thưởng nóng nhé!':`Cần đúng ${JT_PASS}/${JT_N} câu. Bị trừ 1 KPI — ôn lại đề cương nhé!`);}
+$('#jxSubmit').onclick=jtSubmit;
+function jtAns(c,v){const [id,sS,tS]=String(v||'').split('|');if(!c||!JT||JT.id!==id||JT.ended)return false;if(JT.ans[c.id])return true;
+  JT.ans[c.id]=[+sS||0,+tS||999];jtSave();c.think('📝',1.4);setStatus(`📝 ${c.name} đã nộp bài Job Test.`);
+  if(CAT_HOST&&jtEmp().filter(isHuman).every(e=>JT.ans[e.id]))setTimeout(jtHostEnd,2500);   // người chơi nộp hết thì công bố luôn
+  return true;}
+/* --- kết thúc & công bố --- */
+function jtHostEnd(){if(!CAT_HOST||!JT||JT.ended||JT._ending)return;JT._ending=true;
+  const res=jtEmp().map(c=>{let r=JT.ans[c.id];if(!r&&!isHuman(c)){const g=srand(hashStr(JT.id+c.id));const p=.55+g()*.37;let s=0;for(let i=0;i<JT_N;i++)if(g()<p)s++;r=[s,Math.round(55+g()*120)];}return `${c.id}:${r?r[0]:0}:${r?r[1]:999}`;});
+  run('jtend',null,{v:`${JT.id}|${res.join('.')}`});}
+function jtEnd(v){const [id,rs]=String(v||'').split('|');if(!JT||JT.id!==id||JT.ended)return false;JT.ended=true;clearInterval(jxT);$('#jtExam').classList.remove('show');
+  const R=String(rs||'').split('.').map(x=>{const [cid,s,t]=x.split(':');return{c:byId(cid),s:+s||0,t:+t||999};}).filter(r=>r.c);JT.res=R.map(r=>[r.c.id,r.s,r.t]);jtSave();
+  R.forEach(r=>{if(r.s<JT_PASS)addKpi(r.c,-1,r.t>=999?'Bỏ thi Job Test':'Thi rớt Job Test');});
+  const pass=R.filter(r=>r.s>=JT_PASS).sort((a,b)=>b.s-a.s||a.t-b.t),win=pass[0]||null;
+  CHARS.forEach(c=>{if(c._jtSit){c._jtSit=false;if(c.busy&&/Thi Job Test/.test(c.activity||''))end(c,'working');}});
+  if(win){bonusAdd(win.c,JT_PRIZE);setTimeout(()=>hrPop('ok',win.c,'🏆 THƯỞNG NÓNG JOB TEST',`${win.s}/${JT_N} câu · ${win.t} giây`,`Điểm cao nhất và nhanh nhất! ${mgrLabel()} trao bằng khen + thưởng nóng 2.000.000đ 🎓`),4500);
+    if(!MGR.away)guard(async()=>{begin(MGR,'🎓 Trao bằng khen Job Test');const w=win.c;if(!w.away){const a=Math.atan2(w.root.position.x-MGR.root.position.x,w.root.position.z-MGR.root.position.z);await MGR.walkTo(w.root.position.x-Math.sin(a)*1.0,w.root.position.z-Math.cos(a)*1.0);MGR.lookAt=w;w.lookAt=MGR;}
+      await MGR.say(`Chúc mừng ${w.name}! Bằng khen và thưởng nóng 2 triệu cho em nè 🏆`,2.8);w.gesture&&w.gesture('heart',2);w.think('🎓',2);await w.say('Em cảm ơn chị ạ! 🥰',2);MGR.lookAt=null;w.lookAt=null;setAct(MGR,'🚶 Về phòng');await MGR.goSit(MGR.home);end(MGR,'working');},[MGR]);}
+  setStatus(`📊 Kết quả Job Test: ${pass.length}/${R.length} nhân viên đậu.${win?` 🏆 ${win.c.name} đạt ${win.s}/${JT_N} trong ${win.t} giây — thưởng nóng 2.000.000đ!`:' Không ai đạt điểm thưởng.'}`);
+  jtShowRes(R,win);return true;}
+function jtShowRes(R,win){const box=$('#jtRList');box.textContent='';R.slice().sort((a,b)=>b.s-a.s||a.t-b.t).forEach((r,i)=>{const row=document.createElement('div');row.className='wbrow '+(r.s>=JT_PASS?'':'pend');
+    const top=document.createElement('div');top.className='wbtop';const av=document.createElement('span');av.className='av3';setAvatar(av,r.c);const t=document.createElement('div');const b=document.createElement('b');b.textContent=`${win&&r.c===win.c?'🏆 ':(i+1)+'. '}${r.c.name}${isHuman(r.c)?' 👤':' 🤖'}`;
+    const sm=document.createElement('small');sm.textContent=r.t>=999?'Không làm bài':`${r.s}/${JT_N} câu · ${r.t} giây`;t.append(b,sm);const ch=document.createElement('span');ch.className='wbchip';ch.textContent=r.s>=JT_PASS?'✅ Đậu':'❌ Rớt · -1 KPI';top.append(av,t,ch);row.appendChild(top);box.appendChild(row);});
+  $('#jtRSub').textContent=`${R.filter(r=>r.s>=JT_PASS).length}/${R.length} nhân viên đậu (cần ${JT_PASS}/${JT_N} câu)${win?` · 🏆 ${win.c.name} nhận thưởng nóng 2.000.000đ`:''}`;$('#jtRes').classList.add('show');}
+$('#jtRClose').onclick=()=>$('#jtRes').classList.remove('show');
+/* --- thưởng nóng vào phiếu lương --- */
+function bonusStore(){const mk=new Date().getFullYear()+'-'+(new Date().getMonth()+1);let o=null;try{o=JSON.parse(localStorage.getItem('office_bonus')||'null');}catch(e){}if(!o||o.mon!==mk)o={mon:mk,n:{}};return o;}
+function bonusAdd(c,amt){const o=bonusStore();o.n[c.id]=(o.n[c.id]||0)+amt;try{localStorage.setItem('office_bonus',JSON.stringify(o));}catch(e){}}
+window.bonusOf=c=>bonusStore().n[c.id]||0;
+{const o=window.leaveReset;window.leaveReset=()=>{try{o&&o();localStorage.removeItem('office_bonus');}catch(e){}};}
+/* --- đếm ngược, nhắc nhở, mở bài thi --- */
+const jtPill=$('#jtPill');
+jtPill.onclick=()=>{if(JT&&!JT.ended&&Date.now()>=JT.at&&jtMine()&&!JT.ans[jtMine().id])openJtExam();else if(JT&&JT.ended&&JT.res&&Date.now()<JT.at+JT_WIN+300000)jtShowRes(JT.res.map(([id,s,t])=>({c:byId(id),s,t})).filter(r=>r.c),null);else openJtGuide();};
+setInterval(()=>{if(!JT){jtPill.style.display='none';return;}const now=Date.now(),me=jtMine();
+  if(!JT.ended&&now<JT.at){jtPill.style.display='';jtPill.className='jtpill';jtPill.textContent=`📝 Job Test sau ${jtFmt(JT.at-now)} · 📚 Đề cương`;
+    if(!JT.rem&&JT.at-now<=60000){JT.rem=true;jtSave();if(me){banner('⏰','Còn 1 phút nữa là thi Job Test!','Ôn nhanh đề cương rồi chuẩn bị vào thi nhé',{t:'📚 Đề cương',f:()=>{bannerOff();openJtGuide();}},'boba');}}}
+  else if(!JT.ended&&now<JT.at+JT_WIN){jtPill.style.display='';jtPill.className='jtpill live';
+    jtPill.textContent=me?(JT.ans[me.id]?'✅ Đã nộp bài · chờ công bố':`📝 Đang thi · mở bài thi (${jtFmt(JT.at+JT_EXAM-now)})`):`📝 Đang thi Job Test · ${Object.keys(JT.ans).length} người đã nộp`;
+    if(!JT.opened){JT.opened=true;jtSave();
+      jtEmp().forEach(c=>{if(!isHuman(c)&&!c.busy){c._jtSit=true;guard(async()=>{begin(c,'📝 Thi Job Test');await c.goSit(c.home);},[]);}});
+      if(me&&!JT.ans[me.id]){beep(true);banner('📝','Đến giờ thi Job Test!',`${JT_N} câu · ${JT_EXAM/60000} phút · đúng ${JT_PASS}/${JT_N} là đậu`,{t:'📝 Mở bài thi',f:()=>{bannerOff();openJtExam();}},'boba');}}}
+  else if(!JT.ended){jtPill.style.display='';jtPill.textContent='📊 Đang chấm điểm…';if(CAT_HOST)jtHostEnd();}
+  else if(now<JT.at+JT_WIN+300000){jtPill.style.display='';jtPill.className='jtpill done';jtPill.textContent='📊 Kết quả Job Test';}
+  else jtPill.style.display='none';},500);
+// người vào sau lấy lịch thi theo máy chủ phòng
+{const o=roomState;roomState=()=>{const r=o();if(r&&JT&&!JT.ended)r.jt=[JT.id,JT.at,JT.qs.join('.'),JT.by].join('|');return r;};}
+{const o=peerState;peerState=st=>{try{if(st&&st.jt&&!CAT_HOST){const id=String(st.jt).split('|')[0];if(!JT||JT.id!==id)jtSched(st.jt,true);}}catch(e){}o(st);};}
+setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.peerState=peerState;}},0);
+
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
 const CAN_DL=(()=>{try{return window.top===window;}catch(e){return false;}})();   // trang Claude (khung nhúng) chặn tải file
@@ -5050,7 +5201,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue','jtans'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod','jtsched','jtend']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
