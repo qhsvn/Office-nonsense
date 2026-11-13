@@ -502,6 +502,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .jxtop{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;margin-top:6px}.jxtop #jxLeft{color:#d0472f}
 .jtquick{display:flex;gap:6px;margin-top:6px}.jtquick button{flex:1;font:inherit;font-size:12px;font-weight:700;border:2px solid #e3e9f4;background:#f8fbff;border-radius:10px;padding:6px;cursor:pointer}
 .jxtop #jxLeft{font-size:15px;background:#fff0ec;border-radius:999px;padding:4px 10px}.jxtop #jxLeft.low{background:#ff5f6d;color:#fff;animation:jtPulse 1s ease-in-out infinite}
+.jgo{font-size:13px;margin-top:5px;padding:6px 10px;border-radius:10px;border:2px solid #e3e9f4;background:#fff;color:var(--ink);text-align:left}
+.jgo.ok{border-color:#9fdcb8;background:#eafaf1;color:#1d7a4a;font-weight:700}
 </style>
 </head>
 <body>
@@ -4951,9 +4953,11 @@ function jtSched(v,quiet){const [id,atS,qsS,by]=String(v||'').split('|');const a
     $('#mgrLetter').classList.add('show');beep(true);}
   return true;}
 /* --- đề cương --- */
-function openJtGuide(){const box=$('#jtGList');box.textContent='';JT_BANK.forEach(([q,o,k,ex],i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`${i+1}. ${q}`;
-    const a=document.createElement('div');a.className='jtga';a.textContent='✅ '+o[k];const e=document.createElement('small');e.textContent='💡 '+ex;r.append(b,a,e);box.appendChild(r);});
-  $('#jtGSub').textContent=JT&&!JT.ended?`Kỳ thi lúc ${jtWhen(JT.at)} · đề thi ${JT_N} câu lấy ngẫu nhiên từ ${JT_BANK.length} câu dưới đây`:`Đề thi ${JT_N} câu lấy ngẫu nhiên từ ${JT_BANK.length} câu dưới đây`;
+function openJtGuide(){const box=$('#jtGList');box.textContent='';JT_BANK.forEach(([q,o,k,ex],i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`Câu ${i+1}. ${q}`;r.appendChild(b);
+    const g=srand(hashStr('guide'+i)),ord=[0,1,2,3];for(let a=3;a>0;a--){const x=Math.floor(g()*(a+1));[ord[a],ord[x]]=[ord[x],ord[a]];}   // trắc nghiệm A–D, tích sẵn đáp án đúng
+    ord.forEach((oi,j)=>{const d=document.createElement('div');d.className='jgo'+(oi===k?' ok':'');d.textContent=`${oi===k?'☑️':'⬜'} ${'ABCD'[j]}. ${o[oi]}`;r.appendChild(d);});
+    const e=document.createElement('small');e.textContent='💡 '+ex;r.appendChild(e);box.appendChild(r);});
+  $('#jtGSub').textContent='';$('#jtGSub').style.display='none';
   $('#jtGuide').classList.add('show');}
 $('#jtGClose').onclick=()=>$('#jtGuide').classList.remove('show');
 /* --- bài thi --- */
