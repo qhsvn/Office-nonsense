@@ -4933,7 +4933,7 @@ const JT_BANK=[
  ['Khung năng lực (competency framework) dùng để?',['Xác định kiến thức, kỹ năng, thái độ cần cho từng vị trí','Chấm điểm thi đua','Sắp xếp phòng làm việc','Tính thuế'],0,'Là nền tảng cho tuyển dụng, đào tạo và đánh giá.'],
  ['Chương trình Train-the-Trainer nhằm mục đích?',['Đào tạo nhân viên trở thành giảng viên nội bộ','Đào tạo lái tàu hỏa','Tuyển giảng viên bên ngoài','Đánh giá học viên'],0,'Giúp công ty tự chủ nguồn giảng viên.'],
  ['Gamification trong đào tạo là?',['Áp dụng yếu tố trò chơi (điểm, huy hiệu, bảng xếp hạng) để tăng hứng thú','Cho nhân viên chơi game trong giờ làm','Mua máy chơi game cho văn phòng','Tổ chức giải đấu thể thao'],0,'Yếu tố trò chơi giúp học viên chủ động và nhớ lâu hơn.']];
-const JT_N=10,JT_PASS=8,JT_EXAM=600000,JT_WIN=660000,JT_PRIZE=2000000;
+const JT_N=10,JT_PASS=8,JT_EXAM=600000,JT_WIN=630000,JT_PRIZE=2000000;   // 10 phút tính từ giờ thi, như nhau cho mọi người
 let JT=null;try{JT=JSON.parse(localStorage.getItem('office_jt')||'null');}catch(e){}
 const jtSave=()=>{try{localStorage.setItem('office_jt',JSON.stringify(JT));}catch(e){}};
 const jtFmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
@@ -4972,24 +4972,26 @@ $('#jtGClose').onclick=()=>$('#jtGuide').classList.remove('show');
 /* --- bài thi --- */
 let JX=null,jxT=0;
 function openJtExam(){$('#jtStart').classList.remove('show');const me=jtMine();if(!JT||JT.ended||!me||JT.ans[me.id]||Date.now()<JT.at)return;
-  if(!JX||JX.id!==JT.id){JX={id:JT.id,qs:jtQs(),pick:{},t0:Date.now()};}
+  if(Date.now()>=JT.at+JT_EXAM){setStatus('⏰ Đã hết giờ làm bài Job Test.');return;}
+  if(!JX||JX.id!==JT.id){JX={id:JT.id,qs:jtQs(),pick:{},t0:JT.at};}   // đồng hồ tính từ giờ thi, vào trễ thì còn ít thời gian hơn
   const box=$('#jxList');box.textContent='';JX.qs.forEach((q,i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`Câu ${i+1}. ${q.q}`;r.appendChild(b);
     q.opts.forEach((o,j)=>{const bt=document.createElement('button');bt.type='button';bt.className='jxo'+(JX.pick[i]===j?' on':'');bt.textContent=`${'ABCD'[j]}. ${o}`;bt.onclick=()=>{JX.pick[i]=j;r.querySelectorAll('.jxo').forEach((x,k)=>x.classList.toggle('on',k===j));jxCount();};r.appendChild(bt);});box.appendChild(r);});
   jxCount();$('#jtExam').classList.add('show');clearInterval(jxT);
-  const tk=()=>{const l=JX.t0+JT_EXAM-Date.now();$('#jxLeft').textContent=`⏳ Còn ${jtFmt(l)}`;$('#jxLeft').classList.toggle('low',l<60000);if(l<=0){clearInterval(jxT);jtSubmit();}};tk();jxT=setInterval(tk,250);}
+  const tk=()=>{const l=JT.at+JT_EXAM-Date.now();$('#jxLeft').textContent=`⏳ Còn ${jtFmt(l)}`;$('#jxLeft').classList.toggle('low',l<60000);if(l<=0){clearInterval(jxT);jtSubmit();}};tk();jxT=setInterval(tk,250);}
 function jxCount(){const n=Object.keys(JX.pick).length;$('#jxDone').textContent=`Đã làm ${n}/${JX.qs.length} câu`;}
 function jtSubmit(){const me=jtMine();if(!JX||!me||!JT||JT.ans[me.id])return;clearInterval(jxT);$('#jtExam').classList.remove('show');
-  const sc=JX.qs.reduce((s,q,i)=>s+(JX.pick[i]===q.ok?1:0),0),t=Math.max(1,Math.round((Date.now()-JX.t0)/1000));
+  const sc=JX.qs.reduce((s,q,i)=>s+(JX.pick[i]===q.ok?1:0),0),t=Math.max(1,Math.min(JT_EXAM/1000,Math.round((Date.now()-JT.at)/1000)));
   JT.my={pick:Object.assign({},JX.pick),sc,t};jtSave();run('jtans',me,{v:`${JT.id}|${sc}|${t}`});
-  hrPop(sc>=JT_PASS?'ok':'no',me,sc>=JT_PASS?'🎉 BẠN ĐÃ ĐẬU JOB TEST':'😢 CHƯA ĐẠT JOB TEST',`${sc}/${JT_N} câu · ${t} giây`,sc>=JT_PASS?'Chờ mọi người thi xong để công bố kết quả và xem lại bài nhé!':`Cần đúng ${JT_PASS}/${JT_N} câu. Bị trừ 1 KPI — ôn lại đề cương nhé!`);}
+  hrPop(sc>=JT_PASS?'ok':'no',me,sc>=JT_PASS?'🎉 BẠN ĐÃ ĐẬU JOB TEST':'😢 CHƯA ĐẠT JOB TEST',`${sc}/${JT_N} câu · ${t} giây`,sc>=JT_PASS?'Chờ mọi người nộp bài xong để công bố kết quả và xem lại bài nhé!':`Cần đúng ${JT_PASS}/${JT_N} câu. Bị trừ 1 KPI — ôn lại đề cương nhé!`);}
 $('#jxSubmit').onclick=jtSubmit;
 function jtAns(c,v){const [id,sS,tS]=String(v||'').split('|');if(!c||!JT||JT.id!==id||JT.ended)return false;if(JT.ans[c.id])return true;
   JT.ans[c.id]=[+sS||0,+tS||999];jtSave();c.think('📝',1.4);setStatus(`📝 ${c.name} đã nộp bài Job Test.`);
-  if(CAT_HOST&&jtEmp().filter(isHuman).every(e=>JT.ans[e.id]))setTimeout(jtHostEnd,2500);   // người chơi nộp hết thì công bố luôn
   return true;}
 /* --- kết thúc & công bố --- */
-function jtHostEnd(){if(!CAT_HOST||!JT||JT.ended||JT._ending)return;JT._ending=true;
-  const res=jtEmp().map(c=>{let r=JT.ans[c.id];if(!r&&!isHuman(c)){const g=srand(hashStr(JT.id+c.id));const p=.55+g()*.37;let s=0;for(let i=0;i<JT_N;i++)if(g()<p)s++;r=[s,Math.round(120+g()*420)];}return `${c.id}:${r?r[0]:0}:${r?r[1]:999}`;});
+// NPC làm bài theo thời gian thật: mỗi NPC có điểm và số giây nộp bài cố định theo mã kỳ thi
+function jtNpc(c){const g=srand(hashStr(JT.id+c.id));const p=.55+g()*.37;let s=0;for(let i=0;i<JT_N;i++)if(g()<p)s++;return[s,Math.round(60+g()*240)];}
+function jtHostEnd(){if(!CAT_HOST||!JT||JT.ended||JT._ending)return;JT._ending=true;const el=Math.round((Date.now()-JT.at)/1000);
+  const res=jtEmp().map(c=>{let r=JT.ans[c.id];if(!r&&!isHuman(c)){const n=jtNpc(c);r=n[1]<=el?n:[n[0],Math.min(n[1],el)];}return `${c.id}:${r?r[0]:0}:${r?r[1]:999}`;});
   run('jtend',null,{v:`${JT.id}|${res.join('.')}`});}
 function jtEnd(v){const [id,rs]=String(v||'').split('|');if(!JT||JT.id!==id||JT.ended)return false;JT.ended=true;clearInterval(jxT);$('#jtExam').classList.remove('show');
   const R=String(rs||'').split('.').map(x=>{const [cid,s,t]=x.split(':');return{c:byId(cid),s:+s||0,t:+t||999};}).filter(r=>r.c);JT.res=R.map(r=>[r.c.id,r.s,r.t]);jtSave();
@@ -5018,10 +5020,14 @@ setInterval(()=>{if(!JT){jtPill.style.display='none';return;}const now=Date.now(
   if(!JT.ended&&now<JT.at){jtPill.style.display='';jtPill.className='jtpill';jtPill.textContent=`⏳ Thi sau ${jtFmt(JT.at-now)} · 📚 Đề cương`;
     if(!JT.rem&&JT.at-now<=60000){JT.rem=true;jtSave();if(me){banner('⏰','Còn 1 phút nữa là thi Job Test!','Ôn nhanh đề cương rồi chuẩn bị vào thi nhé',{t:'📚 Đề cương',f:()=>{bannerOff();openJtGuide();}},'boba');}}}
   else if(!JT.ended&&now<JT.at+JT_WIN){jtPill.style.display='';jtPill.className='jtpill live';
-    jtPill.textContent=me?(JT.ans[me.id]?'✅ Đã nộp bài · chờ công bố':`📝 Đang thi · mở bài thi (${jtFmt(JT.at+JT_EXAM-now)})`):`📝 Đang thi Job Test · ${Object.keys(JT.ans).length} người đã nộp`;
+    const el=(now-JT.at)/1000,emp=jtEmp(),npcs=emp.filter(c=>!isHuman(c));JT.npcDone=JT.npcDone||{};
+    npcs.forEach(c=>{if(!JT.npcDone[c.id]&&jtNpc(c)[1]<=el){JT.npcDone[c.id]=1;c.think('📝',1.4);setStatus(`📝 ${c.name} đã nộp bài Job Test.`);if(c._jtSit&&c.busy){c._jtSit=false;end(c,'working');}}});
+    const done=emp.filter(c=>JT.ans[c.id]||JT.npcDone[c.id]).length;
+    jtPill.textContent=me?(JT.ans[me.id]?`✅ Đã nộp bài · ${done}/${emp.length} người đã nộp`:`📝 Đang thi · còn ${jtFmt(JT.at+JT_EXAM-now)} · mở bài thi`):`📝 Đang thi Job Test · ${done}/${emp.length} người đã nộp`;
+    if(CAT_HOST&&emp.filter(isHuman).every(e=>JT.ans[e.id])&&npcs.every(c=>JT.npcDone[c.id]))setTimeout(jtHostEnd,1500);   // ai cũng nộp xong thì công bố
     if(!JT.opened){JT.opened=true;jtSave();
       jtEmp().forEach(c=>{if(!isHuman(c)&&!c.busy){c._jtSit=true;guard(async()=>{begin(c,'📝 Thi Job Test');await c.goSit(c.home);},[]);}});
-      if(me&&!JT.ans[me.id]){beep(true);$('#jtStartSub').textContent=`${JT_N} câu trắc nghiệm · ${JT_EXAM/60000} phút làm bài · cần đúng ${JT_PASS}/${JT_N} câu. Bình tĩnh, tự tin — bạn làm được! 💪`;$('#jtStart').classList.add('show');}}}
+      if(me&&!JT.ans[me.id]){beep(true);$('#jtStartSub').textContent=`${JT_N} câu trắc nghiệm · ${JT_EXAM/60000} phút tính từ giờ thi (vào trễ vẫn hết giờ cùng lúc) · cần đúng ${JT_PASS}/${JT_N} câu. Bình tĩnh, tự tin — bạn làm được! 💪`;$('#jtStart').classList.add('show');}}}
   else if(!JT.ended){jtPill.style.display='';jtPill.textContent='📊 Đang chấm điểm…';if(CAT_HOST)jtHostEnd();}
   else if(now<JT.at+JT_WIN+300000){jtPill.style.display='';jtPill.className='jtpill done';jtPill.textContent='📊 Kết quả Job Test';}
   else jtPill.style.display='none';},500);
