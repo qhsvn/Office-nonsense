@@ -4943,7 +4943,8 @@ const jtMine=()=>{const me=ME.id&&byId(ME.id);return me&&!me.manager?me:null;};
 // đề thi: 10 câu lấy ngẫu nhiên từ đề cương, xáo đáp án (mọi máy giống nhau theo mã kỳ thi)
 function jtQs(){if(!JT)return[];const r=srand(hashStr('jt'+JT.id));return JT.qs.map(i=>{const [q,o,k,ex]=JT_BANK[i];const ord=[0,1,2,3];for(let a=3;a>0;a--){const b=Math.floor(r()*(a+1));[ord[a],ord[b]]=[ord[b],ord[a]];}return{q,opts:ord.map(j=>o[j]),ok:ord.indexOf(k),ex};});}
 /* --- quản lý gửi thư --- */
-function openJtSched(){const me=ME.id&&byId(ME.id);if(!(me&&me.manager)&&isHuman(MGR)){setStatus('📝 Chỉ quản lý mới tổ chức Job Test được.');return;}
+function openJtSched(){const me=ME.id&&byId(ME.id);const live=JT&&!JT.ended&&Date.now()<JT.at+JT_WIN;
+  if(!(me&&me.manager)){if(live){openJtLetter();return;}if(isHuman(MGR)){setStatus('📝 Chưa có lịch Job Test — chờ quản lý gửi thư nhé.');return;}}   // nhân viên: nút Job Test để xem lại thư
   if(JT&&!JT.ended&&Date.now()<JT.at+JT_WIN){setStatus(`📝 Đã có lịch Job Test lúc ${jtWhen(JT.at)} rồi.`);return;}
   const d=new Date(Date.now()+5*60000);$('#jtAt').value=isoOf(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');$('#jtAt').min=isoOf(new Date())+'T00:00';jtSchedInfo();$('#jtSched').classList.add('show');}
 function jtSchedInfo(){const t=new Date($('#jtAt').value).getTime();const ok=t>Date.now()+30000;$('#jtInfo').textContent=ok?`📅 Thi lúc ${jtWhen(t)} · còn ${jtFmt(t-Date.now())}`:'⚠️ Chọn thời gian sau hiện tại ít nhất 1 phút';$('#jtSend').disabled=!ok;}
@@ -4958,7 +4959,7 @@ function jtSched(v,quiet){const [id,atS,qsS,by]=String(v||'').split('|');const a
   if(quiet)return true;
   const me=ME.id&&byId(ME.id);
   if(me&&me.manager)hrPop('ok',me,'📧 ĐÃ GỬI THƯ JOB TEST',`Thi lúc ${jtWhen(at)}`,`Toàn bộ ${jtEmp().length} nhân viên đã nhận thư, bắt buộc tham gia.`);
-  else if(me){hrPop('mail',me,'📧 THƯ MỜI JOB TEST',`Thi lúc ${jtWhen(at)}`,'Bắt buộc toàn bộ nhân viên. Bấm “📝 Job Test” trên màn hình để xem thư và đề cương ôn tập.');}
+  else if(me){hrPop('mail',me,'📧 THƯ MỜI JOB TEST',`Thi lúc ${jtWhen(at)}`,'Bắt buộc toàn bộ nhân viên. Muốn xem lại thư thì bấm nút “📝 Job Test” ở tab Cả nhóm.');}
   return true;}
 /* --- đề cương --- */
 function openJtGuide(){const box=$('#jtGList');box.textContent='';JT_BANK.forEach(([q,o,k,ex],i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`Câu ${i+1}. ${q}`;r.appendChild(b);
@@ -5012,9 +5013,9 @@ window.bonusOf=c=>bonusStore().n[c.id]||0;
 {const o=window.leaveReset;window.leaveReset=()=>{try{o&&o();localStorage.removeItem('office_bonus');}catch(e){}};}
 /* --- đếm ngược, nhắc nhở, mở bài thi --- */
 const jtPill=$('#jtPill');
-jtPill.onclick=()=>{if(JT&&!JT.ended&&Date.now()>=JT.at&&jtMine()&&!JT.ans[jtMine().id])openJtExam();else if(JT&&JT.ended&&JT.res&&Date.now()<JT.at+JT_WIN+300000)jtShowRes(JT.res.map(([id,s,t])=>({c:byId(id),s,t})).filter(r=>r.c),null);else openJtLetter();};
+jtPill.onclick=()=>{if(JT&&!JT.ended&&Date.now()>=JT.at&&jtMine()&&!JT.ans[jtMine().id])openJtExam();else if(JT&&JT.ended&&JT.res&&Date.now()<JT.at+JT_WIN+300000)jtShowRes(JT.res.map(([id,s,t])=>({c:byId(id),s,t})).filter(r=>r.c),null);else openJtGuide();};
 setInterval(()=>{if(!JT){jtPill.style.display='none';return;}const now=Date.now(),me=jtMine();
-  if(!JT.ended&&now<JT.at){jtPill.style.display='';jtPill.className='jtpill';jtPill.textContent=`📝 Job Test · thi sau ${jtFmt(JT.at-now)}`;
+  if(!JT.ended&&now<JT.at){jtPill.style.display='';jtPill.className='jtpill';jtPill.textContent=`⏳ Thi sau ${jtFmt(JT.at-now)} · 📚 Đề cương`;
     if(!JT.rem&&JT.at-now<=60000){JT.rem=true;jtSave();if(me){banner('⏰','Còn 1 phút nữa là thi Job Test!','Ôn nhanh đề cương rồi chuẩn bị vào thi nhé',{t:'📚 Đề cương',f:()=>{bannerOff();openJtGuide();}},'boba');}}}
   else if(!JT.ended&&now<JT.at+JT_WIN){jtPill.style.display='';jtPill.className='jtpill live';
     jtPill.textContent=me?(JT.ans[me.id]?'✅ Đã nộp bài · chờ công bố':`📝 Đang thi · mở bài thi (${jtFmt(JT.at+JT_EXAM-now)})`):`📝 Đang thi Job Test · ${Object.keys(JT.ans).length} người đã nộp`;
@@ -5037,7 +5038,7 @@ $('#jlClose').onclick=()=>$('#jtLetter').classList.remove('show');
 $('#jlGuide').onclick=()=>{$('#jtLetter').classList.remove('show');openJtGuide();};
 /* --- xem lại bài thi --- */
 function openJtReview(){if(!JT||!JT.my)return;const qs=jtQs(),P=JT.my.pick||{};const box=$('#jvList');box.textContent='';let ok=0;
-  qs.forEach((q,i)=>{const r=document.createElement('div');const right=P[i]===q.ok;if(right)ok++;r.className='jtgq '+(right?'jvok':'jvno');const b=document.createElement('b');b.textContent=`${right?'✅':'❌'} Câu ${i+1}. ${q.q}`;r.appendChild(b);
+  qs.forEach((q,i)=>{const r=document.createElement('div');const right=P[i]===q.ok;if(right)ok++;r.className='jtgq '+(right?'jvok':'jvno');const b=document.createElement('b');b.textContent=`Câu ${i+1}. ${q.q}`;r.appendChild(b);
     q.opts.forEach((o,j)=>{const d=document.createElement('div');d.className='jgo'+(j===q.ok?' ok':P[i]===j?' bad':'');d.textContent=`${j===q.ok?'☑️':P[i]===j?'✖️':'⬜'} ${'ABCD'[j]}. ${o}${P[i]===j?' (bạn chọn)':''}`;r.appendChild(d);});
     if(P[i]==null){const d=document.createElement('small');d.textContent='⚠️ Bạn chưa trả lời câu này';r.appendChild(d);}
     const e=document.createElement('small');e.textContent='💡 '+q.ex;r.appendChild(e);box.appendChild(r);});
