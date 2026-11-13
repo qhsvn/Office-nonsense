@@ -501,6 +501,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .jxo.on{border-color:#7fb4ff;background:#eaf3ff;font-weight:700}
 .jxtop{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;margin-top:6px}.jxtop #jxLeft{color:#d0472f}
 .jtquick{display:flex;gap:6px;margin-top:6px}.jtquick button{flex:1;font:inherit;font-size:12px;font-weight:700;border:2px solid #e3e9f4;background:#f8fbff;border-radius:10px;padding:6px;cursor:pointer}
+.jxtop #jxLeft{font-size:15px;background:#fff0ec;border-radius:999px;padding:4px 10px}.jxtop #jxLeft.low{background:#ff5f6d;color:#fff;animation:jtPulse 1s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -849,7 +850,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <button type="button" id="lhSelf" class="wbbtn">📝 Đăng ký nghỉ phép cho mình (sếp tổng duyệt luôn)</button>
   <div class="crow"><button type="button" id="lhClose">Đóng</button></div></div></div>
 <div id="jtSched" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtSTitle"><div class="wcard mcardm">
-  <div class="wlogo">📧</div><h2 id="jtSTitle">Gửi thư Job Test</h2><p class="wsub">Bắt buộc toàn bộ nhân viên (người chơi và NPC) tham gia. Đề thi 10 câu về lĩnh vực Đào tạo, đúng 8/10 là đậu, rớt trừ 1 KPI. Điểm cao nhất và làm nhanh nhất được trao bằng khen + thưởng nóng 2.000.000đ.</p>
+  <div class="wlogo">📧</div><h2 id="jtSTitle">Gửi thư Job Test</h2>
   <div class="kmt" style="font-weight:700;text-align:left">📅 Chọn ngày giờ thi</div><div class="lvdates"><label>Ngày giờ<input type="datetime-local" id="jtAt"></label></div>
   <div class="bpleft" id="jtInfo"></div>
   <div class="crow"><button type="button" id="jtCancel" class="cghost">Hủy</button><button type="button" id="jtSend">Gửi thư 📨</button></div></div></div>
@@ -865,6 +866,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
   <div class="wlogo">📊</div><h2 id="jtRTitle">Kết quả Job Test</h2><p class="wsub" id="jtRSub"></p>
   <div class="wblist" id="jtRList"></div>
   <div class="crow"><button type="button" id="jtRClose">Đóng</button></div></div></div>
+<div id="jtStart" class="welcome" role="dialog" aria-modal="true" aria-labelledby="jtStTitle"><div class="wcard mcardm">
+  <div class="wlogo">📝</div><h2 id="jtStTitle">Đến giờ thi Job Test!</h2><p class="wsub" id="jtStartSub"></p>
+  <div class="crow"><button type="button" id="jtGo">▶️ Bắt đầu làm bài</button></div></div></div>
 <div id="reqModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="rqTitle"><div class="wcard mcardm">
   <div class="wlogo">📋</div><h2 id="rqTitle">Yêu cầu báo cáo</h2><p class="wsub">Tích chọn một hoặc nhiều nhân viên phải lên báo cáo. Nhân vật trống sẽ tự lên, người chơi nhận thông báo để đi báo cáo.</p>
   <div class="flspots" id="rqWho"></div>
@@ -4917,7 +4921,7 @@ const JT_BANK=[
  ['Khung năng lực (competency framework) dùng để?',['Xác định kiến thức, kỹ năng, thái độ cần cho từng vị trí','Chấm điểm thi đua','Sắp xếp phòng làm việc','Tính thuế'],0,'Là nền tảng cho tuyển dụng, đào tạo và đánh giá.'],
  ['Chương trình Train-the-Trainer nhằm mục đích?',['Đào tạo nhân viên trở thành giảng viên nội bộ','Đào tạo lái tàu hỏa','Tuyển giảng viên bên ngoài','Đánh giá học viên'],0,'Giúp công ty tự chủ nguồn giảng viên.'],
  ['Gamification trong đào tạo là?',['Áp dụng yếu tố trò chơi (điểm, huy hiệu, bảng xếp hạng) để tăng hứng thú','Cho nhân viên chơi game trong giờ làm','Mua máy chơi game cho văn phòng','Tổ chức giải đấu thể thao'],0,'Yếu tố trò chơi giúp học viên chủ động và nhớ lâu hơn.']];
-const JT_N=10,JT_PASS=8,JT_EXAM=180000,JT_WIN=240000,JT_PRIZE=2000000;
+const JT_N=10,JT_PASS=8,JT_EXAM=600000,JT_WIN=660000,JT_PRIZE=2000000;
 let JT=null;try{JT=JSON.parse(localStorage.getItem('office_jt')||'null');}catch(e){}
 const jtSave=()=>{try{localStorage.setItem('office_jt',JSON.stringify(JT));}catch(e){}};
 const jtFmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
@@ -4943,7 +4947,7 @@ function jtSched(v,quiet){const [id,atS,qsS,by]=String(v||'').split('|');const a
   const me=ME.id&&byId(ME.id);
   if(me&&me.manager)hrPop('ok',me,'📧 ĐÃ GỬI THƯ JOB TEST',`Thi lúc ${jtWhen(at)}`,`Toàn bộ ${jtEmp().length} nhân viên đã nhận thư, bắt buộc tham gia.`);
   else if(me){$('#mlIcon').textContent='📧';$('#mlTitle').textContent='Thư mời Job Test';
-    $('#mlBody').textContent=`Kính gửi ${me.name},\n\nCông ty tổ chức Job Test về lĩnh vực Đào tạo, bắt buộc toàn bộ nhân viên tham gia.\n\n📅 Thời gian: ${jtWhen(at)}\n📝 Đề thi: ${JT_N} câu, làm trong ${JT_EXAM/60000} phút, đúng từ ${JT_PASS}/${JT_N} câu là đậu\n⚠️ Thi rớt hoặc bỏ thi: trừ 1 KPI\n🏆 Điểm cao nhất và làm nhanh nhất: được sếp trao bằng khen + thưởng nóng 2.000.000đ\n\nBấm “📚 Đề cương” trên màn hình để ôn tập trước nhé!\n\n— ${JT.by} 🎖️`;
+    $('#mlBody').textContent=`Kính gửi ${me.name},\n\nCông ty tổ chức Job Test về lĩnh vực Đào tạo, bắt buộc toàn bộ nhân viên tham gia.\n\n📅 Thời gian: ${jtWhen(at)}\n⏱️ Thời gian làm bài: ${JT_EXAM/60000} phút\n📝 Đề thi: ${JT_N} câu, đúng từ ${JT_PASS}/${JT_N} câu là đậu\n⚠️ Thi rớt hoặc bỏ thi: trừ 1 KPI\n🏆 Điểm cao nhất và làm nhanh nhất: được sếp trao bằng khen + thưởng nóng 2.000.000đ\n\nBấm “📚 Đề cương” trên màn hình để ôn tập trước nhé!\n\n— ${JT.by} 🎖️`;
     $('#mgrLetter').classList.add('show');beep(true);}
   return true;}
 /* --- đề cương --- */
@@ -4954,12 +4958,12 @@ function openJtGuide(){const box=$('#jtGList');box.textContent='';JT_BANK.forEac
 $('#jtGClose').onclick=()=>$('#jtGuide').classList.remove('show');
 /* --- bài thi --- */
 let JX=null,jxT=0;
-function openJtExam(){const me=jtMine();if(!JT||JT.ended||!me||JT.ans[me.id]||Date.now()<JT.at)return;
+function openJtExam(){$('#jtStart').classList.remove('show');const me=jtMine();if(!JT||JT.ended||!me||JT.ans[me.id]||Date.now()<JT.at)return;
   if(!JX||JX.id!==JT.id){JX={id:JT.id,qs:jtQs(),pick:{},t0:Date.now()};}
   const box=$('#jxList');box.textContent='';JX.qs.forEach((q,i)=>{const r=document.createElement('div');r.className='jtgq';const b=document.createElement('b');b.textContent=`Câu ${i+1}. ${q.q}`;r.appendChild(b);
     q.opts.forEach((o,j)=>{const bt=document.createElement('button');bt.type='button';bt.className='jxo'+(JX.pick[i]===j?' on':'');bt.textContent=`${'ABCD'[j]}. ${o}`;bt.onclick=()=>{JX.pick[i]=j;r.querySelectorAll('.jxo').forEach((x,k)=>x.classList.toggle('on',k===j));jxCount();};r.appendChild(bt);});box.appendChild(r);});
   jxCount();$('#jtExam').classList.add('show');clearInterval(jxT);
-  const tk=()=>{const l=JX.t0+JT_EXAM-Date.now();$('#jxLeft').textContent=`⏳ ${jtFmt(l)}`;if(l<=0){clearInterval(jxT);jtSubmit();}};tk();jxT=setInterval(tk,250);}
+  const tk=()=>{const l=JX.t0+JT_EXAM-Date.now();$('#jxLeft').textContent=`⏳ Còn ${jtFmt(l)}`;$('#jxLeft').classList.toggle('low',l<60000);if(l<=0){clearInterval(jxT);jtSubmit();}};tk();jxT=setInterval(tk,250);}
 function jxCount(){const n=Object.keys(JX.pick).length;$('#jxDone').textContent=`Đã làm ${n}/${JX.qs.length} câu`;}
 function jtSubmit(){const me=jtMine();if(!JX||!me||!JT||JT.ans[me.id])return;clearInterval(jxT);$('#jtExam').classList.remove('show');
   const sc=JX.qs.reduce((s,q,i)=>s+(JX.pick[i]===q.ok?1:0),0),t=Math.max(1,Math.round((Date.now()-JX.t0)/1000));
@@ -4972,7 +4976,7 @@ function jtAns(c,v){const [id,sS,tS]=String(v||'').split('|');if(!c||!JT||JT.id!
   return true;}
 /* --- kết thúc & công bố --- */
 function jtHostEnd(){if(!CAT_HOST||!JT||JT.ended||JT._ending)return;JT._ending=true;
-  const res=jtEmp().map(c=>{let r=JT.ans[c.id];if(!r&&!isHuman(c)){const g=srand(hashStr(JT.id+c.id));const p=.55+g()*.37;let s=0;for(let i=0;i<JT_N;i++)if(g()<p)s++;r=[s,Math.round(55+g()*120)];}return `${c.id}:${r?r[0]:0}:${r?r[1]:999}`;});
+  const res=jtEmp().map(c=>{let r=JT.ans[c.id];if(!r&&!isHuman(c)){const g=srand(hashStr(JT.id+c.id));const p=.55+g()*.37;let s=0;for(let i=0;i<JT_N;i++)if(g()<p)s++;r=[s,Math.round(120+g()*420)];}return `${c.id}:${r?r[0]:0}:${r?r[1]:999}`;});
   run('jtend',null,{v:`${JT.id}|${res.join('.')}`});}
 function jtEnd(v){const [id,rs]=String(v||'').split('|');if(!JT||JT.id!==id||JT.ended)return false;JT.ended=true;clearInterval(jxT);$('#jtExam').classList.remove('show');
   const R=String(rs||'').split('.').map(x=>{const [cid,s,t]=x.split(':');return{c:byId(cid),s:+s||0,t:+t||999};}).filter(r=>r.c);JT.res=R.map(r=>[r.c.id,r.s,r.t]);jtSave();
@@ -5004,7 +5008,7 @@ setInterval(()=>{if(!JT){jtPill.style.display='none';return;}const now=Date.now(
     jtPill.textContent=me?(JT.ans[me.id]?'✅ Đã nộp bài · chờ công bố':`📝 Đang thi · mở bài thi (${jtFmt(JT.at+JT_EXAM-now)})`):`📝 Đang thi Job Test · ${Object.keys(JT.ans).length} người đã nộp`;
     if(!JT.opened){JT.opened=true;jtSave();
       jtEmp().forEach(c=>{if(!isHuman(c)&&!c.busy){c._jtSit=true;guard(async()=>{begin(c,'📝 Thi Job Test');await c.goSit(c.home);},[]);}});
-      if(me&&!JT.ans[me.id]){beep(true);banner('📝','Đến giờ thi Job Test!',`${JT_N} câu · ${JT_EXAM/60000} phút · đúng ${JT_PASS}/${JT_N} là đậu`,{t:'📝 Mở bài thi',f:()=>{bannerOff();openJtExam();}},'boba');}}}
+      if(me&&!JT.ans[me.id]){beep(true);$('#jtStartSub').textContent=`${JT_N} câu · ${JT_EXAM/60000} phút làm bài · đúng ${JT_PASS}/${JT_N} câu là đậu`;$('#jtStart').classList.add('show');}}}
   else if(!JT.ended){jtPill.style.display='';jtPill.textContent='📊 Đang chấm điểm…';if(CAT_HOST)jtHostEnd();}
   else if(now<JT.at+JT_WIN+300000){jtPill.style.display='';jtPill.className='jtpill done';jtPill.textContent='📊 Kết quả Job Test';}
   else jtPill.style.display='none';},500);
@@ -5012,6 +5016,8 @@ setInterval(()=>{if(!JT){jtPill.style.display='none';return;}const now=Date.now(
 {const o=roomState;roomState=()=>{const r=o();if(r&&JT&&!JT.ended)r.jt=[JT.id,JT.at,JT.qs.join('.'),JT.by].join('|');return r;};}
 {const o=peerState;peerState=st=>{try{if(st&&st.jt&&!CAT_HOST){const id=String(st.jt).split('|')[0];if(!JT||JT.id!==id)jtSched(st.jt,true);}}catch(e){}o(st);};}
 setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.peerState=peerState;}},0);
+
+$('#jtGo').onclick=()=>openJtExam();
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
