@@ -4936,6 +4936,7 @@ const JT_BANK=[
 const JT_N=10,JT_PASS=8,JT_EXAM=600000,JT_WIN=630000,JT_PRIZE=2000000;   // 10 phút tính từ giờ thi, như nhau cho mọi người
 let JT=null;try{JT=JSON.parse(localStorage.getItem('office_jt')||'null');}catch(e){}
 const jtSave=()=>{try{localStorage.setItem('office_jt',JSON.stringify(JT));}catch(e){}};
+const jtDur=t=>{t=Math.round(+t||0);const m=Math.floor(t/60),x=t%60;return m?`${m} phút${x?' '+x+' giây':''}`:`${x} giây`;};
 const jtFmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
 const jtWhen=at=>{const d=new Date(at);return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} ${d.getDate()}/${d.getMonth()+1}`;};
 const jtEmp=()=>CHARS.filter(c=>!c.manager&&!c.away);
@@ -4982,7 +4983,7 @@ function jxCount(){const n=Object.keys(JX.pick).length;$('#jxDone').textContent=
 function jtSubmit(){const me=jtMine();if(!JX||!me||!JT||JT.ans[me.id])return;clearInterval(jxT);$('#jtExam').classList.remove('show');
   const sc=JX.qs.reduce((s,q,i)=>s+(JX.pick[i]===q.ok?1:0),0),t=Math.max(1,Math.min(JT_EXAM/1000,Math.round((Date.now()-JT.at)/1000)));
   JT.my={pick:Object.assign({},JX.pick),sc,t};jtSave();run('jtans',me,{v:`${JT.id}|${sc}|${t}`});
-  hrPop(sc>=JT_PASS?'ok':'no',me,sc>=JT_PASS?'🎉 BẠN ĐÃ ĐẬU JOB TEST':'😢 CHƯA ĐẠT JOB TEST',`${sc}/${JT_N} câu · ${t} giây`,sc>=JT_PASS?'Chờ mọi người nộp bài xong để công bố kết quả và xem lại bài nhé!':`Cần đúng ${JT_PASS}/${JT_N} câu. Bị trừ 1 KPI — ôn lại đề cương nhé!`);}
+  hrPop(sc>=JT_PASS?'ok':'no',me,sc>=JT_PASS?'🎉 BẠN ĐÃ ĐẬU JOB TEST':'😢 CHƯA ĐẠT JOB TEST',`${sc}/${JT_N} câu · ${jtDur(t)}`,sc>=JT_PASS?'Chờ mọi người nộp bài xong để công bố kết quả và xem lại bài nhé!':`Cần đúng ${JT_PASS}/${JT_N} câu. Bị trừ 1 KPI — ôn lại đề cương nhé!`);}
 $('#jxSubmit').onclick=jtSubmit;
 function jtAns(c,v){const [id,sS,tS]=String(v||'').split('|');if(!c||!JT||JT.id!==id||JT.ended)return false;if(JT.ans[c.id])return true;
   JT.ans[c.id]=[+sS||0,+tS||999];jtSave();c.think('📝',1.4);setStatus(`📝 ${c.name} đã nộp bài Job Test.`);
@@ -4998,14 +4999,14 @@ function jtEnd(v){const [id,rs]=String(v||'').split('|');if(!JT||JT.id!==id||JT.
   R.forEach(r=>{if(r.s<JT_PASS)addKpi(r.c,-1,r.t>=999?'Bỏ thi Job Test':'Thi rớt Job Test');});
   const pass=R.filter(r=>r.s>=JT_PASS).sort((a,b)=>b.s-a.s||a.t-b.t),win=pass[0]||null;
   CHARS.forEach(c=>{if(c._jtSit){c._jtSit=false;if(c.busy&&/Thi Job Test/.test(c.activity||''))end(c,'working');}});
-  if(win){bonusAdd(win.c,JT_PRIZE);setTimeout(()=>hrPop('ok',win.c,'🏆 THƯỞNG NÓNG JOB TEST',`${win.s}/${JT_N} câu · ${win.t} giây`,`Điểm cao nhất và nhanh nhất! ${mgrLabel()} trao bằng khen + thưởng nóng 2.000.000đ 🎓`),4500);
+  if(win){bonusAdd(win.c,JT_PRIZE);setTimeout(()=>hrPop('ok',win.c,'🏆 THƯỞNG NÓNG JOB TEST',`${win.s}/${JT_N} câu · ${jtDur(win.t)}`,`Điểm cao nhất và nhanh nhất! ${mgrLabel()} trao bằng khen + thưởng nóng 2.000.000đ 🎓`),4500);
     if(!MGR.away)guard(async()=>{begin(MGR,'🎓 Trao bằng khen Job Test');const w=win.c;if(!w.away){const a=Math.atan2(w.root.position.x-MGR.root.position.x,w.root.position.z-MGR.root.position.z);await MGR.walkTo(w.root.position.x-Math.sin(a)*1.0,w.root.position.z-Math.cos(a)*1.0);MGR.lookAt=w;w.lookAt=MGR;}
       await MGR.say(`Chúc mừng ${w.name}! Bằng khen và thưởng nóng 2 triệu cho em nè 🏆`,2.8);w.gesture&&w.gesture('heart',2);w.think('🎓',2);await w.say('Em cảm ơn chị ạ! 🥰',2);MGR.lookAt=null;w.lookAt=null;setAct(MGR,'🚶 Về phòng');await MGR.goSit(MGR.home);end(MGR,'working');},[MGR]);}
-  setStatus(`📊 Kết quả Job Test: ${pass.length}/${R.length} nhân viên đậu.${win?` 🏆 ${win.c.name} đạt ${win.s}/${JT_N} trong ${win.t} giây — thưởng nóng 2.000.000đ!`:' Không ai đạt điểm thưởng.'}`);
+  setStatus(`📊 Kết quả Job Test: ${pass.length}/${R.length} nhân viên đậu.${win?` 🏆 ${win.c.name} đạt ${win.s}/${JT_N} trong ${jtDur(win.t)} — thưởng nóng 2.000.000đ!`:' Không ai đạt điểm thưởng.'}`);
   jtShowRes(R,win);return true;}
 function jtShowRes(R,win){const box=$('#jtRList');box.textContent='';R.slice().sort((a,b)=>b.s-a.s||a.t-b.t).forEach((r,i)=>{const row=document.createElement('div');row.className='wbrow '+(r.s>=JT_PASS?'':'pend');
     const top=document.createElement('div');top.className='wbtop';const av=document.createElement('span');av.className='av3';setAvatar(av,r.c);const t=document.createElement('div');const b=document.createElement('b');b.textContent=`${win&&r.c===win.c?'🏆 ':(i+1)+'. '}${r.c.name}${isHuman(r.c)?' 👤':' 🤖'}`;
-    const sm=document.createElement('small');sm.textContent=r.t>=999?'Không làm bài':`${r.s}/${JT_N} câu · ${r.t} giây`;t.append(b,sm);const ch=document.createElement('span');ch.className='wbchip';ch.textContent=r.s>=JT_PASS?'✅ Đậu':'❌ Rớt · -1 KPI';top.append(av,t,ch);row.appendChild(top);box.appendChild(row);});
+    const sm=document.createElement('small');sm.textContent=r.t>=999?'Không làm bài':`${r.s}/${JT_N} câu · ${jtDur(r.t)}`;t.append(b,sm);const ch=document.createElement('span');ch.className='wbchip';ch.textContent=r.s>=JT_PASS?'✅ Đậu':'❌ Rớt · -1 KPI';top.append(av,t,ch);row.appendChild(top);box.appendChild(row);});
   $('#jtRSub').textContent=`${R.filter(r=>r.s>=JT_PASS).length}/${R.length} nhân viên đậu (cần ${JT_PASS}/${JT_N} câu)${win?` · 🏆 ${win.c.name} nhận thưởng nóng 2.000.000đ`:''}`;$('#jtRes').classList.add('show');}
 $('#jtRClose').onclick=()=>$('#jtRes').classList.remove('show');
 /* --- thưởng nóng vào phiếu lương --- */
@@ -5048,7 +5049,7 @@ function openJtReview(){if(!JT||!JT.my)return;const qs=jtQs(),P=JT.my.pick||{};c
     q.opts.forEach((o,j)=>{const d=document.createElement('div');d.className='jgo'+(j===q.ok?' ok':P[i]===j?' bad':'');d.textContent=`${j===q.ok?'☑️':P[i]===j?'✖️':'⬜'} ${'ABCD'[j]}. ${o}${P[i]===j?' (bạn chọn)':''}`;r.appendChild(d);});
     if(P[i]==null){const d=document.createElement('small');d.textContent='⚠️ Bạn chưa trả lời câu này';r.appendChild(d);}
     const e=document.createElement('small');e.textContent='💡 '+q.ex;r.appendChild(e);box.appendChild(r);});
-  $('#jvSub').textContent=`Bạn đúng ${ok}/${qs.length} câu · ${JT.my.t} giây`;$('#jtReview').classList.add('show');}
+  $('#jvSub').textContent=`Bạn đúng ${ok}/${qs.length} câu · ${jtDur(JT.my.t)}`;$('#jtReview').classList.add('show');}
 $('#jvClose').onclick=()=>$('#jtReview').classList.remove('show');
 $('#jtRReview').onclick=()=>{$('#jtRes').classList.remove('show');openJtReview();};
 {const o=jtShowRes;jtShowRes=(R,win)=>{o(R,win);$('#jtRReview').style.display=JT&&JT.my?'':'none';};}
