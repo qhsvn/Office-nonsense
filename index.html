@@ -511,13 +511,13 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 @keyframes pbFl{0%{opacity:.95}100%{opacity:0}}
 .pbook{position:absolute;inset:0;z-index:35;display:none;pointer-events:none}.pbook.show{display:block}
 .pbstack{position:absolute;inset:0}
-.pbph{position:absolute;width:44%;transform:rotate(var(--r));background:#fff;padding:6px 6px 5px;border:0;border-radius:6px;box-shadow:0 10px 24px rgba(40,50,80,.35);pointer-events:auto;cursor:pointer;animation:pbZig 1.6s cubic-bezier(.3,.6,.3,1) both;font:inherit}
+.pbph{position:absolute;width:46%;transform:rotate(var(--r));background:#fff;padding:6px 6px 5px;border:0;border-radius:6px;box-shadow:0 10px 24px rgba(40,50,80,.35);pointer-events:auto;cursor:pointer;animation:pbZig 1.6s cubic-bezier(.3,.6,.3,1) both;font:inherit}
 .pbph img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:3px;background:#dfefff}
 .pbph span{display:block;font-size:11.5px;font-weight:700;color:#5b4632;margin-top:5px;text-align:center;font-family:"Comic Sans MS","Segoe Print",cursive,sans-serif}
 .pbph.zoom{z-index:99!important;width:86%;left:7%!important;top:12%!important;transform:rotate(0deg);transition:all .3s}
 @keyframes pbZig{0%{transform:translate(var(--sw),-160%) rotate(calc(var(--r) * -3));opacity:0}15%{opacity:1}35%{transform:translate(calc(var(--sw) * -1),-95%) rotate(calc(var(--r) * 2))}60%{transform:translate(calc(var(--sw) * .5),-40%) rotate(calc(var(--r) * -1))}82%{transform:translate(calc(var(--sw) * -.2),-8%) rotate(var(--r))}100%{transform:translate(0,0) rotate(var(--r));opacity:1}}
 .pbtitle{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:linear-gradient(135deg,#ff9a3d,#ffcf4d);color:#fff;font-weight:800;font-size:15px;padding:7px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(230,140,40,.35);white-space:nowrap}
-.pbclose{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);pointer-events:auto;font:inherit;font-weight:800;border:0;border-radius:999px;padding:9px 22px;background:#fff;color:var(--ink);box-shadow:0 6px 18px rgba(60,80,120,.3);cursor:pointer}
+.pbclose{position:absolute;right:12px;bottom:12px;pointer-events:auto;font:inherit;font-weight:800;border:0;border-radius:999px;padding:9px 22px;background:#fff;color:var(--ink);box-shadow:0 6px 18px rgba(60,80,120,.3);cursor:pointer}
 .beachbar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:20;display:none;gap:6px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:94%}.beachbar.show{display:flex}
 .beachbar button{font:inherit;font-size:12.5px;font-weight:800;border:0;border-radius:999px;padding:8px 12px;background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 3px 10px rgba(60,90,140,.25);cursor:pointer}
 #stage.beach-on .tod,#stage.beach-on .dancefab,#stage.beach-on .jtpill,#stage.beach-on .views{display:none!important}
@@ -527,6 +527,10 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 
 #stage.pb-on .tag{display:none!important}
 .pbph span{font-size:10.5px!important}
+
+#stage.beach-on .hint{display:none!important}
+.beachbar{flex-wrap:nowrap!important;gap:5px!important;bottom:10px!important;max-width:96%!important}
+.beachbar button{font-size:11px!important;padding:6px 9px!important;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -5186,8 +5190,25 @@ function beachWear(c,on,i){
       const cg=new THREE.Group();c.armR.hand.add(cg);cg.position.set(0,-.02,.06);const gl=bMat('#ffffff',{transparent:true,opacity:.5,roughness:.1});
       bMk(new THREE.CylinderGeometry(.06,.045,.16,10),gl,0,.08,0,cg);bMk(new THREE.CylinderGeometry(.053,.04,.12,10),bMat('#ff922b'),0,.07,0,cg);const u=bMk(new THREE.ConeGeometry(.09,.05,8),bMat('#ff6b9a'),.04,.2,0,cg);u.rotation.z=.4;cg.visible=false;c._bCup=cg;}
     c._bAcc.g.visible=true;c._bAcc.hat.visible=((c.seed||i)*7)%3!==0;}
-  else{const s=c._bw;if(!s)return;c._bw=null;const set=(m,v)=>{m.color.setHex(v);m.emissive&&m.emissive.copy(m.color);};set(c.mShirt,s.sh);set(c.mSkirt,s.sk);if(c.mVest&&s.v!=null)set(c.mVest,s.v);
+  else{bBikini(c,false);const s=c._bw;if(!s)return;c._bw=null;const set=(m,v)=>{m.color.setHex(v);m.emissive&&m.emissive.copy(m.color);};set(c.mShirt,s.sh);set(c.mSkirt,s.sk);if(c.mVest&&s.v!=null)set(c.mVest,s.v);
     s.hide.forEach(o=>o.visible=true);if(c._bAcc)c._bAcc.g.visible=false;if(c._bCup)c._bCup.visible=false;}}
+// bikini (nhân vật nữ)
+function bBikini(c,on,top,bot){const B=c.body;if(!B)return;
+  if(on){if(!c._bk){const g=new THREE.Group();g.visible=false;B.add(g);const topM=bMat(top||'#ff8fab'),botM=bMat(bot||'#e64980');
+      bMk(new THREE.CylinderGeometry(.112,.146,.22,24),SKIN,0,.21,0,g);
+      bMk(new THREE.CylinderGeometry(.118,.121,.035,24),topM,0,.262,0,g).castShadow=false;
+      for(const x of[.048,-.048]){const cp=bMk(new THREE.SphereGeometry(.052,14,10),topM,x,.262,.092,g);cp.scale.set(1,.78,.55);cp.castShadow=false;}
+      const st=bMk(new THREE.BoxGeometry(.012,.07,.012),topM,0,.3,.1,g);st.castShadow=false;
+      bMk(new THREE.CylinderGeometry(.147,.157,.11,24),botM,0,.045,0,g);
+      const bw=bMk(new THREE.SphereGeometry(.02,8,6),topM,0,.262,.122,g);bw.castShadow=false;
+      c._bk={g,topM,botM,hid:[],sl:[],on:false};}
+    const K=c._bk;if(top)K.topM.color.set(top);if(bot)K.botM.color.set(bot);if(K.on)return;K.on=true;
+    const keep=new Set([K.g,c.armL.g,c.armR.g,c.head]);
+    B.children.forEach(o=>{if(keep.has(o)||o.material===SKIN||!o.visible)return;o.visible=false;K.hid.push(o);});
+    [c.armL.g,c.armR.g].forEach(a=>{const sl=a.children[0],cf=a.children[1];if(sl&&sl.material){K.sl.push([sl,sl.material]);sl.material=SKIN;}if(cf&&cf.visible){cf.visible=false;K.hid.push(cf);}});
+    K.g.visible=true;}
+  else{const K=c._bk;if(!K||!K.on)return;K.on=false;K.g.visible=false;K.hid.forEach(o=>o.visible=true);K.hid=[];K.sl.forEach(([m,mt])=>m.material=mt);K.sl=[];}}
+function bIsF(c){return c&&c.gender!=='m';}
 // hoạt động trên biển
 function bReset(c){c._swim=false;c.lying=false;c._sunbathe=false;c.root.rotation.x=0;c.pos.y=0;c.arms='idle';if(c._bCup)c._bCup.visible=false;c.cur&&(c.cur.rootY=0);}
 function bWalk(c,x,z,tok){c.pose='stand';c.seat=null;return new Promise(res=>{c.path=[{x,z}];c.walking=true;c.onArrive=()=>res(true);const iv=setInterval(()=>{if(c._bTok!==tok||!BEACH.on||(BEACH.photo&&!c._toRow)){clearInterval(iv);res(false);}else if(!c.path.length){clearInterval(iv);res(true);}},200);});}
@@ -5213,8 +5234,8 @@ function pbShot(n,cap){let url='';
     x.font='64px serif';x.fillText('🌴',18,200);x.fillText('🌴',396,190);x.font='34px serif';x.fillText(['👋','✌️','🍹','🤸','❤️'][n],222,120);
     x.font='bold 18px '+FONT;x.fillStyle='#5a3b12';x.textAlign='center';x.fillText(BEACH.ppl.map(c=>c.name).join(' · ').slice(0,46),240,280);url=cv.toDataURL('image/jpeg',.82);}
   const flash=$('#pbFlash');flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go');try{beep(true);}catch(e){}
-  const ph=document.createElement('button');ph.type='button';ph.className='pbph';const POS=[[4,7],[52,15],[6,38],[50,46],[27,68]],r=(n%2?1:-1)*(4+(n*1.3)%3);
-  ph.style.left=POS[n%5][0]+'%';ph.style.top=POS[n%5][1]+'%';ph.style.setProperty('--r',r+'deg');ph.style.setProperty('--sw',(n%2?-1:1)*46+'px');ph.style.zIndex=10+n;
+  const ph=document.createElement('button');ph.type='button';ph.className='pbph';const POS=[[3,9],[51,36],[5,63]],r=(n%2?1:-1)*(4+(n*1.3)%3);
+  ph.style.left=POS[n%3][0]+'%';ph.style.top=POS[n%3][1]+'%';ph.style.setProperty('--r',r+'deg');ph.style.setProperty('--sw',(n%2?-1:1)*46+'px');ph.style.zIndex=10+n;
   const im=document.createElement('img');im.src=url;im.alt=cap;const t=document.createElement('span');t.textContent=cap;ph.append(im,t);ph.onclick=()=>ph.classList.toggle('zoom');
   $('#pbStack').appendChild(ph);pbEl.classList.add('show');PB.push(ph);}
 function pbEnd(){$('#pbTitle').style.display='';$('#pbClose').style.display='';}
@@ -5229,7 +5250,7 @@ async function beachTrip(ppl,dest,v,rp){
   $('#pbFlash').classList.remove('go');void $('#pbFlash').offsetWidth;$('#pbFlash').classList.add('go');
   window.__altScene=BW.S;BEACH.on=true;stage.classList.add('beach-on');if(meIn)$('#beachBar').classList.add('show');
   camera.position.set(0,7.5,16);controls.target.set(0,.6,-2);controls.update();
-  ppl.forEach((c,i)=>{BW.S.add(c.root);c.root.visible=true;c.awaySp.visible=false;c.pack.visible=false;c.pose='stand';c.seat=null;c.lying=false;c.pos.set(-14+i*.8,0,6+i*.4);c.yaw=PI/2;c._bAct='walk';beachWear(c,true,i);});
+  ppl.forEach((c,i)=>{BW.S.add(c.root);c.root.visible=true;c.awaySp.visible=false;c.pack.visible=false;c.pose='stand';c.seat=null;c.lying=false;c.pos.set(-14+i*.8,0,6+i*.4);c.yaw=PI/2;c._bAct='walk';beachWear(c,true,i);if(bIsF(c)&&!isHuman(c)&&srand(hashStr(dest.n+c.id+'bk'))()<.5)bBikini(c,true,BEACH_SHIRT[i%BEACH_SHIRT.length],BEACH_SHORT[i%BEACH_SHORT.length]);});
   banner(dest.e,`Cả team đã tới ${dest.n}!`,'Tắm biển, phơi nắng, uống cocktail thôi! 🌊🍹',null,'yep');setStatus(`${dest.e} Cả team đã tới bãi biển ${dest.n}! Cát vàng, biển xanh, cocktail mát lạnh 🍹`);setTimeout(()=>{if(evBanT.textContent.startsWith('Cả team đã tới'))bannerOff();},4000);
   const host=ppl.includes(MGR)?MGR:ppl[0];
   await Promise.all(ppl.map((c,i)=>{const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,-6+i*2.4,3+((i%2)*.8),tok);}));
@@ -5255,7 +5276,7 @@ async function beachTrip(ppl,dest,v,rp){
   const TH=[['😆','😁','🥰'],['✌️','😎','🤙'],['🍹','🥥','🥂'],['🤸','🙌','✨'],['❤️','💕','🥰']];
   const NAME=['Cả team vẫy tay chào','Tạo dáng tự do','Cùng nâng ly','Nhảy lên nào','Thả tim cho team'];
   const CAPS=['Cả team vui quá! 🥰','Ai cũng sống ảo 😎','Cạn ly vì team! 🍹','Bay lên nào! 🤸','Yêu team nhiều lắm ❤️'];
-  for(let n=0;n<5;n++){
+  const SHOTS=[0,2,4];for(let k=0;k<3;k++){const n=SHOTS[k];
     order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;});
     await Promise.race([Promise.all(order.map((c,i)=>{const f=FORM[n](i);const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,f.x,f.z,tok);})),wait(2.2)]);
     order.forEach((c,i)=>{const f=FORM[n](i);c.path=[];c.walking=false;c.pos.set(f.x,0,f.z);c.yaw=Math.atan2(CAM[n][0]-f.x,CAM[n][2]-f.z)*.7;c.root.rotation.y=c.yaw;});
@@ -5263,7 +5284,7 @@ async function beachTrip(ppl,dest,v,rp){
     order.forEach((c,i)=>{const g=MIX[n][(i+n)%5];if(g==='cup'){c.arms='cup';if(c._bCup)c._bCup.visible=true;if(i%2)c.gesture('cheer',2.4);}else if(g==='jump'){c._jumpT=simTime+i*.06;c.gesture('jump',1.4);}else c.gesture(g,2.8);
       if(i===mi&&n===4)c.gesture('heart',2.8);if((i+n)%2)c.think(TH[n][(i+n)%3],2);});
     host.say(n===0?'1, 2, 3… cười lên nào! 📸':`${NAME[n]}! 1, 2, 3… 📸`,1.6);await wait(1.7);
-    pbShot(n,`${dest.e} ${dest.n} · ${day} · ${CAPS[n]}`);await wait(2.4);}
+    pbShot(k,`${dest.e} ${dest.n} · ${day} · ${CAPS[n]}`);await wait(2.4);}
   order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;});pbEnd();setStatus(`📔 Kỷ niệm team building ${dest.n} — bấm vào ảnh để phóng to.`);
   await wait(7);
 }
@@ -5275,18 +5296,24 @@ function beachLeave(){if(!BEACH.on&&!window.__altScene)return;BEACH.on=false;BEA
 // Mochi ở nhà: không hiện trên bãi biển
 try{CAT.tagEl.classList.add('cattag');}catch(e){}
 // đổi đồ khi đang đi biển: chọn đồ đi biển (áo, quần short, mũ, kính)
-let BWP={s:0,k:0,h:1,g:1};
+let BWP={s:0,k:0,h:1,g:1,b:0};
 function openBeachWear(){const me=ME.id&&byId(ME.id);if(!me||!me._bw)return;const box=$('#bwOpts');box.textContent='';
   const sec=(t,arr,key,isColor)=>{const h=document.createElement('div');h.className='kmt';h.style.cssText='font-weight:700;text-align:left;margin-top:8px';h.textContent=t;box.appendChild(h);const r=document.createElement('div');r.className='bwrow';
     arr.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.className='bwsw'+(BWP[key]===i?' on':'');if(isColor){b.style.background=v;b.title=v;}else b.textContent=v;b.onclick=()=>{BWP[key]=i;openBeachWear();};r.appendChild(b);});box.appendChild(r);};
-  sec('👕 Áo đi biển',BEACH_SHIRT,'s',true);sec('🩳 Quần short',BEACH_SHORT,'k',true);sec('👒 Mũ cói',['Không đội','Đội mũ'],'h',false);sec('🕶️ Kính râm',['Không đeo','Đeo kính'],'g',false);
+  const F=bIsF(me);if(!F)BWP.b=0;if(F)sec('👗 Kiểu đồ',['👕 Áo + quần short','👙 Bikini'],'b',false);const BK=F&&BWP.b===1;
+  sec(BK?'👙 Áo bikini':'👕 Áo đi biển',BEACH_SHIRT,'s',true);sec(BK?'👙 Quần bikini':'🩳 Quần short',BEACH_SHORT,'k',true);sec('👒 Mũ cói',['Không đội','Đội mũ'],'h',false);sec('🕶️ Kính râm',['Không đeo','Đeo kính'],'g',false);
   $('#bwModal').classList.add('show');}
 $('#bwCancel').onclick=()=>$('#bwModal').classList.remove('show');
-$('#bwOk').onclick=()=>{$('#bwModal').classList.remove('show');const me=ME.id&&byId(ME.id);if(me)run('bwear',me,{v:[BWP.s,BWP.k,BWP.h,BWP.g].join('.')});};
-function bwearSet(c,v){if(!c||!c._bw)return false;const [s,k,h,g]=String(v||'').split('.').map(Number);const set=(m,x)=>{m.color.set(x);m.emissive&&m.emissive.copy(m.color);};
+$('#bwOk').onclick=()=>{$('#bwModal').classList.remove('show');const me=ME.id&&byId(ME.id);if(me)run('bwear',me,{v:[BWP.s,BWP.k,BWP.h,BWP.g,BWP.b].join('.')});};
+function bwearSet(c,v){if(!c||!c._bw)return false;const [s,k,h,g,bk]=String(v||'').split('.').map(Number);const set=(m,x)=>{m.color.set(x);m.emissive&&m.emissive.copy(m.color);};
   set(c.mShirt,BEACH_SHIRT[(s|0)%BEACH_SHIRT.length]);if(c.mVest)set(c.mVest,BEACH_SHIRT[(s|0)%BEACH_SHIRT.length]);set(c.mSkirt,BEACH_SHORT[(k|0)%BEACH_SHORT.length]);
+  if(bk===1&&bIsF(c))bBikini(c,true,BEACH_SHIRT[(s|0)%BEACH_SHIRT.length],BEACH_SHORT[(k|0)%BEACH_SHORT.length]);else bBikini(c,false);
   if(c._bAcc){c._bAcc.hat.visible=h===1;c._bAcc.g.children.forEach(o=>{if(o!==c._bAcc.hat)o.visible=g===1;});}c.think('✨',1.4);return true;}
 setTimeout(()=>{['#selCustom','#soloCustom'].forEach(sel=>{const b=$(sel);if(!b)return;const o=b.onclick;b.onclick=e=>{const me=ME.id&&byId(ME.id);if(BEACH.on&&me&&me._bw){openBeachWear();return;}o&&o.call(b,e);};});},0);
+
+{const o=meow;meow=(...a)=>{if(BEACH.on||EV.trip||window.__altScene)return;return o(...a);};}
+{const o=catSay;catSay=(...a)=>{if(BEACH.on||EV.trip)return;return o(...a);};}
+{const o=catThink;catThink=(...a)=>{if(BEACH.on||EV.trip)return;return o(...a);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
