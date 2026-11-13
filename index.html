@@ -4640,8 +4640,9 @@ function negWarn(v){const [id,nS,dS,why,kmS]=String(v||'').split('|');const c=by
 /* ================= đồng bộ trạng thái phòng: máy chủ phòng gửi ảnh chụp NPC + KPI, người chơi gửi trạng thái nhân vật của mình ================= */
 const r2=v=>Math.round(v*100)/100;
 function charState(c){return[r2(c.root.position.x),r2(c.root.position.z),c.busy?1:0,c.away?1:0,String(c.activity||'').slice(0,40),c.atHome()?1:0,c.outside?1:0];}
-function roomState(){if(!CAT_HOST)return null;const o=negStore();
-  return{t:Date.now(),c:CHARS.map(c=>[c.id,c.kpi||0,c.kpiMonth||0,c.lv||0,o.n[c.id]||0,isHuman(c)?0:JSON.stringify(c.look()).slice(0,400)].concat(isHuman(c)?[]:charState(c)))};}
+let RS_N=0;
+function roomState(){if(!CAT_HOST)return null;const o=negStore(),withLook=(RS_N++%4)===0;   // ngoại hình NPC gửi mỗi 4 nhịp cho nhẹ
+  return{t:Date.now(),c:CHARS.map(c=>[c.id,c.kpi||0,c.kpiMonth||0,c.lv||0,o.n[c.id]||0,isHuman(c)?0:(()=>{const L=JSON.stringify(c.look()).slice(0,400);if(withLook||L!==c._rsLook){c._rsLook=L;return L;}return 0;})()].concat(isHuman(c)?[]:charState(c)))};}
 function myState(){const c=ME.id&&byId(ME.id);return c?charState(c):null;}
 function mirror(c,s){   // nhân vật trên máy này đứng yên mà máy gốc đang làm việc khác: đi theo cho giống
   const [x,z,busy,away,act,home,out]=s;c._st=s;c._stAt=Date.now();c._stBusyN=busy?(c._stBusyN||0)+1:0;
@@ -4655,8 +4656,10 @@ function mirror(c,s){   // nhân vật trên máy này đứng yên mà máy g�
       while(c._mirTok===tok&&c._mirror&&c._st&&c._st[2]&&Date.now()-t0<90000&&Date.now()-c._stAt<12000){if(c._st[4]&&c.activity!==c._st[4]){c.activity=c._st[4];refreshCards();}await wait(1);}
       if(c._mirTok===tok&&c._mirror&&!c.busy){c._mirror=false;c.activity='🚶 Quay về chỗ';refreshCards();await c.goSit(c.home);if(c._mirTok===tok&&!c.busy){c.activity='💻 Đang làm việc';refreshCards();}}}
       catch(e){}finally{if(c._mirTok===tok)c._mirror=false;}})();return;}
-  if(home&&!c.atHome()){c.goSit(c.home).catch(()=>{});return;}
-  if(!home&&Math.hypot(c.root.position.x-x,c.root.position.z-z)>1.5)c.walkTo(x,z).catch(()=>{});}
+  // lệch vị trí: chờ 2 nhịp liên tiếp mới chỉnh, và không chỉnh chồng lên lần đang đi (tránh giật lag)
+  const off=home?!c.atHome():Math.hypot(c.root.position.x-x,c.root.position.z-z)>1.5;c._mirMis=off?(c._mirMis||0)+1:0;
+  if(!off||c._mirMis<2||c._mirMove)return;c._mirMove=true;const tok=c._mirTok;
+  (home?c.goSit(c.home):c.walkTo(x,z)).catch(()=>{}).finally(()=>{c._mirMove=false;c._mirMis=0;});}
 let ST_SEEN=0;
 function peerState(st){if(CAT_HOST||!st||!Array.isArray(st.c)||st.t===ST_SEEN)return;ST_SEEN=st.t;let ch=false;const o=negStore();
   st.c.forEach(e=>{const c=byId(e[0]);if(!c)return;const [,kpi,km,lv,ng,lk]=e;
@@ -4668,7 +4671,7 @@ function peerState(st){if(CAT_HOST||!st||!Array.isArray(st.c)||st.t===ST_SEEN)re
 function peerPlayer(id,s){const c=byId(id);if(!c||c.id===ME.id||!Array.isArray(s)||!isHuman(c))return;mirror(c,s);}
 {const o=begin;begin=(c,a)=>{if(c&&c._mirror){c._mirror=false;c._mirTok=(c._mirTok||0)+1;}o(c,a);};}
 setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.myState=myState;OFFICE.peerState=peerState;OFFICE.peerPlayer=peerPlayer;}},0);
-setInterval(()=>{if(window.OFFICE&&OFFICE.actPush&&(CAT_HOST||ME.id))OFFICE.actPush();},3000);
+let PS_AT=0;setInterval(()=>{const now=Date.now();if(!window.OFFICE||!OFFICE.actPush)return;if(CAT_HOST||(ME.id&&now-PS_AT>5000)){PS_AT=now;OFFICE.actPush();}},3000);   // máy chủ 3 giây, người chơi khác 5 giây
 
 /* ===== được giữ lại: lên cảm ơn quản lý ===== */
 async function actThank(c){if(!c||c.away)return;begin(c,'🙏 Lên cảm ơn quản lý');
@@ -4789,7 +4792,7 @@ $('#lhClose').onclick=()=>$('#leaveHub').classList.remove('show');
 $('#lhSelf').onclick=()=>{$('#leaveHub').classList.remove('show');openLeave();};
 setInterval(()=>{if($('#leaveHub').classList.contains('show'))openLeaveHub();},2000);
 {const o=refreshCards;refreshCards=()=>{o();try{const b=document.querySelector('[data-cmd=sick]');if(b){const n=Object.keys(LEAVE_PEND).length,t=isMyMgr(selected)?`📝 Nghỉ phép · duyệt đơn${n?` (${n})`:''}`:'📝 Đăng ký nghỉ phép';if(b.textContent!==t)b.textContent=t;}}catch(e){}};}
-setInterval(()=>{try{refreshCards();}catch(e){}},3000);
+setInterval(()=>{try{const b=document.querySelector('[data-cmd=sick]');if(b){const n=Object.keys(LEAVE_PEND).length,t=isMyMgr(selected)?`📝 Nghỉ phép · duyệt đơn${n?` (${n})`:''}`:'📝 Đăng ký nghỉ phép';if(b.textContent!==t)b.textContent=t;}}catch(e){}},2000);
 
 /* ===== ngày nghỉ phép không tính lương ===== */
 function leaveStore(){const mk=new Date().getFullYear()+'-'+(new Date().getMonth()+1);let o=null;try{o=JSON.parse(localStorage.getItem('office_leave')||'null');}catch(e){}if(!o||o.mon!==mk)o={mon:mk,n:{}};return o;}
