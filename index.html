@@ -531,6 +531,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 #stage.beach-on .hint{display:none!important}
 .beachbar{flex-wrap:nowrap!important;gap:5px!important;bottom:10px!important;max-width:96%!important}
 .beachbar button{font-size:11px!important;padding:6px 9px!important;white-space:nowrap}
+
+.beachbar .bdr{display:none}.beachbar.pick button{display:none}.beachbar.pick .bdr{display:inline-block}
 </style>
 </head>
 <body>
@@ -575,7 +577,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     <button type="button" class="jtpill" id="jtPill" style="display:none"></button>
     <div class="pbflash" id="pbFlash"></div>
     <div class="pbook" id="pbook"><div class="pbstack" id="pbStack"></div><div class="pbtitle" id="pbTitle" style="display:none">📔 Kỷ niệm team building</div><button type="button" class="pbclose" id="pbClose" style="display:none">Đóng</button></div>
-    <div class="beachbar" id="beachBar"><button type="button" data-bact="swim">🏊 Bơi</button><button type="button" data-bact="sun">😎 Phơi nắng</button><button type="button" data-bact="drink">🍹 Uống nước</button><button type="button" data-bact="walk">🚶 Đi dạo</button></div>
+    <div class="beachbar" id="beachBar"><button type="button" data-bact="swim">🏊 Bơi</button><button type="button" data-bact="sun">😎 Phơi nắng</button><button type="button" data-bact="drink">🍹 Uống nước</button><button type="button" data-bact="walk">🚶 Đi dạo</button><button class="bdr" data-bact="drink:cocktail">🍹 Cocktail</button><button class="bdr" data-bact="drink:coco">🥥 Dừa tươi</button><button class="bdr" data-bact="back">↩︎</button></div>
     <button type="button" class="clk" id="clk" title="Giờ thật của máy bạn — bấm để trời sáng/tối theo giờ thật">🕗 --:--</button>
     <div class="tod" id="tod">
       <button data-tod="day" class="on">☀️ Ban ngày</button>
@@ -5091,7 +5093,7 @@ setInterval(()=>{const b=document.querySelector('[data-cmd=jobtest] small');if(!
 
 /* ================= 🏖️ Bãi biển team building (Phú Quốc · Nha Trang) + photobook check-in ================= */
 const BEACH={on:false,photo:false,scene:null,dest:null,ppl:[],t:0};
-const BEACH_DEST={'Phú Quốc':{sea:'#27c2d3',deep:'#139bb8',pier:true},'Nha Trang':{sea:'#1f86d6',deep:'#125fb0',mountains:true},'Vũng Tàu':{sea:'#3a9ec4',deep:'#23779f',cape:true}};
+const BEACH_DEST={'Phú Quốc':{sea:'#27c2d3',deep:'#139bb8',rocks:true},'Nha Trang':{sea:'#1f86d6',deep:'#125fb0',mountains:true},'Vũng Tàu':{sea:'#3a9ec4',deep:'#23779f',cape:true}};
 const BL={loungers:[],bar:{x:6.2,z:1.4},row:2.6};let B_OBS=[],B_PLAN=[];
 function bMat(c,o){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.8,metalness:0},o||{}));}
 function bMk(geo,m,x,y,z,p){const me=new THREE.Mesh(geo,m);me.position.set(x||0,y||0,z||0);me.castShadow=true;me.receiveShadow=true;p.add(me);return me;}
@@ -5145,13 +5147,13 @@ function buildBeach(key){
     BL.loungers.push({x:lx,z:lz});for(const dz of[-.6,0,.6])B_OBS.push({x:lx,z:lz+dz,r:.4});B_OBS.push({x:lx-.75,z:lz+.3,r:.1});B_PLAN.push({x:lx,z:lz,r:.95});}
   // quầy cocktail
   {const g=new THREE.Group();g.position.set(BL.bar.x,0,BL.bar.z-1.4);S.add(g);const w=bMat('#c08a52');
-    bMk(new THREE.BoxGeometry(2.6,1,.7),w,0,.5,0,g);bMk(new THREE.BoxGeometry(2.8,.08,.9),bMat('#e9c48f'),0,1.04,0,g);
+    bMk(new THREE.BoxGeometry(2.6,.72,.7),w,0,.36,0,g);bMk(new THREE.BoxGeometry(2.8,.08,.9),bMat('#e9c48f'),0,.76,0,g);bMk(new THREE.BoxGeometry(2.4,.28,.8),bMat('#a0703f'),0,.14,-.95,g);   // bục đứng cho bartender
     for(const sx of[-1.2,1.2])bMk(new THREE.CylinderGeometry(.06,.06,2.4,8),w,sx,1.2,-.2,g);
     bMk(new THREE.ConeGeometry(2.1,.9,8),bMat('#d9b36a'),0,2.75,-.2,g);
     const glass=bMat('#ffffff',{transparent:true,opacity:.45,roughness:.1}),drinks=['#ff922b','#ff6b9a','#74c0fc','#ffd43b'];
-    drinks.forEach((c,i)=>{const dx=-.9+i*.6;bMk(new THREE.CylinderGeometry(.07,.05,.2,10),glass,dx,1.18,.15,g);bMk(new THREE.CylinderGeometry(.062,.045,.15,10),bMat(c),dx,1.15,.15,g);
-      const u=bMk(new THREE.ConeGeometry(.1,.06,8),bMat(drinks[(i+1)%4]),dx+.05,1.36,.15,g);u.rotation.z=.4;});
-    for(let i=0;i<2;i++){bMk(new THREE.SphereGeometry(.13,12,10),bMat('#7a5a2e'),.6+i*.35,1.21,-.15,g);bMk(new THREE.CylinderGeometry(.01,.01,.22,6),bMat('#ff6b6b'),.62+i*.35,1.38,-.15,g);}
+    drinks.forEach((c,i)=>{const dx=-.9+i*.6;bMk(new THREE.CylinderGeometry(.07,.05,.2,10),glass,dx,.9,.15,g);bMk(new THREE.CylinderGeometry(.062,.045,.15,10),bMat(c),dx,.87,.15,g);
+      const u=bMk(new THREE.ConeGeometry(.1,.06,8),bMat(drinks[(i+1)%4]),dx+.05,1.08,.15,g);u.rotation.z=.4;});
+    for(let i=0;i<2;i++){bMk(new THREE.SphereGeometry(.13,12,10),bMat('#5e8c31'),.6+i*.35,.93,-.15,g);bMk(new THREE.CylinderGeometry(.01,.01,.22,6),bMat('#ff6b6b'),.62+i*.35,1.1,-.15,g);}
     const sg=canvasTex(256,64,(x,W,H)=>{x.fillStyle='#fff8e7';x.fillRect(0,0,W,H);x.fillStyle='#e8590c';x.font='bold 30px '+FONT;x.textAlign='center';x.textBaseline='middle';x.fillText('🍹 Cocktail Bar',W/2,H/2);});
     const sign=bMk(new THREE.PlaneGeometry(1.6,.4),new THREE.MeshBasicMaterial({map:sg}),0,1.85,.25,g);sign.castShadow=false;}
   // mây trắng
@@ -5164,6 +5166,9 @@ function buildBeach(key){
     const lh=new THREE.Group();lh.position.set(-34,8.6,-40);S.add(lh);bMk(new THREE.CylinderGeometry(.9,1.2,6,14),bMat('#f4f4ef'),0,3,0,lh);bMk(new THREE.CylinderGeometry(1.25,1.25,.35,14),bMat('#c8362c'),0,6.1,0,lh);
     bMk(new THREE.CylinderGeometry(.7,.7,1,12),new THREE.MeshBasicMaterial({color:'#ffe27a'}),0,6.8,0,lh);bMk(new THREE.ConeGeometry(.95,1,12),bMat('#c8362c'),0,7.8,0,lh);
     [[6,-24,'#d8452f'],[16,-30,'#2f6fd8'],[-4,-36,'#e0a21f']].forEach(([x,z,col],i)=>{const b=new THREE.Group();b.position.set(x,.15,z);b.rotation.y=i*1.3;S.add(b);bMk(new THREE.BoxGeometry(2.6,.5,.9),bMat(col),0,0,0,b);bMk(new THREE.BoxGeometry(.9,.6,.7),bMat('#f2efe4'),-.3,.5,0,b);BEACH.boats=(BEACH.boats||[]).concat([b]);});}
+  if(D.rocks){ // ghềnh đá + thuyền thúng, thuyền câu
+    const rm=[bMat('#7d7468'),bMat('#948a7c'),bMat('#6b6359')];[[13,-9,1.6],[15,-10.5,1.1],[11.6,-10.2,.8],[-15,-9.6,1.3],[-13.4,-10.8,.9]].forEach(([x,z,r],i)=>{const m=bMk(new THREE.DodecahedronGeometry(r,0),rm[i%3],x,r*.3,z,S);m.rotation.set(i,i*1.7,0);m.scale.y=.6;});
+    [[4,-22,'#2f9e44'],[-8,-27,'#e8590c'],[18,-33,'#1971c2']].forEach(([x,z,col],i)=>{const b=new THREE.Group();b.position.set(x,.15,z);b.rotation.y=i*1.1+.4;S.add(b);bMk(new THREE.BoxGeometry(2.4,.45,.85),bMat(col),0,0,0,b);bMk(new THREE.BoxGeometry(.8,.55,.65),bMat('#f2efe4'),-.3,.45,0,b);bMk(new THREE.CylinderGeometry(.03,.03,1.4,6),bMat('#5c4a32'),.5,.9,0,b);BEACH.boats.push(b);});}
   if(D.mountains){const mm=[bMat('#3d7a5a'),bMat('#4f8f6b'),bMat('#5e7fa8')];[[-30,-58,10,9],[-12,-64,13,12],[8,-60,9,8],[26,-56,11,10],[40,-66,14,13]].forEach(([x,z,r,h],i)=>{const m=bMk(new THREE.ConeGeometry(r,h,7),mm[i%3],x,h/2-1,z,S);m.castShadow=false;});
     [[-6,-30,2.6],[12,-36,3.2]].forEach(([x,z,r])=>{const is=bMk(new THREE.SphereGeometry(r,14,10),bMat('#4c9a5e'),x,-r*.45,z,S);is.scale.y=.55;is.castShadow=false;});}
   return{S,sea,base,foam,foamM,foams,ripTex,palms,clouds,nf:0};
@@ -5177,7 +5182,7 @@ function beachTick(){if(!BEACH.on||!BW)return;const t=simTime;BEACH.t=t;(BEACH.b
   BW.foam.position.z=-9.75+Math.sin(t*.9)*.18;BW.foamM.opacity=.65+Math.sin(t*.9)*.2;
   BW.palms.forEach(pl=>{pl.top.rotation.z=Math.sin(t*1.1+pl.ph)*.06;pl.top.rotation.x=Math.cos(t*.9+pl.ph)*.04;});
   BW.clouds.forEach((g,i)=>{g.position.x+=.004+i*.0006;if(g.position.x>55)g.position.x=-55;});
-  BEACH.ppl.forEach((c,i)=>{c.root.rotation.x=c._sunbathe?B_LIE:0;if(c._sunbathe){c.pos.y=c._lieY||.4;c.root.rotation.y=PI;}else bPush(c);if(c._swim){c.pos.y=-.42+Math.sin(t*2.2+i)*.05;c.pos.x+=Math.sin(t*.4+i)*.002;}else if(c._jumpT){const u=(t-c._jumpT)/.55;if(u>=1){c._jumpT=0;c.pos.y=c._baseY||0;}else c.pos.y=(c._baseY||0)+Math.sin(u*PI)*.55;}});}
+  BEACH.ppl.forEach((c,i)=>{c.root.rotation.x=c._sunbathe?B_LIE:0;if(c._sunbathe){c.pos.y=c._lieY||.3;c.root.rotation.y=PI;c.legL.rotation.x=c.legR.rotation.x=B_LEG;c.arms='idle';}else bPush(c);if(c._swim){c.pos.y=-.42+Math.sin(t*2.2+i)*.05;c.pos.x+=Math.sin(t*.4+i)*.002;}else if(c._jumpT){const u=(t-c._jumpT)/.55;if(u>=1){c._jumpT=0;c.pos.y=c._baseY||0;}else c.pos.y=(c._baseY||0)+Math.sin(u*PI)*.55;}});}
 {const o=scrTick;scrTick=()=>{o();try{beachTick();}catch(e){}};}
 // đồ đi biển
 const BIKINI=['#ff8fab','#74c0fc','#ffd43b','#8ce99a','#ffa94d','#b197fc','#e64980','#0b7285'];
@@ -5190,13 +5195,15 @@ function beachWear(c,on,i){
       for(const s of[1,-1]){const l=bMk(new THREE.BoxGeometry(.13,.08,.02),lens,s*.13,-.07,.345,g);l.castShadow=false;}bMk(new THREE.BoxGeometry(.1,.015,.015),fr,0,-.05,.35,g).castShadow=false;
       const hat=new THREE.Group();hat.position.y=.27;g.add(hat);const hm=bMat('#e9c77b'),band=bMat('#e8590c');bMk(new THREE.CylinderGeometry(.56,.56,.025,24),hm,0,0,0,hat);bMk(new THREE.CylinderGeometry(.27,.31,.2,20),hm,0,.11,0,hat);bMk(new THREE.CylinderGeometry(.312,.312,.05,20),band,0,.035,0,hat);
       c._bAcc={g,hat};
+      const co=new THREE.Group();c.armR.hand.add(co);co.position.set(0,.02,.07);const sh=bMk(new THREE.SphereGeometry(.085,14,10),bMat('#5e8c31'),0,.07,0,co);sh.scale.y=.92;
+      bMk(new THREE.CylinderGeometry(.05,.05,.012,12),bMat('#f8f3e3'),0,.148,0,co).castShadow=false;const sw=bMk(new THREE.CylinderGeometry(.008,.008,.17,6),bMat('#ff6b9a'),.02,.21,0,co);sw.rotation.z=-.3;sw.castShadow=false;co.visible=false;c._bCoco=co;
       const cg=new THREE.Group();c.armR.hand.add(cg);cg.position.set(0,-.02,.06);const gl=bMat('#ffffff',{transparent:true,opacity:.5,roughness:.1});
       bMk(new THREE.CylinderGeometry(.06,.045,.16,10),gl,0,.08,0,cg);bMk(new THREE.CylinderGeometry(.053,.04,.12,10),bMat('#ff922b'),0,.07,0,cg);const u=bMk(new THREE.ConeGeometry(.09,.05,8),bMat('#ff6b9a'),.04,.2,0,cg);u.rotation.z=.4;cg.visible=false;c._bCup=cg;}
     c._bAcc.g.visible=true;c._bAcc.hat.visible=((c.seed||i)*7)%3!==0;
     save.leg=c.mLeg.color.getHex();c.mLeg.color.set('#fde0d1');c.mLeg.emissive&&c.mLeg.emissive.copy(c.mLeg.color);   // chân trần
     if(bIsF(c))bBikini(c,true,BIKINI[i%BIKINI.length],BIKINI[i%BIKINI.length]);}
   else{bBikini(c,false);const s=c._bw;if(!s)return;c._bw=null;if(s.leg!=null){c.mLeg.color.setHex(s.leg);c.mLeg.emissive&&c.mLeg.emissive.copy(c.mLeg.color);}const set=(m,v)=>{m.color.setHex(v);m.emissive&&m.emissive.copy(m.color);};set(c.mShirt,s.sh);set(c.mSkirt,s.sk);if(c.mVest&&s.v!=null)set(c.mVest,s.v);
-    s.hide.forEach(o=>o.visible=true);if(c._bAcc)c._bAcc.g.visible=false;if(c._bCup)c._bCup.visible=false;}}
+    s.hide.forEach(o=>o.visible=true);if(c._bAcc)c._bAcc.g.visible=false;bHold(c,null);}}
 // bikini (nhân vật nữ)
 function bBikini(c,on,top,bot){const B=c.body;if(!B)return;
   if(on){if(!c._bkn){const g=new THREE.Group();g.visible=false;B.add(g);const topM=bMat(top||'#ff8fab'),botM=bMat(bot||'#e64980');
@@ -5214,14 +5221,15 @@ function bBikini(c,on,top,bot){const B=c.body;if(!B)return;
     K.g.visible=true;}
   else{const K=c._bkn;if(!K||!K.on)return;K.on=false;K.g.visible=false;K.hid.forEach(o=>o.visible=true);K.hid=[];K.sl.forEach(([m,mt])=>m.material=mt);K.sl=[];}}
 function bIsF(c){return c&&c.gender!=='m';}
-const B_LIE=68*PI/180;   // ngả lưng theo ghế, đầu tựa lên phần lưng ghế
+const B_LIE=47*PI/180,B_LEG=-(PI/2-B_LIE);   // lưng ngả theo lưng ghế, chân duỗi thẳng trên đệm
 function bLoungerH(zl){return zl<-.56?.34+Math.min(1,(-.56-zl)/.52)*.48:.37;}
-function bLie(c,L){c.pos.set(L.x,0,L.z-1);c.yaw=PI;c.root.rotation.set(B_LIE,PI,0);c.root.updateMatrixWorld(true);let lift=0;const v=new THREE.Vector3();
+function bLie(c,L){c.pos.set(L.x,0,L.z+.16);c.yaw=PI;c.root.rotation.set(B_LIE,PI,0);c.legL.rotation.x=c.legR.rotation.x=B_LEG;c.hips.position.y=LEGH;c.root.updateMatrixWorld(true);let lift=0;const v=new THREE.Vector3();
   c.root.traverseVisible(o=>{if(!o.isMesh||o===c.hit||!o.geometry||!o.geometry.attributes.position||(o.material&&o.material.visible===false))return;const pa=o.geometry.attributes.position,st=Math.max(1,Math.floor(pa.count/160));
     for(let i=0;i<pa.count;i+=st){v.fromBufferAttribute(pa,i).applyMatrix4(o.matrixWorld);const xl=v.x-L.x,zl=-(v.z-L.z);if(Math.abs(xl)>.36||zl<-1.1||zl>.92)continue;const need=bLoungerH(zl)-v.y;if(need>lift)lift=need;}});
-  c._lieY=Math.max(lift,.33)+.01;c.pos.y=c._lieY;c._lounger=L;c._sunbathe=true;}
+  c._lieY=Math.max(lift,.2)+.01;c.pos.y=c._lieY;c._lounger=L;c._sunbathe=true;}
 // hoạt động trên biển
-function bReset(c){if(c._sunbathe&&c._lounger)c.pos.set(c._lounger.x+.9,0,c._lounger.z);c._swim=false;c.lying=false;c._sunbathe=false;c.root.rotation.x=0;c.pos.y=0;c.arms='idle';if(c._bCup)c._bCup.visible=false;c.cur&&(c.cur.rootY=0);}
+function bHold(c,k){if(c._bCup)c._bCup.visible=k==='cocktail';if(c._bCoco)c._bCoco.visible=k==='coco';c._bHold=k||null;if(k)c._bLast=k;}
+function bReset(c){if(c._sunbathe&&c._lounger)c.pos.set(c._lounger.x+.9,0,c._lounger.z);c._swim=false;c.lying=false;c._sunbathe=false;c.root.rotation.x=0;c.pos.y=0;c.arms='idle';bHold(c,null);c.cur&&(c.cur.rootY=0);}
 function bRoute(a,b,d){d=d||0;if(d<4)for(const o of B_PLAN){const vx=b.x-a.x,vz=b.z-a.z,L2=vx*vx+vz*vz;if(L2<1e-4)break;let t=((o.x-a.x)*vx+(o.z-a.z)*vz)/L2;if(t<=.02||t>=.98)continue;
     const px=a.x+vx*t,pz=a.z+vz*t,dx=px-o.x,dz=pz-o.z,dd=Math.hypot(dx,dz),R=o.r+.22;if(dd>=R)continue;
     let nx,nz;if(dd>1e-3){nx=dx/dd;nz=dz/dd;}else{const L=Math.sqrt(L2);nx=-vz/L;nz=vx/L;}const w={x:o.x+nx*(R+.2),z:o.z+nz*(R+.2)};return bRoute(a,w,d+1).concat(bRoute(w,b,d+1));}
@@ -5233,14 +5241,16 @@ const B_LINES={swim:['Nước mát quá trời luôn! 🌊','Ai bơi thi với m
 async function bAct(c,act,i,tok){bReset(c);const r=srand(hashStr(BEACH.key+c.id+act+Math.floor(simTime/5)));
   if(act==='swim'){if(!await bWalk(c,-6+i*2.6+r()*.8,-11.4-r()*1.8,tok))return;c._swim=true;c.arms='wave';c.think('🏊',1.6);if(r()<.6)c.say(pick(B_LINES.swim),2.2);await bWait(16,c,tok);c._swim=false;c.pos.y=0;}
   else if(act==='sun'){const L=BL.loungers[i%BL.loungers.length];if(!await bWalk(c,L.x+.9,L.z,tok))return;bLie(c,L);c.think('😎',1.8);if(r()<.6)wait(1).then(()=>c.say(pick(B_LINES.sun),2.2));await bWait(16,c,tok);if(c._sunbathe){c._sunbathe=false;c.root.rotation.x=0;c.pos.set(L.x+.9,0,L.z);}}
-  else if(act==='drink'){if(!await bWalk(c,BL.bar.x-1+((i*.55)%2.2),BL.bar.z+.3,tok))return;c.yaw=PI;await bServe(c);if(c._bTok!==tok||!BEACH.on||BEACH.photo)return;c.yaw=0;c.arms='cup';if(c._bCup)c._bCup.visible=true;c.think(pick(['🍹','🥥']),1.6);if(r()<.7)c.say(pick(B_LINES.drink),2.2);await bWait(14,c,tok);}
+  else if(act.startsWith('drink')){const kind=act==='drink:coco'?'coco':act==='drink:cocktail'?'cocktail':(r()<.5?'coco':'cocktail');if(!await bWalk(c,BL.bar.x-1+((i*.55)%2.2),BL.bar.z+.3,tok))return;c.yaw=PI;await bServe(c,kind);if(c._bTok!==tok||!BEACH.on||BEACH.photo)return;c.yaw=0;c.arms='cup';bHold(c,kind);c.think(kind==='coco'?'🥥':'🍹',1.6);if(r()<.7)c.say(pick(B_LINES.drink),2.2);await bWait(14,c,tok);}
   else{for(let k=0;k<3;k++){if(!await bWalk(c,-11+r()*22,-7.6+r()*2.4,tok))return;c.yaw=PI;if(k===1){c.think(pick(['🌅','🐚']),1.6);if(r()<.5)c.say(pick(B_LINES.walk),2.2);}if(!await bWait(2.5,c,tok))return;}}
   bReset(c);}
 async function bLife(c,i){let slot=0;while(BEACH.on&&!BEACH.photo){const tok=c._bTok=(c._bTok||0)+1;
     const act=isHuman(c)?(c._bAct||'walk'):['swim','sun','drink','walk'][Math.floor(srand(hashStr(BEACH.key+c.id+slot))()*4)];slot++;
     await bAct(c,act,i,tok);if(c._bTok===tok&&isHuman(c)&&c._bAct!=='walk')await bWait(1,c,tok);}}
-function beachDo(c,v){if(!BEACH.on||BEACH.photo||!c||!BEACH.ppl.includes(c)||!['swim','sun','drink','walk'].includes(v))return false;c._bAct=v;c._bTok=(c._bTok||0)+1;return true;}
-document.querySelectorAll('[data-bact]').forEach(b=>b.onclick=()=>{const me=ME.id&&byId(ME.id);if(me)run('beachdo',me,{v:b.dataset.bact});});
+function beachDo(c,v){if(!BEACH.on||BEACH.photo||!c||!BEACH.ppl.includes(c)||!['swim','sun','drink','drink:cocktail','drink:coco','walk'].includes(v))return false;c._bAct=v;c._bTok=(c._bTok||0)+1;return true;}
+document.querySelectorAll('[data-bact]').forEach(b=>b.onclick=()=>{const me=ME.id&&byId(ME.id);if(!me)return;const a=b.dataset.bact;
+  if(a==='drink'){$('#beachBar').classList.toggle('pick');return;}if(a==='back'){$('#beachBar').classList.remove('pick');return;}
+  $('#beachBar').classList.remove('pick');run('beachdo',me,{v:a});});
 // photobook
 const pbEl=$('#pbook');let PB=[];
 function pbShot(n,cap){let url='';
@@ -5294,15 +5304,15 @@ async function beachTrip(ppl,dest,v,rp){
   const NAME=['Cả team vẫy tay chào','Tạo dáng tự do','Cùng nâng ly','Nhảy lên nào','Thả tim cho team'];
   const CAPS=['Cả team vui quá! 🥰','Ai cũng sống ảo 😎','Cạn ly vì team! 🍹','Bay lên nào! 🤸','Yêu team nhiều lắm ❤️'];
   const SHOTS=[0,2,4];for(let k=0;k<3;k++){const n=SHOTS[k];
-    order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;});
+    order.forEach(c=>{c.arms='idle';bHold(c,null);});
     await Promise.race([Promise.all(order.map((c,i)=>{const f=FORM[n](i);const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,f.x,f.z,tok);})),wait(2.2)]);
     order.forEach((c,i)=>{const f=FORM[n](i);c.path=[];c.walking=false;c.pos.set(f.x,0,f.z);c.yaw=Math.atan2(CAM[n][0]-f.x,CAM[n][2]-f.z)*.7;c.root.rotation.y=c.yaw;});
     camera.position.set(...CAM[n]);controls.target.set(0,1,BL.row-.3);controls.update();
-    order.forEach((c,i)=>{const g=MIX[n][(i+n)%5];if(g==='cup'){c.arms='cup';if(c._bCup)c._bCup.visible=true;if(i%2)c.gesture('cheer',2.4);}else if(g==='jump'){c._jumpT=simTime+i*.06;c.gesture('jump',1.4);}else c.gesture(g,2.8);
+    order.forEach((c,i)=>{const g=MIX[n][(i+n)%5];if(g==='cup'){c.arms='cup';bHold(c,c._bLast||(i%2?'coco':'cocktail'));if(i%2)c.gesture('cheer',2.4);}else if(g==='jump'){c._jumpT=simTime+i*.06;c.gesture('jump',1.4);}else c.gesture(g,2.8);
       if(i===mi&&n===4)c.gesture('heart',2.8);if((i+n)%2)c.think(TH[n][(i+n)%3],2);});
     host.say(n===0?'1, 2, 3… cười lên nào! 📸':`${NAME[n]}! 1, 2, 3… 📸`,1.6);await wait(1.7);
     pbShot(k,`${dest.e} ${dest.n} · ${day} · ${CAPS[n]}`);await wait(2.4);}
-  order.forEach(c=>{c.arms='idle';if(c._bCup)c._bCup.visible=false;});pbEnd();setStatus(`📔 Kỷ niệm team building ${dest.n} — bấm vào ảnh để phóng to.`);
+  order.forEach(c=>{c.arms='idle';bHold(c,null);});pbEnd();setStatus(`📔 Kỷ niệm team building ${dest.n} — bấm vào ảnh để phóng to.`);
   await wait(7);
 }
 function beachLeave(){if(!BEACH.on&&!window.__altScene)return;BEACH.on=false;BEACH.photo=false;stage.classList.remove('beach-on','pb-on');$('#beachBar').classList.remove('show');pbOff();
@@ -5342,14 +5352,14 @@ function bBartender(S){
     const sk=new THREE.Group();sk.position.set(0,.02,.02);b.armR.hand.add(sk);const met=bMat('#ced4da',{metalness:.6,roughness:.25});
     bMk(new THREE.CylinderGeometry(.05,.04,.17,12),met,0,.08,0,sk);bMk(new THREE.CylinderGeometry(.028,.05,.06,12),met,0,.195,0,sk);bMk(new THREE.SphereGeometry(.025,8,6),met,0,.235,0,sk);b._shaker=sk;}
   const b=BARTENDER;S.add(b.root);b.root.visible=true;b.busy=true;b.pose='stand';b.seat=null;b.path=[];b.walking=false;b.lying=false;
-  b.pos.set(BL.bar.x,0,-.9);b.yaw=0;b.root.rotation.set(0,0,0);b.arms='cup';b._shakeT=0;BEACH.bt=b;bBartLife();}
+  b.pos.set(BL.bar.x,.28,-.9);b.yaw=0;b.root.rotation.set(0,0,0);b.arms='cup';b._shakeT=0;BEACH.bt=b;bBartLife();}
 const BT_LINES=['Mojito mát lạnh có ngay! 🍹','Ai uống dừa tươi không nè? 🥥','Cocktail đặc biệt của quán nha! 🍸','Thêm đá cho mát nè 🧊','Sinh tố xoài ngon lắm đó! 🥭'];
 async function bBartLife(){let slot=0;while(BEACH.on&&BEACH.bt){const b=BEACH.bt,r=srand(hashStr(BEACH.key+'bt'+slot++));
   await wait(5+r()*5);if(!BEACH.on||BEACH.bt!==b||BEACH.photo)continue;if(b._serving)continue;
   b._shakeT=simTime+2.2;b.think(pick(['🍹','🍸','🥥','🧊']),1.8);if(r()<.6)b.say(BT_LINES[Math.floor(r()*BT_LINES.length)],2.4);}}
-async function bServe(c){const b=BEACH.bt;if(!b){await wait(.6);return;}b._serving=true;b.faceTo(c);b._shakeT=simTime+1.6;b.think('🍹',1.4);await wait(1.6);
-  b.say(pick(['Của bạn đây! 🍹','Mời bạn nha! 🥂','Dừa tươi nè! 🥥']),1.8);await wait(.6);b.yaw=0;b._serving=false;}
-{const o=beachTick;beachTick=()=>{o();const b=BEACH.on&&BEACH.bt;if(!b)return;b.arms='cup';b.pos.y=0;
+async function bServe(c,kind){const b=BEACH.bt;if(!b){await wait(.6);return;}b._serving=true;b.faceTo(c);b._shakeT=simTime+1.6;b.think(kind==='coco'?'🥥':'🍹',1.4);await wait(1.6);
+  b.say(kind==='coco'?pick(['Dừa tươi mát lạnh nè! 🥥','Trái dừa của bạn đây! 🥥']):pick(['Cocktail của bạn đây! 🍹','Mời bạn ly cocktail nha! 🍸']),1.8);await wait(.6);b.yaw=0;b._serving=false;}
+{const o=beachTick;beachTick=()=>{o();const b=BEACH.on&&BEACH.bt;if(!b)return;b.arms='cup';b.pos.y=.28;
   if(b._shakeT>simTime){const t=simTime;b.armR.g.rotation.x+=Math.sin(t*22)*.35;b.armR.g.rotation.z+=Math.cos(t*22)*.12;}};}
 // người không tham gia: ẩn hoàn toàn khi ở biển (không hiện tên, bong bóng, KPI…)
 {const o=updateOverlay;const v=new THREE.Vector3();updateOverlay=()=>{o();if(!BEACH.on)return;
