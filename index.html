@@ -533,6 +533,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .beachbar button{font-size:11px!important;padding:6px 9px!important;white-space:nowrap}
 
 .beachbar .bdr{display:none}.beachbar.pick button{display:none}.beachbar.pick .bdr{display:inline-block}
+
+.pbph.zoom{width:86%!important;max-width:520px}
+.pbtitle{z-index:120}
 </style>
 </head>
 <body>
@@ -5260,8 +5263,8 @@ function pbShot(n,cap){let url='';
     x.font='64px serif';x.fillText('🌴',18,200);x.fillText('🌴',396,190);x.font='34px serif';x.fillText(['👋','✌️','🍹','🤸','❤️'][n],222,120);
     x.font='bold 18px '+FONT;x.fillStyle='#5a3b12';x.textAlign='center';x.fillText(BEACH.ppl.map(c=>c.name).join(' · ').slice(0,46),240,280);url=cv.toDataURL('image/jpeg',.82);}
   const flash=$('#pbFlash');flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go');try{beep(true);}catch(e){}
-  const ph=document.createElement('button');ph.type='button';ph.className='pbph';const POS=[[3,9],[51,36],[5,63]],r=(n%2?1:-1)*(4+(n*1.3)%3);
-  ph.style.left=POS[n%3][0]+'%';ph.style.top=POS[n%3][1]+'%';ph.style.setProperty('--r',r+'deg');ph.style.setProperty('--sw',(n%2?-1:1)*46+'px');ph.style.zIndex=10+n;
+  const ph=document.createElement('button');ph.type='button';ph.className='pbph';const POS=[[3,14],[51,39],[5,64]],SW=stage.clientWidth||360,SH=stage.clientHeight||400,PW=Math.min(SW*.46,(SH*.25-40)*1.5+12),r=(n%2?1:-1)*(4+(n*1.3)%3);
+  ph.style.width=Math.max(120,PW)+'px';ph.style.left=POS[n%3][0]+'%';ph.style.top=POS[n%3][1]+'%';ph.style.setProperty('--r',r+'deg');ph.style.setProperty('--sw',(n%2?-1:1)*46+'px');ph.style.zIndex=10+n;
   const im=document.createElement('img');im.src=url;im.alt=cap;const t=document.createElement('span');t.textContent=cap;ph.append(im,t);ph.onclick=()=>ph.classList.toggle('zoom');
   $('#pbStack').appendChild(ph);pbEl.classList.add('show');PB.push(ph);}
 function pbEnd(){$('#pbTitle').style.display='';$('#pbClose').style.display='';}
@@ -5274,7 +5277,7 @@ async function beachTrip(ppl,dest,v,rp){
   B_CAM={p:camera.position.clone(),t:controls.target.clone()};
   const me=ME.id&&byId(ME.id),meIn=me&&ppl.includes(me);
   $('#pbFlash').classList.remove('go');void $('#pbFlash').offsetWidth;$('#pbFlash').classList.add('go');
-  window.__altScene=BW.S;BEACH.on=true;stage.classList.add('beach-on');if(meIn)$('#beachBar').classList.add('show');
+  window.__altScene=BW.S;BEACH.on=true;stage.classList.add('beach-on');try{musicStart();surfStart();}catch(e){}if(meIn)$('#beachBar').classList.add('show');
   camera.position.set(0,7.5,16);controls.target.set(0,.6,-2);controls.update();
   bBartender(BW.S);
   ppl.forEach((c,i)=>{BW.S.add(c.root);c.root.visible=true;c.awaySp.visible=false;c.pack.visible=false;c.pose='stand';c.seat=null;c.lying=false;c.pos.set(-14+i*.8,0,6+i*.4);c.yaw=PI/2;c._bAct='walk';beachWear(c,true,i);});
@@ -5315,7 +5318,7 @@ async function beachTrip(ppl,dest,v,rp){
   order.forEach(c=>{c.arms='idle';bHold(c,null);});pbEnd();setStatus(`📔 Kỷ niệm team building ${dest.n} — bấm vào ảnh để phóng to.`);
   await wait(7);
 }
-function beachLeave(){if(!BEACH.on&&!window.__altScene)return;BEACH.on=false;BEACH.photo=false;stage.classList.remove('beach-on','pb-on');$('#beachBar').classList.remove('show');pbOff();
+function beachLeave(){if(!BEACH.on&&!window.__altScene)return;BEACH.on=false;try{musicStop();surfStop();}catch(e){}BEACH.photo=false;stage.classList.remove('beach-on','pb-on');$('#beachBar').classList.remove('show');pbOff();
   BEACH.ppl.forEach(c=>{bReset(c);c._toRow=false;c.path=[];c.walking=false;beachWear(c,false);scene.add(c.root);c.root.visible=false;});
   if(BEACH.bt){const b=BEACH.bt;BEACH.bt=null;scene.add(b.root);b.root.visible=false;b.tagEl.style.display='none';}
   window.__altScene=null;if(B_CAM){camera.position.copy(B_CAM.p);controls.target.copy(B_CAM.t);controls.update();}
@@ -5369,6 +5372,26 @@ async function bServe(c,kind){const b=BEACH.bt;if(!b){await wait(.6);return;}b._
   b.tagEl.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`;b.tagEl.style.zIndex=String(Math.round((1-v.z)*100000));
   const talking=b.speech&&simTime<b.speech.until,thinking=b.thought&&simTime<b.thought.until,key=talking?'s:'+b.speech.text:thinking?'t:'+b.thought.e:'';
   if(key!==b._bk){b._bk=key;if(!key)b.bubEl.style.display='none';else{b.bubEl.className='bub'+(talking?'':' think');b.bubEl.textContent=talking?b.speech.text:b.thought.e;b.bubEl.style.display='block';}}};}
+
+// nhạc bãi biển: dùng nhạc xả stress, không bị tắt giữa chừng khi đang ở biển
+{const o=musicStop;musicStop=(...a)=>{if(BEACH.on&&MUSIC.on)return;return o(...a);};}
+setTimeout(()=>{const b=$('#musicBtn'),o=b.onclick;b.onclick=e=>{o&&o.call(b,e);if(BEACH.on&&MUSIC.on){musicStart();surfStart();}else surfStop();};},0);
+
+// âm thanh sóng biển vỗ rì rào (tạo bằng Web Audio, không cần file)
+let SURF=null;
+function surfStart(){if(!MUSIC.on||SURF)return;const c=audioCtx();if(!c)return;
+  const len=c.sampleRate*6,buf=c.createBuffer(2,len,c.sampleRate);
+  for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=last*3.2;}
+    const f=Math.floor(c.sampleRate*.5);for(let i=0;i<f;i++){const k=i/f;d[i]=d[i]*k+d[len-f+i]*(1-k);}}   // nối vòng lặp mượt
+  const src=c.createBufferSource();src.buffer=buf;src.loop=true;src.loopEnd=len/c.sampleRate-.5;
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=700;lp.Q.value=.4;
+  const g=c.createGain();g.gain.value=0;
+  const lfo=c.createOscillator();lfo.frequency.value=.11;const lg=c.createGain();lg.gain.value=.11;lfo.connect(lg);lg.connect(g.gain);   // sóng dâng lên rút xuống
+  const lfo2=c.createOscillator();lfo2.frequency.value=.11;const lf=c.createGain();lf.gain.value=480;lfo2.connect(lf);lf.connect(lp.frequency);
+  src.connect(lp);lp.connect(g);g.connect(c.destination);src.start();lfo.start();lfo2.start();
+  g.gain.setTargetAtTime(.16,c.currentTime,1.2);SURF={src,lfo,lfo2,g};}
+function surfStop(){if(!SURF)return;const S=SURF,c=MUSIC.ctx;SURF=null;try{S.g.gain.cancelScheduledValues(c.currentTime);S.g.gain.setTargetAtTime(0,c.currentTime,.4);}catch(e){}
+  setTimeout(()=>{try{S.src.stop();S.lfo.stop();S.lfo2.stop();S.g.disconnect();}catch(e){}},1800);}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
