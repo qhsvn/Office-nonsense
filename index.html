@@ -5046,6 +5046,8 @@ function openJtReview(){if(!JT||!JT.my)return;const qs=jtQs(),P=JT.my.pick||{};c
 $('#jvClose').onclick=()=>$('#jtReview').classList.remove('show');
 $('#jtRReview').onclick=()=>{$('#jtRes').classList.remove('show');openJtReview();};
 {const o=jtShowRes;jtShowRes=(R,win)=>{o(R,win);$('#jtRReview').style.display=JT&&JT.my?'':'none';};}
+// nút Job Test: nhân viên thấy "Xem lại thư mời", quản lý thấy "Quản lý gửi thư hẹn ngày thi"
+setInterval(()=>{const b=document.querySelector('[data-cmd=jobtest] small');if(!b)return;const me=ME.id&&byId(ME.id);const t=me&&!me.manager?'Xem lại thư mời':'Quản lý gửi thư hẹn ngày thi';if(b.textContent!==t)b.textContent=t;},1000);
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
