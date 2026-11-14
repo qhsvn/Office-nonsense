@@ -542,6 +542,13 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 
 .trlock{opacity:.5;filter:grayscale(.6);cursor:not-allowed!important}
 .trlock small{display:block;font-size:10px;font-weight:600;color:#7c6aa8;margin-top:2px}
+
+.thpop{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.7);opacity:0;pointer-events:none;z-index:200;background:#fff;border-radius:22px;padding:18px 20px 16px;width:min(84%,340px);text-align:center;box-shadow:0 18px 50px rgba(20,20,40,.35);transition:transform .35s cubic-bezier(.2,1.4,.4,1),opacity .25s;border:3px solid #ffd6dc}
+.thpop.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto;cursor:pointer}
+.thpop .thic{font-size:46px;line-height:1;margin-bottom:6px}.thpop .tht{font-weight:800;font-size:17px;color:#2b2d42;line-height:1.3}.thpop .ths{font-size:12.5px;color:#5c5f7a;margin-top:6px;line-height:1.4}
+.thpop.bad{border-color:#ff8787;background:linear-gradient(#fff5f5,#fff)}.thpop.bad .tht{color:#e03131}.thpop.ok{border-color:#8ce99a;background:linear-gradient(#f4fff6,#fff)}.thpop.ok .tht{color:#2b8a3e}
+#stage.police-on::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:5;animation:polFl .5s steps(1) infinite}
+@keyframes polFl{0%{box-shadow:inset 0 0 70px 12px rgba(255,40,60,.5)}50%{box-shadow:inset 0 0 70px 12px rgba(40,90,255,.5)}}
 </style>
 </head>
 <body>
@@ -647,6 +654,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b pink big" data-cmd="yep">🎊 Tiệc tất niên<small>Karaoke &amp; bốc thăm trúng thưởng</small></button>
           <button class="b pink big" data-cmd="boss">👨‍💼 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
           <button class="b pink big" data-cmd="incident">💥 Sự cố<small>Mất điện, kẹt giấy, Mochi phá…</small></button>
+          <button class="b pink big" data-cmd="thief">🦹 Trộm đột nhập<small>Báo cảnh sát nhanh được +2 KPI</small></button>
           <button class="b pink big" data-cmd="trip">🚌 Team building<small>Cả team đi du lịch, gắn kết</small></button>
           <button class="b pink big" data-cmd="jobtest">📝 Job Test<small>Quản lý gửi thư hẹn ngày thi</small></button>
         </div>
@@ -1972,7 +1980,7 @@ class Chibi{
   update(dt){
     const t=simTime;
     if(this.path.length){
-      const p=this.path[0],dx=p.x-this.pos.x,dz=p.z-this.pos.z,d=Math.hypot(dx,dz),step=1.55*dt;
+      const p=this.path[0],dx=p.x-this.pos.x,dz=p.z-this.pos.z,d=Math.hypot(dx,dz),step=(this.spd||1.55)*dt;
       if(d>.001)this.yaw=Math.atan2(dx,dz);
       if(d<=step){this.pos.x=p.x;this.pos.z=p.z;this.path.shift();if(!this.path.length){const r=this.onArrive;this.onArrive=null;this.walking=false;r&&r();}}
       else{this.pos.x+=dx/d*step;this.pos.z+=dz/d*step;}
@@ -3668,7 +3676,7 @@ function run(name,c,arg){
 
 /* ================= v5: trà sữa, sự cố, sếp tổng, tất niên, minigame, giao file ================= */
 const EV={inc:null,boss:false,yep:false,boba:false,quiz:null,nextRand:150,lastBoss:-999,rand:true};
-const evBusy=()=>!!(EV.inc||EV.boss||EV.yep||EV.boba||EV.trip||(EV.quiz&&EV.quiz.on));
+const evBusy=()=>!!(EV.inc||EV.boss||EV.yep||EV.boba||EV.trip||EV.thief||(EV.quiz&&EV.quiz.on));
 const freeEmp=()=>CHARS.filter(c=>!c.busy&&!c.away&&!c.homeAfter&&!c.leavingNow);
 const present=()=>CHARS.filter(c=>!c.away&&!c.leavingNow);
 const isHuman=c=>!!(c&&(c.id===ME.id||c.claimName));
@@ -4333,6 +4341,8 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='dayoff')return runDayoff(c,v);
   if(n==='argue')return runArgue(c);
   if(n==='tod')return todSet(v);
+  if(n==='thief')return thiefStart(v);
+  if(n==='thiefcall')return thiefCall(c);
   if(n==='beachdo')return beachDo(c,v);
   if(n==='bwear')return bwearSet(c,v);
   if(n==='jtsched')return jtSched(v);
@@ -5728,6 +5738,85 @@ function dlWearSet(c,v){if(!c||!c._dw||!c._dlA)return false;const [s,k,h,g]=Stri
 setTimeout(()=>{const ok=$('#bwOk'),o=ok.onclick;ok.onclick=e=>{if(BEACH.kind==='dl'){$('#bwModal').classList.remove('show');const me=ME.id&&byId(ME.id);if(me)run('bwear',me,{v:[DWP.s,DWP.k,DWP.h,DWP.g].join('.')});return;}o&&o.call(ok,e);};
   ['#selCustom','#soloCustom'].forEach(sel=>{const b=$(sel);if(!b)return;const o2=b.onclick;b.onclick=e=>{const me=ME.id&&byId(ME.id);if(BEACH.on&&BEACH.kind==='dl'&&me&&me._dw){openDlWear();return;}o2&&o2.call(b,e);};});},10);
 
+// ===================== TRỘM ĐỘT NHẬP VĂN PHÒNG =====================
+KPI_WHY.thiefcall='Báo cảnh sát kịp thời khi có trộm';KPI_WHY.thiefloss='Để trộm lấy mất chứng từ mật';
+const THIEF=makeGuest({id:'thief',name:'🦹 Kẻ lạ mặt',short:'Kẻ trộm',slot:'Khách',hairStyle:'short',hairColor:'#1b1b1f',shirt:'#22232a',skirt:'#18181d',tagColor:'#343a40'});
+const COPS=[0,1].map(k=>makeGuest({id:'cop'+k,name:'👮 Cảnh sát',short:'Cảnh sát',slot:'Khách',hairStyle:'short',hairColor:'#2b2233',shirt:'#1f4e9c',skirt:'#1b2a4a',tagColor:'#1c7ed6'}));
+(()=>{const T=THIEF,M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{}));const add=(p,g,m,x,y,z)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;};
+  const hat=add(T.head,new THREE.SphereGeometry(R*1.1,20,12,0,TAU,0,PI/2),M('#141418'),0,.03,0);hat.scale.y=.95;
+  const mask=add(T.head,new THREE.CylinderGeometry(R*1.02,R*1.02,.1,24,1,true),M('#0d0d10',{side:THREE.DoubleSide}),0,-.1,0);
+  const sack=new THREE.Group();sack.position.set(0,.22,-.2);T.body.add(sack);const sk=add(sack,new THREE.SphereGeometry(.17,14,10),M('#9c7b4f',{roughness:.95}),0,0,0);sk.scale.set(1,1.15,.85);add(sack,new THREE.CylinderGeometry(.05,.07,.08,10),M('#7a5c36'),0,.2,0);T._sack=sk;
+  const fl=new THREE.Group();fl.position.set(0,-.03,.04);T.armR.hand.add(fl);add(fl,new THREE.CylinderGeometry(.025,.03,.14,10),M('#2b2d31',{metalness:.5}),0,.05,0);
+  const beam=new THREE.Mesh(new THREE.ConeGeometry(.42,1.7,18,1,true),new THREE.MeshBasicMaterial({color:'#fff3b0',transparent:true,opacity:.16,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  beam.rotation.x=-PI/2+.32;beam.position.set(.17,.2-.27,.17+.8);T.body.add(beam);T._beam=beam;
+  const fd=add(T.armR.hand,new THREE.BoxGeometry(.16,.21,.03),M('#e03131'),0,.04,.07);fd.visible=false;T._folder=fd;
+  const cuffs=new THREE.Group();T.body.add(cuffs);cuffs.position.set(0,.04,.2);[-.06,.06].forEach(x=>add(cuffs,new THREE.TorusGeometry(.035,.009,6,14),M('#ced4da',{metalness:.8,roughness:.25}),x,0,0));add(cuffs,new THREE.BoxGeometry(.08,.008,.008),M('#ced4da',{metalness:.8}),0,0,0);cuffs.visible=false;T._cuffs=cuffs;
+  COPS.forEach(P=>{const cap=new THREE.Group();cap.position.y=.2;P.head.add(cap);add(cap,new THREE.CylinderGeometry(R*.95,R*1.02,.13,22),M('#13294b'),0,.08,0);add(cap,new THREE.CylinderGeometry(R*1.08,R*1.08,.02,22),M('#0d1b33'),0,.01,.04);
+    add(cap,new THREE.SphereGeometry(.035,10,8),M('#ffd43b',{metalness:.6,roughness:.3}),0,.09,R*.95);const bd=add(P.body,new THREE.BoxGeometry(.05,.06,.01),M('#ffd43b',{metalness:.6}),-.06,.25,.155);bd.castShadow=false;});})();
+const TH_DESK={x:-9,z:-6.95,face:PI};
+function thStop(c){c.path=[];c.walking=false;const r=c.onArrive;c.onArrive=null;r&&r();}
+function thCanCall(c){return !!(c&&!c.away&&!c.outside&&!c.leavingNow&&!c.eyesShut&&!/Ngủ trưa|🛏️/.test(c.activity||''));}
+// thông báo nổi to giữa màn hình
+const thPop=(()=>{const el=document.createElement('div');el.className='thpop';el.innerHTML='<div class="thic"></div><div class="tht"></div><div class="ths"></div>';stage.appendChild(el);let to=0;el.onclick=()=>el.classList.remove('show');
+  return (ic,t,s,kind)=>{el.className='thpop '+(kind||'');el.querySelector('.thic').textContent=ic;el.querySelector('.tht').textContent=t;el.querySelector('.ths').textContent=s;void el.offsetWidth;el.classList.add('show');clearTimeout(to);to=setTimeout(()=>el.classList.remove('show'),8000);};})();
+// còi hú + đèn xanh đỏ
+let TH_SIREN=null;const TH_LIGHT=new THREE.PointLight(0xff2a3c,0,9);TH_LIGHT.position.set(EXIT.out.x+.6,2.2,EXIT.out.z);scene.add(TH_LIGHT);
+function thSiren(on){stage.classList.toggle('police-on',on);if(!on){TH_LIGHT.intensity=0;if(TH_SIREN){try{TH_SIREN.g.gain.setTargetAtTime(0,MUSIC.ctx.currentTime,.2);const S=TH_SIREN;setTimeout(()=>{try{S.o.stop();S.l.stop();}catch(e){}},900);}catch(e){}TH_SIREN=null;}return;}
+  if(!TH_SIREN&&MUSIC.on){const c=audioCtx();if(c){const o=c.createOscillator(),l=c.createOscillator(),lg=c.createGain(),g=c.createGain();o.type='triangle';o.frequency.value=760;l.type='square';l.frequency.value=1.6;lg.gain.value=170;l.connect(lg);lg.connect(o.frequency);g.gain.value=0;o.connect(g);g.connect(c.destination);o.start();l.start();g.gain.setTargetAtTime(.07,c.currentTime,.2);TH_SIREN={o,l,g};}}}
+function thTick(){if(!stage.classList.contains('police-on'))return;const k=Math.floor(simTime*4)%2;TH_LIGHT.color.setHex(k?0x2a5bff:0xff2a3c);TH_LIGHT.intensity=2.2;}
+{const o=scrTick;scrTick=(...a)=>{try{thTick();}catch(e){}return o(...a);};}
+
+let TH=null;
+function thiefStart(v){if(EV.thief){setStatus('🦹 Đang có trộm trong văn phòng rồi!');return false;}if(evBusy()||danceRunning||meetingOn){setStatus('⏳ Đợi xong hoạt động hiện tại đã nhé!');return false;}
+  guard(()=>actThief(v),[]);return true;}
+function thiefCall(c){if(!EV.thief||!TH||!TH.open||TH.called||!c)return false;TH.called=c;TH.open=false;
+  addKpi(c,2,KPI_WHY.thiefcall);const kp=c.manager?'':' · +2 KPI';c.think('📞',1.8);c.say('A lô 113! Văn phòng em có trộm, tới ngay giúp em! 📞',2.6);
+  thPop('👮',`Cảm ơn ${c.name} đã báo cảnh sát kịp thời!`,(c.manager?'':'+2 KPI · ')+'Cảnh sát đang tới, còi hú ò e ò e…','ok');
+  banner('🚓','Cảnh sát đang tới!',`${c.name} đã gọi 113${kp}`,null,'boss');setStatus(`📞 ${c.name} đã báo cảnh sát kịp thời!${kp} Cảnh sát đang tới…`);thSiren(true);return true;}
+async function actThief(v){
+  const T=THIEF;TH={open:false,called:null,stolen:false};EV.thief=TH;EV.lastThief=simTime;
+  try{T.pos.set(EXIT.out.x,0,EXIT.out.z);T.yaw=-PI/2;T.root.visible=true;T.arms='idle';T.spd=1.35;T._folder.visible=false;T._cuffs.visible=false;T._beam.visible=true;T._sack.scale.set(1,1.15,.85);T.lookAt=null;
+    setStatus('👣 Có tiếng động lạ ngoài cửa…');T.think('🤫',2);
+    await doorIn();await walkDirect(T,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();
+    // báo động cho mọi người
+    TH.open=true;beep(false);
+    const me=ME.id&&byId(ME.id),can=thCanCall(me);
+    banner('🚨','CÓ TRỘM ĐỘT NHẬP!',can?'Bấm báo cảnh sát ngay — người báo đầu tiên được +2 KPI!':'Bạn không ở văn phòng nên không báo được…',can?{t:'📞 Báo cảnh sát',f:()=>{const m=ME.id&&byId(ME.id);if(m&&thCanCall(m))run('thiefcall',m);}}:null,'boss');
+    setStatus('🚨 Có trộm đột nhập văn phòng! Ai báo cảnh sát đầu tiên được +2 KPI — không ai báo thì cả phòng bị trừ 1 KPI!');
+    present().forEach((c,i)=>{if(!thCanCall(c))return;wait(.2+i*.15).then(()=>{c.lookAt=T;c.think(pick(['😱','😨','🫣']),2);if(!isHuman(c)&&i%2===0)c.say(pick(['Trộm! Trộm! 😱','Ai đó báo cảnh sát đi! 😨','Ối có người lạ! 🫣']),2.2);});});
+    const walk=(async()=>{await T.goStand(TH_DESK);if(TH.called)return;T.yaw=PI;T.arms='hold';T.think('🤫',1.4);await wait(1.2);if(TH.called)return;
+      T._folder.visible=true;T.think('📁',1.2);await wait(1);T._folder.visible=false;T._sack.scale.set(1.15,1.3,1);TH.stolen=true;T.arms='idle';setStatus('📁 Kẻ trộm đã nhét tập chứng từ mật vào bao tải!');})();
+    for(let s=20;s>0&&!TH.called;s--){if(/TRỘM/.test(evBanT.textContent))evBanS.textContent=can?`⏳ Còn ${s} giây — bấm 📞 Báo cảnh sát ngay!`:`⏳ Còn ${s} giây…`;await wait(1);}
+    TH.open=false;
+    if(TH.called)await thCatch();
+    else{bannerOff();await walk;if(!TH.stolen){T._sack.scale.set(1.15,1.3,1);TH.stolen=true;}
+      T.spd=2.6;T.think('💨',1.4);T.say('Hehe, chuồn thôi! 💨',1.6);await T.goStand(EXIT.in);await doorIn();await walkDirect(T,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();T.root.visible=false;
+      thPop('🚨','MẤT CẮP DỰ ÁN CỦA CÔNG TY!','Chứng từ mật đã bị đánh cắp vì không ai báo cảnh sát kịp thời 😢 · Cả phòng bị trừ 1 KPI','bad');
+      banner('🚨','Mất cắp dự án của công ty!','Không ai báo cảnh sát kịp thời · cả phòng bị trừ 1 KPI 😢',null,'boss');beep(false);
+      CHARS.forEach(c=>{addKpi(c,-1,KPI_WHY.thiefloss);if(!c.away){c.lookAt=null;c.think('😢',2);}});
+      if(!MGR.away){MGR.gesture('think',2);MGR.say('Trời ơi, mất hết chứng từ dự án rồi! 😫',2.8);}
+      setStatus('🚨 Mất cắp dự án của công ty! Không ai báo cảnh sát kịp thời — cả phòng bị trừ 1 KPI.');await wait(6);bannerOff();}
+  }finally{T.spd=0;T.root.visible=false;T._beam.visible=false;T._cuffs.visible=false;T._folder.visible=false;T.lookAt=null;COPS.forEach(P=>{P.root.visible=false;P.spd=0;P.lookAt=null;});thSiren(false);
+    CHARS.forEach(c=>{if(c.lookAt===T)c.lookAt=null;});EV.thief=null;TH=null;}}
+async function thCatch(){const T=THIEF;await wait(2.5);
+  COPS.forEach((P,k)=>{P.pos.set(EXIT.out.x,0,EXIT.out.z+(k?.5:-.5));P.yaw=-PI/2;P.root.visible=true;P.arms='idle';P.spd=2.4;});
+  await doorIn();await Promise.all(COPS.map((P,k)=>walkDirect(P,[{x:12.5,z:EXIT.in.z+(k?.4:-.4)},{x:EXIT.in.x,z:EXIT.in.z+(k?.4:-.4)}])));doorOut();
+  bannerOff();setStatus('🚓 Cảnh sát đã tới! Kẻ trộm đang bỏ chạy…');COPS[0].say('Cảnh sát đây! Đứng yên! 👮',2);
+  thStop(T);T.spd=2.1;T.think('😨',1.6);T.say('Chết rồi, cảnh sát! 😱',1.8);
+  const runs=[{x:2,z:-3.5},{x:-3.5,z:1.8},{x:4,z:3.2}];
+  for(let k=0;k<runs.length;k++){const tp=T.goStand(runs[k]);await Promise.race([Promise.all(COPS.map((P,j)=>(async()=>{for(let q=0;q<3;q++){await Promise.race([P.goStand({x:T.pos.x+(j?.5:-.5),z:T.pos.z+.4}),wait(1.1)]);}})())),wait(3.6)]);await Promise.race([tp,wait(.2)]);}
+  thStop(T);COPS.forEach(thStop);COPS.forEach((P,j)=>{P.pos.set(T.pos.x+(j?.55:-.55),0,T.pos.z+.15);P.faceTo(T);P.lookAt=T;});T.lookAt=COPS[0];T.arms='hold';T._cuffs.visible=true;T._beam.visible=false;
+  await COPS[1].say('Anh đã bị bắt! 🚔',1.8);await T.say('Tôi xin lỗi… tôi trả lại chứng từ 😭',2.2);T._sack.scale.set(1,1.15,.85);
+  thPop('🚔','Đã bắt được kẻ trộm!','Chứng từ mật đã được trả lại chỗ cũ 📁 · Cảm ơn cả phòng 👏','ok');setStatus('🚔 Cảnh sát đã còng tay kẻ trộm! Chứng từ mật được trả lại an toàn 📁');
+  present().forEach((c,i)=>{if(!thCanCall(c))return;c.lookAt=null;wait(i*.15).then(()=>{c.gesture('clap',2.2);if(i%2)c.say(pick(['👏 Bắt được rồi!','Hú hồn luôn 😌','Cảm ơn các chú cảnh sát! 👮']),2);});});
+  await wait(1.6);COPS.forEach(P=>P.lookAt=null);T.lookAt=null;T.spd=1.6;COPS.forEach(P=>P.spd=1.6);
+  const out=[T,...COPS].map((c,k)=>(async()=>{await c.goStand({x:EXIT.in.x,z:EXIT.in.z+(k===0?0:k===1?-.5:.5)});})());await Promise.race([Promise.all(out),wait(9)]);
+  await doorIn();await Promise.all([T,...COPS].map((c,k)=>walkDirect(c,[{x:12.5,z:EXIT.in.z+(k===0?0:k===1?-.5:.5)},{x:EXIT.out.x,z:EXIT.out.z+(k===0?0:k===1?-.5:.5)}])));doorOut();thSiren(false);}
+// trộm xuất hiện ngẫu nhiên: ban đêm hoặc lúc văn phòng vắng
+function thOfficeEmpty(){const out=CHARS.filter(c=>c.away||c.outside||/Ngủ trưa|Đi ăn trưa|🛏️|🍱/.test(c.activity||'')).length;return out>=Math.ceil(CHARS.length/2);}
+{const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!EV.thief&&!danceRunning&&!meetingOn&&(todName==='night'||thOfficeEmpty())&&simTime-(EV.lastThief||-1e9)>600&&Math.random()<.35){EV.nextRand=simTime+rand(150,280);run('thief',null,{v:'1'});return;}return o();};}
+EVCMD.thief=()=>run('thief',null,{v:'1'});
+
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
 const CAN_DL=(()=>{try{return window.top===window;}catch(e){return false;}})();   // trang Claude (khung nhúng) chặn tải file
@@ -5915,7 +6004,7 @@ setTimeout(()=>{VIEWS.party={t:[0,.9,5.4],p:[0,5.6,14]};},0);
 let REMOTE_EXEC=false,AUTO_EXEC=false,MY_ACT=null,ACT_HIST=[];
 const SYNC_SOLO=new Set(['home','work','coffee','print','phone','meetroom','report','exchange','tease','sofa','walk','water','dancesolo','feedcat','watercat','nap','pet','wc','clean','sweep','litter','siesta','gohome','ot','sick','comein']);
 const SYNC_GROUP=new Set(['meeting','lunch','dance','break','birthday','leave','newday','siestaall']);
-['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue','jtans','beachdo','bwear'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod','jtsched','jtend']).forEach(n=>SYNC_GROUP.add(n));
+['fix','quizans','bobapick','grpans','flowers','mgrsorry','partner'].forEach(n=>SYNC_SOLO.add(n));['scroff','quizjoin','thankmgr','dayoff','leavereq','argue','jtans','beachdo','bwear','thiefcall'].forEach(n=>SYNC_SOLO.add(n));EV_GROUP.concat(['grpask','grpgo','reqreport','scrfine','fire','firereq','firedec','negwarn','leavedec','tod','jtsched','jtend','thief']).forEach(n=>SYNC_GROUP.add(n));
 function shareAct(n,c,a){let ser=null;if(a&&typeof a==='object'){if(a.id&&byId(a.id))ser={id:a.id};else if(typeof a.x==='number')ser={x:+a.x.toFixed(2),z:+a.z.toFixed(2)};else if(typeof a.v==='string')ser={v:a.v.slice(0,400)};}
   {const na={n,c:c?c.id:null,a:ser,at:Date.now(),k:Math.random().toString(36).slice(2,7)};ACT_HIST=ACT_HIST.filter(x=>Date.now()-x.at<25000).slice(-5);MY_ACT=Object.assign({},na,{q:ACT_HIST.slice()});ACT_HIST.push(na);}if(window.OFFICE&&OFFICE.actPush)OFFICE.actPush();}
 {const o=run;run=(n,c,a)=>{const ok=o(n,c,a);
