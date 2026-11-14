@@ -5909,12 +5909,18 @@ function zSpray(c,v){if(!zCanAct(c))return false;const t=zByIdAny(v);if(!t)retur
   if(CAT_HOST){Z.fxN=(Z.fxN||0)+1;(Z.fx=Z.fx||[]).push([Z.fxN,c.id,t.id]);if(Z.fx.length>10)Z.fx.shift();}
   if(t._zInf){t._zInf.hp--;t.think('💦',1);if(t._zInf.hp<=0&&CAT_HOST){zHeal(t);addKpi(c,1,KPI_WHY.zcure);c.think('💪',1.2);}return true;}
   t._hp=Math.max(0,t._hp-1);t.think('💦',1);zTagName(t);if(t._hp<=0&&CAT_HOST){zCure(t);addKpi(c,1,KPI_WHY.zcure);c.think('💪',1.2);if(isHuman(c))setStatus(`🧴 ${c.name} đã chữa khỏi một zombie!`);}return true;}
-function zBlock(c){if(!zCanAct(c))return false;if(simTime-(c._zBcd||0)<1.2)return false;
-  if(!isHuman(c)){const nb=CHARS.filter(x=>!isHuman(x)&&x!==c&&x._zBlkT&&simTime-x._zBlkT<4).length;if(nb>=2)return false;c._zBlkT=simTime;}
-  c._zBcd=simTime;
-  const was=Z.door;Z.door=Math.min(100,Z.door+(isHuman(c)?18:4));c.think('💺',1.2);
-  if(Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)>1.4&&!c._zGo){c._zGo=true;(async()=>{try{c.standUp&&c.standUp();await Promise.race([c.goStand({x:10.6,z:EXIT.in.z+((c.id.length%3)-1)*.5}),wait(5)]);c.arms='hold';zFace(c,{x:12,z:c.pos.z});}finally{c._zGo=false;}})();}
-  if(was<=0&&Z.door>0&&CAT_HOST)zDoorRebuilt();zHud();return true;}
+function zBlock(c){if(!zCanAct(c))return false;if(c._zDrag)return false;
+  if(!isHuman(c)&&CHARS.filter(x=>!isHuman(x)&&x!==c&&x._zDrag).length>=2)return false;
+  c._zDrag=true;if(isHuman(c))setStatus('💺 Đang kéo bàn chặn cửa… mất 15 giây!');
+  (async()=>{try{
+    if(Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)>1.4){c.standUp&&c.standUp();await Promise.race([c.goStand({x:10.6,z:EXIT.in.z+((c.id.length%3)-1)*.5}),wait(5)]);}
+    c.arms='hold';zFace(c,{x:12,z:c.pos.z});if(!c.busy)begin(c,'💺 Kéo bàn chặn cửa');
+    await wait(15);
+    if(CAT_HOST&&Z&&!Z.end){const was=Z.door;Z.door=Math.min(100,Z.door+(isHuman(c)?18:4));if(was<=0&&Z.door>0)zDoorRebuilt();}
+    c.think('💺',1.2);
+    if(c.home){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await Promise.race([c.goSit(c.home),wait(8)]);}
+  }finally{c._zDrag=false;if(c.busy&&/Kéo bàn|Quay về chỗ/.test(c.activity||''))end(c,c.home?'working':'standing');zHud();}})();
+  return true;}
 function zMask(c){if(!zCanAct(c))return false;if(simTime-(c._zMcd||0)<2)return false;c._zMcd=simTime;
   const list=[c].concat(zHere().filter(x=>x!==c&&!x._zMask&&!x._zInf).sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z)).slice(0,2));
   list.forEach(x=>{if(!x._zInf){zMaskOn(x,true);x.think('😷',1.4);}});c.say('Đeo khẩu trang vào nè, khỏi bị lây! 😷',2);zHud();return true;}
