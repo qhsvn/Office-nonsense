@@ -5826,10 +5826,11 @@ async function thCatch(){const T=THIEF;await wait(2.5);
   for(let k=0;k<runs.length;k++){const tp=T.goStand(runs[k]);await Promise.race([Promise.all(COPS.map((P,j)=>(async()=>{for(let q=0;q<3;q++){await Promise.race([P.goStand({x:T.pos.x+(j?.5:-.5),z:T.pos.z+.4}),wait(1.1)]);}})())),wait(3.6)]);await Promise.race([tp,wait(.2)]);}
   thStop(T);COPS.forEach(thStop);COPS.forEach((P,j)=>{P.pos.set(T.pos.x+(j?.55:-.55),0,T.pos.z+.15);P.faceTo(T);P.lookAt=T;});T.lookAt=COPS[0];T.arms='hold';T._cuffs.visible=true;T._beam.visible=false;T._fl.visible=false;
   await COPS[1].say('Anh đã bị bắt! 🚔',1.8);await T.say('Tôi xin lỗi… tôi trả lại chứng từ 😭',2.2);T._sack.scale.set(1,1.15,.85);
-  thPop('🚔','Đã bắt được kẻ trộm!','Chứng từ mật đã được trả lại chỗ cũ 📁 · Cảm ơn cả phòng 👏','ok');setStatus('🚔 Cảnh sát đã còng tay kẻ trộm! Chứng từ mật được trả lại an toàn 📁');
+  setStatus('🚔 Cảnh sát đã còng tay kẻ trộm! Chứng từ mật được trả lại an toàn 📁');
   present().forEach((c,i)=>{if(!thCanCall(c))return;c.lookAt=null;wait(i*.15).then(()=>{c.gesture('clap',2.2);if(i%2)c.say(pick(['👏 Bắt được rồi!','Hú hồn luôn 😌','Cảm ơn các chú cảnh sát! 👮']),2);});});
   await wait(1.6);COPS.forEach(P=>{P.lookAt=null;P.path=[];});T.lookAt=null;T.spd=1.3;T._escort=true;T.think('😭',1.6);setStatus('🚔 Hai chú cảnh sát kẹp hai bên, dẫn kẻ trộm bị còng tay ra xe…');
-  await Promise.race([T.goStand(EXIT.in),wait(14)]);await doorIn();await walkDirect(T,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();T._escort=false;thSiren(false);}
+  await Promise.race([T.goStand(EXIT.in),wait(14)]);await doorIn();await walkDirect(T,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();T._escort=false;T.root.visible=false;COPS.forEach(P=>P.root.visible=false);thSiren(false);
+  thPop('🚔','Đã bắt được kẻ trộm!','Cảnh sát đã còng tay, áp giải kẻ trộm ra xe · Chứng từ mật được trả lại 📁 · Cảm ơn '+(TH&&TH.called?TH.called.name:'cả phòng')+' 👏','ok');setStatus('🚔 Đã bắt được kẻ trộm! Cảnh sát đã áp giải ra xe, chứng từ mật an toàn 📁');await wait(3);}
 // trộm xuất hiện ngẫu nhiên: ban đêm hoặc lúc văn phòng vắng
 function thOfficeEmpty(){const out=CHARS.filter(c=>c.away||c.outside||/Ngủ trưa|Đi ăn trưa|🛏️|🍱/.test(c.activity||'')).length;return out>=Math.ceil(CHARS.length/2);}
 {const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!EV.thief&&!danceRunning&&!meetingOn&&(todName==='night'||thOfficeEmpty())&&simTime-(EV.lastThief||-1e9)>600&&Math.random()<.35){EV.nextRand=simTime+rand(150,280);run('thief',null,{v:'1'});return;}return o();};}
