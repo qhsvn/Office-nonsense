@@ -5484,17 +5484,44 @@ function buildDalat(key){
         for(let pp=0;pp<14;pp++){const b=pp/14*TAU;const pe=new THREE.Mesh(petG,bMat(pp%2?'#ffd43b':'#fcc419'));pe.position.set(Math.cos(b)*.14,Math.sin(b)*.14,0);pe.scale.set(.03,.075,.012);pe.rotation.z=b-PI/2;pe.castShadow=false;hd.add(pe);}
         const dc=bMk(new THREE.CylinderGeometry(.085,.085,.03,16),bMat('#6b3f1d'),0,0,.01,hd);dc.rotation.x=PI/2;dc.castShadow=false;}}
     for(let x=-10;x<=-6;x+=.8)B_OBS.push({x,z:bz,r:.4});});
-  // cổng check-in vòm hoa
-  const gate=new THREE.Group();gate.position.set(DL.gate.x,0,DL.gate.z);S.add(gate);const pm=bMat('#f3e6d6');for(const s2 of[1,-1]){bMk(new THREE.CylinderGeometry(.08,.09,2.1,10),pm,s2*1.15,1.05,0,gate);B_OBS.push({x:DL.gate.x+s2*1.15,z:DL.gate.z,r:.18});}
-  const arch=bMk(new THREE.TorusGeometry(1.15,.06,8,28,PI),pm,0,2.1,0,gate);
-  for(let k=0;k<=16;k++){const a=k/16*PI;bud(bMat(['#ff8fab','#ffd43b','#b197fc','#ffffff'][k%4]),Math.cos(a)*1.15,2.1+Math.sin(a)*1.15,.06,.085,gate);bud(leaf[k%3],Math.cos(a+.1)*1.15,2.1+Math.sin(a+.1)*1.15,-.02,.07,gate);}
-  for(const s2 of[1,-1])for(let k=0;k<6;k++)bud(bMat(['#ff8fab','#b197fc','#ffd43b'][k%3]),s2*1.15+Math.sin(k*2)*.07,.35+k*.3,.08,.07,gate);
-  const sg=new THREE.Mesh(new THREE.PlaneGeometry(1.7,.46),new THREE.MeshBasicMaterial({map:canvasTex(340,92,(x,w,h)=>{x.fillStyle='#fff7f0';x.fillRect(0,0,w,h);x.strokeStyle='#f783ac';x.lineWidth=6;x.strokeRect(3,3,w-6,h-6);x.fillStyle='#d6336c';x.font='bold 46px '+FONT;x.textAlign='center';x.textBaseline='middle';x.fillText('ĐÀ LẠT',w/2,h/2+3);})}));sg.position.set(0,2.45,.07);gate.add(sg);
-  // vườn dâu
-  const berryRows=[2.8,4.2,5.6];berryRows.forEach((bz,ri)=>{bMk(new THREE.BoxGeometry(5,.16,.5),bMat('#5b3d26'),7.8,.08,bz,S).castShadow=false;
-    for(let k=0;k<14;k++){const fx=5.5+k*.34;bMk(new THREE.SphereGeometry(.11,8,6),bMat(k%2?'#3c8d3c':'#4fa34a'),fx,.24,bz+(k%2?.08:-.08),S);if(k%2===0)bMk(new THREE.SphereGeometry(.04,6,6),bMat('#e8263f'),fx+.05,.22,bz+.17,S);}
-    for(let x=5.6;x<=10;x+=.7)B_OBS.push({x,z:bz,r:.3});});
-  const bs=new THREE.Mesh(new THREE.PlaneGeometry(1.3,.4),new THREE.MeshBasicMaterial({map:canvasTex(260,80,(x,w,h)=>{x.fillStyle='#fff3bf';x.fillRect(0,0,w,h);x.fillStyle='#c92a2a';x.font='bold 36px '+FONT;x.textAlign='center';x.textBaseline='middle';x.fillText('Vườn dâu 🍓',w/2,h/2+2);})}));bs.position.set(4.9,.9,2.1);S.add(bs);bMk(new THREE.CylinderGeometry(.03,.03,.9,6),bMat('#6b4f32'),4.9,.45,2.08,S);B_OBS.push({x:4.9,z:2.1,r:.15});
+  // cổng gỗ Đà Lạt: cột gỗ thông, mái ngói nhỏ, bảng gỗ treo, chậu cẩm tú cầu, đèn lồng
+  const gate=new THREE.Group();gate.position.set(DL.gate.x,0,DL.gate.z);S.add(gate);const wood=bMat('#8a5a34',{roughness:.9}),woodL=bMat('#b07a4a',{roughness:.85}),roofM=bMat('#7a3b2e',{roughness:.8});
+  for(const s2 of[1,-1]){bMk(new THREE.CylinderGeometry(.11,.13,2.5,12),wood,s2*1.3,1.25,0,gate);bMk(new THREE.CylinderGeometry(.16,.16,.08,12),woodL,s2*1.3,.04,0,gate);B_OBS.push({x:DL.gate.x+s2*1.3,z:DL.gate.z,r:.2});
+    const pot=bMk(new THREE.BoxGeometry(.5,.32,.5),woodL,s2*1.85,.16,.05,gate);B_OBS.push({x:DL.gate.x+s2*1.85,z:DL.gate.z+.05,r:.32});
+    [['#8fa8ff','#b4c4ff'],['#d0a2ff','#e5c9ff']].forEach((cc,q)=>{const ball=new THREE.Group();ball.position.set(s2*1.85+(q?.1:-.1),.45+q*.06,.05+(q?-.06:.06));gate.add(ball);for(let f=0;f<22;f++){const u=rf()*TAU,v=Math.acos(2*rf()-1);bud(bMat(cc[f%2]),Math.sin(v)*Math.cos(u)*.14,Math.abs(Math.cos(v))*.12,Math.sin(v)*Math.sin(u)*.14,.045,ball);}});
+    for(let q=0;q<4;q++)bud(leaf[q%3],s2*1.85+Math.cos(q*1.6)*.2,.36,.05+Math.sin(q*1.6)*.2,.1,gate).scale.set(.12,.05,.09);
+    const lan=bMk(new THREE.SphereGeometry(.09,12,10),new THREE.MeshBasicMaterial({color:TN==='day'?'#ffcf8a':'#ffb347'}),s2*1.48,1.95,.12,gate);lan.scale.y=1.25;bMk(new THREE.CylinderGeometry(.004,.004,.2,4),bMat('#333'),s2*1.48,2.14,.12,gate);}
+  bMk(new THREE.BoxGeometry(3.2,.17,.2),wood,0,2.42,0,gate);bMk(new THREE.BoxGeometry(2.6,.09,.12),wood,0,2.2,0,gate);
+  for(const s2 of[1,-1]){const rf3=bMk(new THREE.BoxGeometry(1.95,.07,.56),roofM,s2*.86,2.83,0,gate);rf3.rotation.z=-s2*.42;}bMk(new THREE.BoxGeometry(.12,.1,.6),roofM,0,3.22,0,gate);
+  bMk(new THREE.BoxGeometry(.08,.42,.1),wood,0,2.68,0,gate);
+  const board=new THREE.Group();board.position.set(0,1.68,.02);gate.add(board);for(const s2 of[1,-1])bMk(new THREE.CylinderGeometry(.008,.008,.42,4),bMat('#5c4033'),s2*.7,.48,0,board);
+  bMk(new THREE.BoxGeometry(1.75,.56,.06),woodL,0,0,0,board);
+  const sg=new THREE.Mesh(new THREE.PlaneGeometry(1.66,.48),new THREE.MeshBasicMaterial({map:canvasTex(420,120,(x,w,h)=>{x.fillStyle='#a8703f';x.fillRect(0,0,w,h);for(let y=0;y<h;y+=5){x.strokeStyle=`rgba(70,40,20,${.08+Math.random()*.1})`;x.lineWidth=1.2;x.beginPath();x.moveTo(0,y+Math.random()*3);x.bezierCurveTo(w*.3,y+4,w*.6,y-3,w,y+2);x.stroke();}
+    x.strokeStyle='#6b4423';x.lineWidth=6;x.strokeRect(4,4,w-8,h-8);x.textAlign='center';x.textBaseline='middle';x.fillStyle='#4a2c14';x.font='bold 58px '+FONT;x.fillText('ĐÀ LẠT',w/2+2,h*.43+2);x.fillStyle='#fff4dc';x.fillText('ĐÀ LẠT',w/2,h*.43);x.font='600 20px '+FONT;x.fillStyle='#ffe8b8';x.fillText('Thành phố ngàn hoa',w/2,h*.82);})}));sg.position.z=.032;board.add(sg);
+  if(TN!=='day'){const pl=new THREE.PointLight(0xffb36b,.6,5);pl.position.set(0,2,.6);gate.add(pl);}
+  // vườn dâu: nhà kính, luống phủ bạt đen, cây dâu lá ba chẽ, quả dâu đỏ có hạt vàng và đài xanh
+  const berryRows=[2.8,4.2,5.6],X0=5.3,LEN=5;const plants=[];berryRows.forEach(bz=>{for(let k=0;k<12;k++)for(const dz of[-.15,.15])plants.push([X0+.2+k*.41+(dz>0?.2:0),bz+dz]);});
+  berryRows.forEach(bz=>{bMk(new THREE.BoxGeometry(LEN,.24,.62),bMat('#6b4a32'),X0+LEN/2,.12,bz,S).castShadow=false;bMk(new THREE.BoxGeometry(LEN+.02,.025,.66),bMat('#2a2a2e',{roughness:.45,metalness:.1}),X0+LEN/2,.25,bz,S).castShadow=false;
+    for(let x=X0+.3;x<=X0+LEN-.3;x+=.7)B_OBS.push({x,z:bz,r:.33});});
+  const lfG=new THREE.SphereGeometry(1,8,6),lfI=new THREE.InstancedMesh(lfG,bMat('#3f9142',{roughness:.7}),plants.length*9);const M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),E3=new THREE.Euler(),V3=new THREE.Vector3(),SC=new THREE.Vector3();let li=0;
+  const lfCol=[new THREE.Color('#3f9142'),new THREE.Color('#52a84f'),new THREE.Color('#2f7d36')];
+  plants.forEach(([px,pz],pi)=>{for(let a=0;a<3;a++){const ang=a/3*TAU+pi;for(let f=0;f<3;f++){const fa=ang+(f-1)*.55,d=.1+(f===1?.03:0);V3.set(px+Math.cos(fa)*d,.32+(f===1?.03:0),pz+Math.sin(fa)*d);E3.set(0,-fa,.25);Q.setFromEuler(E3);SC.set(.075,.022,.055);M4.compose(V3,Q,SC);lfI.setMatrixAt(li,M4);lfI.setColorAt(li,lfCol[(pi+a+f)%3]);li++;}}});
+  lfI.castShadow=false;S.add(lfI);
+  const bTex=canvasTex(64,64,(x,w,h)=>{x.fillStyle='#e3172f';x.fillRect(0,0,w,h);x.fillStyle='#ffe066';for(let yy=4;yy<h;yy+=8)for(let xx=(yy/8%2)*4;xx<w;xx+=8){x.beginPath();x.ellipse(xx,yy,1.3,2,0,0,TAU);x.fill();}});
+  const prof=[[0,0],[.022,.006],[.04,.024],[.052,.05],[.054,.075],[.046,.096],[.026,.11],[0,.112]].map(([a,b])=>new THREE.Vector2(a,b));
+  const brG=new THREE.LatheGeometry(prof,14),nB=plants.length*2,nRaw=Math.ceil(nB/7),brI=new THREE.InstancedMesh(brG,bMat('#ffffff',{map:bTex,roughness:.35}),nB),rwI=new THREE.InstancedMesh(brG,bMat('#e5efb8',{roughness:.5}),nRaw),cxG=new THREE.ConeGeometry(.05,.03,5),cxI=new THREE.InstancedMesh(cxG,bMat('#3a8f3a'),nB);
+  let bi=0,ri=0,rk=0;
+  plants.forEach(([px,pz],pi)=>{for(let q=0;q<2;q++){const out=pz>Math.round(pz)?1:-1,side=(pi+q)%2?1:-1,bx=px+side*.06,bzz=pz+(q?.12:-.12),by=.2+(q?.03:0);
+    V3.set(bx,by-.06,bzz);E3.set(q?.25:-.25,pi,0);Q.setFromEuler(E3);SC.setScalar(1.35);M4.compose(V3,Q,SC);if((pi*3+q)%7===0&&rk<nRaw)rwI.setMatrixAt(rk++,M4);else brI.setMatrixAt(ri++,M4);
+    V3.set(bx,by-.06+.152,bzz);E3.set(q?.25:-.25,pi,0);Q.setFromEuler(E3);SC.set(1.3,1,1.3);M4.compose(V3,Q,SC);cxI.setMatrixAt(bi,M4);bi++;}});
+  brI.count=ri;rwI.count=rk;brI.castShadow=rwI.castShadow=cxI.castShadow=false;S.add(brI,rwI,cxI);
+  // nhà kính khung trắng, mái nilon trong
+  const fr=bMat('#f1f3f5'),film=new THREE.MeshStandardMaterial({color:'#ffffff',transparent:true,opacity:.16,roughness:.2,side:THREE.DoubleSide,depthWrite:false});
+  for(let x=X0-.1;x<=X0+LEN+.1;x+=1.3){const ar=bMk(new THREE.TorusGeometry(2.05,.03,6,24,PI),fr,x,.6,4.2,S);ar.rotation.y=PI/2;for(const dz of[-2.05,2.05])bMk(new THREE.CylinderGeometry(.03,.03,.6,6),fr,x,.3,4.2+dz,S);}
+  bMk(new THREE.BoxGeometry(LEN+.4,.04,.04),fr,X0+LEN/2,2.65,4.2,S);const roof=new THREE.Mesh(new THREE.CylinderGeometry(2.05,2.05,LEN+.3,24,1,true,0,PI),film);roof.position.set(X0+LEN/2,.6,4.2);roof.rotation.set(0,0,PI/2);S.add(roof);
+  const bs=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.42),new THREE.MeshBasicMaterial({map:canvasTex(300,90,(x,w,h)=>{x.fillStyle='#fff3bf';x.fillRect(0,0,w,h);x.strokeStyle='#e03131';x.lineWidth=5;x.strokeRect(3,3,w-6,h-6);
+    x.fillStyle='#e3172f';x.beginPath();x.moveTo(44,70);x.bezierCurveTo(14,50,18,22,44,24);x.bezierCurveTo(70,22,74,50,44,70);x.fill();x.fillStyle='#2f9e44';x.beginPath();x.moveTo(30,24);x.lineTo(44,14);x.lineTo(58,24);x.lineTo(44,30);x.fill();x.fillStyle='#ffe066';[[38,38],[50,38],[44,48],[36,52],[52,52]].forEach(([a,b])=>{x.beginPath();x.arc(a,b,2,0,TAU);x.fill();});
+    x.fillStyle='#c92a2a';x.font='bold 34px '+FONT;x.textAlign='left';x.textBaseline='middle';x.fillText('VƯỜN DÂU',86,h/2+2);})}));bs.position.set(4.6,1,2.05);S.add(bs);bMk(new THREE.CylinderGeometry(.03,.03,1,6),bMat('#6b4f32'),4.6,.5,2.03,S);B_OBS.push({x:4.6,z:2.05,r:.15});
   // quán cà phê gỗ
   const cf=new THREE.Group();cf.position.set(DL.cafe.x,0,DL.cafe.z);S.add(cf);bMk(new THREE.BoxGeometry(3.4,2.2,2),bMat('#c9a27a'),0,1.1,0,cf);const rf2=bMk(new THREE.ConeGeometry(2.7,1.2,4),bMat('#8c3b2e'),0,2.75,0,cf);rf2.rotation.y=PI/4;rf2.scale.set(1,1,.75);
   bMk(new THREE.BoxGeometry(1.2,.8,.05),bMat('#ffe8a8',{emissive:TN==='night'?'#ffcf70':'#000000',emissiveIntensity:.8}),-.9,1.35,1.01,cf);
