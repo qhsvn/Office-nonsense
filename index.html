@@ -5351,7 +5351,7 @@ async function beachTrip(ppl,dest,v,rp){
     0:{f:i=>({x:FX+(i-(N-1)/2)*.85,z:FZ-1.55}),cam:[FX,2.8,FZ+5.4],tgt:[FX,.9,FZ-1],hold:'corn',ges:['wave','cheer'],th:['🔥','🌽','🥰'],name:'Quây quần bên lửa trại',cap:'Ấm áp bên lửa trại 🔥'},
     1:{f:i=>({x:QX+(i-(N-1)/2)*.8,z:QZ-.95}),cam:[QX,2.5,QZ+4.8],tgt:[QX,.95,QZ-.6],hold:'skewer',ges:['cheer','clap'],th:['🍢','😋','🔥'],name:'Tiệc nướng BBQ',cap:'BBQ cùng cả team 🍢'},
     2:{f:i=>{const a=-PI/2+(i/Math.max(1,N-1)-.5)*2.1;return{x:FX+Math.cos(a)*1.45,z:FZ+Math.sin(a)*1.45};},cam:[FX,2.6,FZ+5],tgt:[FX,.9,FZ-.6],hold:null,ges:['heart','heart'],th:['❤️','🔥','🥰'],name:'Thả tim bên lửa trại',cap:'Yêu team bên ánh lửa ❤️🔥'}}
-   :{1:{f:i=>({x:(i-(N-1)/2)*.85+7.7,z:1.55}),cam:[7.7,2.6,8.4],tgt:[7.7,1,2.6],hold:'basket',ges:['cheer','wave'],th:['🍓','🧺','😋'],name:'Khoe giỏ dâu nào',cap:'Hái dâu cùng cả team 🍓'}};
+   :{1:{f:i=>({x:(i-(N-1)/2)*.85+7.8,z:6.95}),cam:[7.8,2.5,12.6],tgt:[7.8,1,5.6],hold:'basket',ges:['cheer','wave'],th:['🍓','🧺','😋'],name:'Khoe giỏ dâu nào',cap:'Hái dâu cùng cả team 🍓'}};
   const SHOTS=[0,2,4];for(let k=0;k<3;k++){const n=SHOTS[k],sp=SPEC[k];
     order.forEach(c=>{c.arms='idle';bHold(c,null);});
     const O=OFF[k],F2=sp?sp.f:i=>{const f=FORM[n](i);return{x:f.x+O.x,z:f.z+O.z};},CM=sp?sp.cam:[CAM[n][0]+O.x,CAM[n][1],CAM[n][2]+O.z];
@@ -5560,7 +5560,10 @@ function buildDalat(key){
     const dirt=bMk(new THREE.CircleGeometry(1.15,28),bMat('#3d2f24',{roughness:1}),0,.01,0,g);dirt.rotation.x=-PI/2;dirt.castShadow=false;
     const stM=[bMat('#9a9a94',{roughness:.8}),bMat('#85837c',{roughness:.8}),bMat('#a8a49a',{roughness:.8})];for(let k=0;k<12;k++){const a=k/12*TAU,st=bMk(new THREE.SphereGeometry(.11,12,8),stM[k%3],Math.cos(a)*.6,.06,Math.sin(a)*.6,g);st.scale.set(1.25,.62,1);st.rotation.y=-a;}
     const emb=bMk(new THREE.CircleGeometry(.4,20),new THREE.MeshBasicMaterial({color:'#ff5a00'}),0,.03,0,g);emb.rotation.x=-PI/2;emb.castShadow=false;fire.emb=emb;
-    const logM=bMat('#4a3322',{roughness:.95}),logE=new THREE.MeshBasicMaterial({color:'#ff7a1a'});for(let k=0;k<6;k++){const a=k/6*TAU,lg=new THREE.Group();lg.position.set(Math.cos(a)*.3,0,Math.sin(a)*.3);lg.rotation.set(0,-a,0);g.add(lg);const l=bMk(new THREE.CylinderGeometry(.045,.055,.78,8),logM,0,0,0,lg);l.position.set(-.16,.32,0);l.rotation.z=-.5;bMk(new THREE.SphereGeometry(.05,8,6),logE,-.02,.06,0,lg).castShadow=false;}
+    const logM=bMat('#4a3322',{roughness:.95}),logE=new THREE.MeshBasicMaterial({color:'#ff7a1a'}),UP=new THREE.Vector3(0,1,0);
+    for(let k=0;k<6;k++){const a=k/6*TAU,b0=new THREE.Vector3(Math.cos(a)*.36,.03,Math.sin(a)*.36),t0=new THREE.Vector3(Math.cos(a)*.04,.42,Math.sin(a)*.04),d=t0.clone().sub(b0),L=d.length();
+      const l=bMk(new THREE.CylinderGeometry(.04,.05,L,8),logM,0,0,0,g);l.position.copy(b0).add(t0).multiplyScalar(.5);l.quaternion.setFromUnitVectors(UP,d.normalize());bMk(new THREE.SphereGeometry(.045,8,6),logE,b0.x*.9,.05,b0.z*.9,g).castShadow=false;}
+    for(let k=0;k<2;k++){const lg=bMk(new THREE.CylinderGeometry(.05,.05,.7,8),logM,0,.06,0,g);lg.rotation.set(0,k*PI/2+.4,PI/2);}
     const fm=(sz,op)=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:op}));sp.scale.set(sz*.55,sz,1);g.add(sp);return sp;};
     [[.9,0,0,.95],[.7,.12,.05,.85],[.68,-.12,-.04,.85],[.5,.06,-.12,.8],[.48,-.05,.13,.8],[.35,.18,-.1,.7]].forEach(([sz,x,z,op],k)=>{const f=fm(sz,op);f.position.set(x,sz*.45+.1,z);f.base={sz,x,z,op,ph:k*1.7};fire.fl.push(f);});
     const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.55}));glow.scale.set(2.6,2.6,1);glow.position.y=.5;g.add(glow);fire.glow=glow;
@@ -5572,14 +5575,14 @@ function buildDalat(key){
     B_OBS.push({x:DL.fire.x,z:DL.fire.z,r:.8});
     // bếp nướng BBQ
     const q=new THREE.Group();q.position.set(DL.bbq.x,0,DL.bbq.z);S.add(q);fire.bbq=q;const blk=bMat('#2b2d31',{roughness:.5,metalness:.4}),stl=bMat('#c9ced3',{metalness:.7,roughness:.3});
-    for(const sx of[-.5,.5])for(const sz of[-.2,.2])bMk(new THREE.CylinderGeometry(.025,.025,.62,6),blk,sx,.31,sz,q);
-    bMk(new THREE.BoxGeometry(1.15,.24,.5),blk,0,.72,0,q);const coal=bMk(new THREE.BoxGeometry(1.05,.02,.42),new THREE.MeshBasicMaterial({color:'#ff4d00'}),0,.82,0,q);coal.castShadow=false;fire.coal=coal;
-    for(let k=0;k<10;k++){const b=bMk(new THREE.CylinderGeometry(.008,.008,.48,4),stl,-.5+k*.11,.86,0,q);b.rotation.x=PI/2;b.castShadow=false;}
-    const foods=[bMat('#8b4a2b'),bMat('#2f9e44'),bMat('#e03131'),bMat('#f1e6c8'),bMat('#a0522d')];for(let k=0;k<6;k++){const sk=new THREE.Group();sk.position.set(-.42+k*.17,.9,0);q.add(sk);const st=bMk(new THREE.CylinderGeometry(.006,.006,.5,4),bMat('#d9b77a'),0,0,0,sk);st.rotation.x=PI/2;
+    for(const sx of[-.5,.5])for(const sz of[-.2,.2])bMk(new THREE.CylinderGeometry(.025,.025,.44,6),blk,sx,.22,sz,q);
+    bMk(new THREE.BoxGeometry(1.15,.22,.5),blk,0,.51,0,q);const coal=bMk(new THREE.BoxGeometry(1.05,.02,.42),new THREE.MeshBasicMaterial({color:'#ff4d00'}),0,.61,0,q);coal.castShadow=false;fire.coal=coal;
+    for(let k=0;k<10;k++){const b=bMk(new THREE.CylinderGeometry(.008,.008,.48,4),stl,-.5+k*.11,.64,0,q);b.rotation.x=PI/2;b.castShadow=false;}
+    const foods=[bMat('#8b4a2b'),bMat('#2f9e44'),bMat('#e03131'),bMat('#f1e6c8'),bMat('#a0522d')];for(let k=0;k<6;k++){if(k===1||k===4)continue;const sk=new THREE.Group();sk.position.set(-.42+k*.17,.675,.06);q.add(sk);const st=bMk(new THREE.CylinderGeometry(.006,.006,.5,4),bMat('#d9b77a'),0,0,0,sk);st.rotation.x=PI/2;
       for(let m=0;m<4;m++)bMk(new THREE.BoxGeometry(.06,.05,.06),foods[(k+m)%5],0,.01,-.15+m*.1,sk).castShadow=false;}
     const smokeTex=canvasTex(64,64,(x,w,h)=>{const gr=x.createRadialGradient(w/2,h/2,1,w/2,h/2,w/2);gr.addColorStop(0,'rgba(230,230,235,.75)');gr.addColorStop(1,'rgba(230,230,235,0)');x.fillStyle=gr;x.fillRect(0,0,w,h);});
     for(let k=0;k<8;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:smokeTex,transparent:true,depthWrite:false,opacity:.3}));sp.ph=k/8;sp.dx=Math.sin(k*2.3)*.3;q.add(sp);fire.smoke.push(sp);}
-    const cg=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.4}));cg.scale.set(1.6,.8,1);cg.position.y=.95;q.add(cg);
+    const cg=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,blending:THREE.AdditiveBlending,transparent:true,depthWrite:false,opacity:.4}));cg.scale.set(1.6,.8,1);cg.position.y=.72;q.add(cg);
     const tb=new THREE.Group();tb.position.set(1.35,0,.1);q.add(tb);bMk(new THREE.BoxGeometry(.9,.05,.6),bMat('#b07a4a'),0,.72,0,tb);for(const sx of[-.38,.38])for(const sz of[-.24,.24])bMk(new THREE.CylinderGeometry(.03,.03,.7,6),bMat('#6b4f32'),sx,.35,sz,tb);
     for(let k=0;k<3;k++){bMk(new THREE.CylinderGeometry(.13,.12,.02,16),bMat('#ffffff'),-.25+k*.25,.76,.05,tb);for(let m=0;m<3;m++)bMk(new THREE.BoxGeometry(.05,.04,.05),foods[(k+m)%5],-.25+k*.25+(m-1)*.05,.79,.05+(m%2)*.04,tb).castShadow=false;}
     for(let k=0;k<2;k++)bMk(new THREE.CylinderGeometry(.03,.035,.2,8),bMat(k?'#2f9e44':'#e8590c',{transparent:true,opacity:.85}),.3+k*.08,.85,-.18,tb);
@@ -5594,6 +5597,7 @@ function buildDalat(key){
   return{S,kind:'dl',lake,rip,pines,flowers,clouds,bulbs,fire,puffs:[],nf:0};}
 {const o=buildBeach;buildBeach=key=>BEACH_DEST[key]&&BEACH_DEST[key].kind==='dl'?buildDalat(key):o(key);}
 
+const _Q1=new THREE.Quaternion(),_Q2=new THREE.Quaternion(),_Q3=new THREE.Quaternion(),_Q4=new THREE.Quaternion(),_E1=new THREE.Euler(),_AZ=new THREE.Vector3(0,0,1),_AX=new THREE.Vector3(1,0,0);
 // cảnh động: thuyền thiên nga, gió thông, lửa trại, hơi thở khói
 function dlTick(t){const W=BW;W.rip.offset.set(t*.006,t*.003);
   BEACH.boats.forEach((b,i)=>{const L=DL.lake,th=t*.09+b.ph,x=L.x+Math.cos(th)*(L.rx-2),z=L.z+Math.sin(th)*(L.rz-1.1);b.position.set(x,.06+Math.sin(t*1.6+i)*.03,z);b.rotation.y=Math.atan2(-Math.sin(th)*(L.rx-2),Math.cos(th)*(L.rz-1.1));b.rotation.z=Math.sin(t*1.2+i)*.04;});
@@ -5602,13 +5606,18 @@ function dlTick(t){const W=BW;W.rip.offset.set(t*.006,t*.003);
   if(W.fire.g){const F=W.fire;F.fl.forEach(f=>{const b=f.base,k=1+Math.sin(t*9+b.ph)*.1+Math.sin(t*17+b.ph*2)*.08;f.scale.set(b.sz*.55*(1+Math.sin(t*7+b.ph)*.08),b.sz*k,1);f.position.set(b.x+Math.sin(t*5+b.ph)*.02,b.sz*k*.45+.1,b.z);f.material.opacity=b.op*(.85+Math.sin(t*13+b.ph)*.15);});
     F.light.intensity=1.8+Math.sin(t*11)*.3+Math.sin(t*23)*.18;F.glow.material.opacity=.45+Math.sin(t*9)*.08;F.emb.material.color.setRGB(1,.3+Math.sin(t*6)*.08,0);
     F.sparks.forEach(sp=>{const u=(t*.45+sp.ph)%1;sp.position.set(sp.dx*(1+u)+Math.sin(t*3+sp.ph*9)*.08,.35+u*2.2,sp.dz*(1+u));sp.material.opacity=(1-u)*.9;sp.scale.setScalar(.07*(1-u*.6));});
-    F.smoke.forEach(sp=>{const u=(t*.22+sp.ph)%1;sp.position.set(sp.dx*u+Math.sin(t+sp.ph*6)*.1,.95+u*2.2,0);sp.scale.setScalar(.3+u*1.1);sp.material.opacity=.32*(1-u);});
+    F.smoke.forEach(sp=>{const u=(t*.22+sp.ph)%1;sp.position.set(sp.dx*u+Math.sin(t+sp.ph*6)*.1,.72+u*2.2,0);sp.scale.setScalar(.3+u*1.1);sp.material.opacity=.32*(1-u);});
     F.coal.material.color.setRGB(1,.28+Math.sin(t*5)*.06,0);}
   if(BEACH.night)W.bulbs.forEach((b,i)=>{const k=.75+Math.sin(t*2+i)*.25;b.material.color.setRGB(1,.82*k+.1,.45*k);});
   // hơi thở khói trắng vì trời lạnh
   W.puffs=W.puffs.filter(p=>{const u=(t-p.t0)/1.3;if(u>=1){W.S.remove(p.m);return false;}p.m.position.y+=.004;p.m.scale.setScalar(.6+u*1.6);p.m.material.opacity=.45*(1-u);return true;});
   BEACH.ppl.forEach((c,i)=>{
-    if(c._bHold&&c.cupG&&c._dlP){const it=c._dlP[c._bHold];if(it)it.rotation.copy(c.cupG.rotation);}
+    if(c._bHold&&c.cupG&&c._dlP){const it=c._dlP[c._bHold];if(it){if(c._grill&&c._bHold==='skewer'){
+        c.armR.g.rotation.x=-1.15+Math.sin(t*2.2+i)*.06;c.armR.g.rotation.z=.12;c.armL.g.rotation.x=-.5;
+        const fl=Math.floor(t/1.6+i*.3),u=Math.min(1,(t/1.6+i*.3-fl)*4),roll=(fl+(u<1?u:1))*PI;
+        _Q1.setFromEuler(_E1.set(0,c.root.rotation.y,0));_Q2.setFromAxisAngle(_AZ,roll);_Q3.setFromAxisAngle(_AX,PI/2);_Q1.multiply(_Q2).multiply(_Q3);
+        it.parent.getWorldQuaternion(_Q4);it.quaternion.copy(_Q4.invert().multiply(_Q1));}
+      else it.rotation.copy(c.cupG.rotation);}}
     if(c._ride){const b=BEACH.boats[c._ride.b],off=c._ride.s?-.2:.2,cy=Math.cos(b.rotation.y),sy=Math.sin(b.rotation.y);c.pos.x=b.position.x+off*cy-.15*sy;c.pos.z=b.position.z-off*sy-.15*cy;c.yaw=b.rotation.y;c.root.rotation.y=c.yaw;}
     else if(c.pose!=='sit')bPush(c);
     if(c._jumpT){const u=(t-c._jumpT)/.55;if(u>=1){c._jumpT=0;c.pos.y=0;}else c.pos.y=Math.sin(u*PI)*.55;}
@@ -5647,7 +5656,7 @@ const DL_LINES={swan:['Đạp vịt vui quá trời! 🦢','Hồ đẹp ghê, gi
   drink:['Cà phê Đà Lạt thơm lừng ☕','Trời lạnh uống đồ nóng là nhất 🥰','Sữa đậu nành nóng hổi nè 🥛'],flower:['Cẩm tú cầu đẹp quá! 💜','Chụp tấm hình với hoa nè 📸','Hoa hướng dương to ghê 🌻'],
   bbq:['Thịt nướng thơm lừng! 🍢','Lật xiên đi kẻo cháy 😆','Ai ăn xiên rau củ không? 🫑'],
   fire:['Ấm quá trời luôn 🔥','Bắp nướng thơm phức! 🌽','Hát một bài đi cả nhà 🎶'],walk:['Đồi thông đẹp như tranh 🌲','Se se lạnh thích ghê 🧣','Sương mù lãng mạn quá ☁️']};
-function dlUnride(c){if(c._ride){const b=BEACH.boats[c._ride.b];if(b)b.seats=b.seats.filter(x=>x!==c);c._ride=null;c.pose='stand';c.seat=null;c.pos.set(DL.dock.x+(c._rideOff||0),0,DL.dock.z+.2);}
+function dlUnride(c){c._grill=false;if(c._ride){const b=BEACH.boats[c._ride.b];if(b)b.seats=b.seats.filter(x=>x!==c);c._ride=null;c.pose='stand';c.seat=null;c.pos.set(DL.dock.x+(c._rideOff||0),0,DL.dock.z+.2);}
   if(c._dlSit){c._dlSit=false;c.pose='stand';c.seat=null;}}
 {const o=bReset;bReset=c=>{dlUnride(c);o(c);};}
 async function dlAct(c,act,i,tok){bReset(c);const r=srand(hashStr(BEACH.key+c.id+act+Math.floor(simTime/5))),E={coffee:'☕',soy:'🥛'};
@@ -5662,8 +5671,8 @@ async function dlAct(c,act,i,tok){bReset(c);const r=srand(hashStr(BEACH.key+c.id
       if(s%2){c.gesture(pick(['heart','wave','cheer']),2.2);c.think(pick(['📸','🌸','💜']),1.6);}else{c.think(pick(['🌻','🌷','💐']),1.6);}if(r()<.4)c.say(pick(DL_LINES.flower),2);if(!await bWait(3.6,c,tok))return;}}
   else if(act==='fire'&&BW.fire.g){const seat=BW.fire.seats[i%BW.fire.seats.length];if(!await bWalk(c,seat.x+Math.cos(seat.face)*.0,seat.z,tok))return;c.pos.set(seat.x,0,seat.z);c.yaw=seat.face;c.seatH=.34;c.pose='sit';c._dlSit=true;c.arms='cup';bHold(c,'corn');
     c.think('🔥',1.6);if(r()<.6)c.say(pick(DL_LINES.fire),2.2);const end=simTime+(isHuman(c)?1e6:18);while(simTime<end){if(!await bWait(4,c,tok))return;c.yaw=seat.face;if(r()<.35)c.think(pick(['🌽','🍠','🎶','🔥']),1.4);}}
-  else if(act==='bbq'&&BW.fire.bbq){const spots=[[-.35,-.7],[.35,-.7],[0,-.75],[1.35,-.6],[-1.3,-.55]],sp=spots[i%spots.length];if(!await bWalk(c,DL.bbq.x+sp[0],DL.bbq.z+sp[1],tok))return;c.yaw=0;c.arms='cup';bHold(c,'skewer');c.think('🍢',1.6);if(r()<.6)c.say(pick(DL_LINES.bbq),2.2);
-    const end=simTime+(isHuman(c)?1e6:18);while(simTime<end){if(!await bWait(3.5,c,tok))return;c.yaw=(r()-.5)*.8;if(r()<.4)c.gesture(pick(['clap','cheer']),1.6);if(r()<.4)c.think(pick(['🍢','🔥','😋','🥩']),1.4);}}
+  else if(act==='bbq'&&BW.fire.bbq){const spots=[[-.36,-.62],[.36,-.62],[0,-.64],[-.36,.62],[.36,.62]],sp=spots[i%spots.length];if(!await bWalk(c,DL.bbq.x+sp[0],DL.bbq.z+sp[1],tok))return;c.yaw=sp[1]<0?0:PI;c.arms='cup';bHold(c,'skewer');c._grill=true;c.think('🍢',1.6);if(r()<.6)c.say(pick(DL_LINES.bbq),2.2);
+    const end=simTime+(isHuman(c)?1e6:18);while(simTime<end){if(!await bWait(3.5,c,tok)){c._grill=false;return;}c.yaw=(sp[1]<0?0:PI)+(r()-.5)*.25;if(r()<.4)c.think(pick(['🍢','🔥','😋','🥩']),1.4);if(r()<.2)c.say(pick(DL_LINES.bbq),2);}c._grill=false;}
   else{for(let k=0;k<3;k++){const B=BEACH.box;if(!await bWalk(c,B.x0+r()*(B.x1-B.x0),B.z0+r()*(B.z1-B.z0),tok))return;c.yaw=r()*TAU;if(k===1){c.think(pick(['🌲','☁️','🧣']),1.6);if(r()<.5)c.say(pick(DL_LINES.walk),2.2);}if(!await bWait(2.5,c,tok))return;}}
   bReset(c);}
 {const o=bAct;bAct=(c,act,i,tok)=>BEACH.kind==='dl'?dlAct(c,act,i,tok):o(c,act,i,tok);}
