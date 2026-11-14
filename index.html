@@ -539,6 +539,9 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 
 #beachBar{flex-wrap:wrap!important;justify-content:center}
 .pbph span{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important;font-weight:600!important;font-size:11px!important;line-height:1.35;letter-spacing:0;word-break:normal;overflow-wrap:anywhere}
+
+.trlock{opacity:.5;filter:grayscale(.6);cursor:not-allowed!important}
+.trlock small{display:block;font-size:10px;font-weight:600;color:#7c6aa8;margin-top:2px}
 </style>
 </head>
 <body>
@@ -4531,6 +4534,7 @@ const tripWhy=r=>r==='x'?'⏰ Không trả lời lời mời':TRIP_NO[(+r||0)%TR
 async function actTrip(v){
   const [dS,mS,wS]=String(v).split('|'),mand=mS==='1',rng=srand(hashStr(String(v))),rp=a=>a[Math.floor(rng()*a.length)];
   const dest=TRIP_DEST[(parseInt(dS,10)||0)%TRIP_DEST.length];
+  if(trLocked(TRIP_DEST.indexOf(dest))){setStatus(`🌙 Ban đêm biển ${dest.n} đóng cửa — chuyến team building bị hủy, chỉ đi Đà Lạt được thôi nha!`);return;}
   const why={};if(!mand)(wS||'').split('.').filter(Boolean).forEach(x=>{const [id,r]=x.split('~');if(byId(id))why[id]=r;});
   const ppl=present().filter(c=>!c.busy&&!c.outside&&!(c.id in why));if(ppl.length<2){setStatus('🚌 Cần ít nhất 2 người rảnh để đi team building.');return;}
   const no=Object.keys(why).map(byId).filter(c=>c&&!c.away);const noTxt=no.map(c=>`${c.name} (${tripWhy(why[c.id])})`).join(', ');
@@ -4560,10 +4564,15 @@ function openTrip(){if(EV.trip){setStatus('🚌 Cả team đang đi team buildin
      const ee=document.createElement('span');ee.className='fle';ee.textContent=e;const t=document.createElement('span');const bb=document.createElement('b');bb.textContent=n;const s2=document.createElement('small');s2.textContent=sm;s2.style.display='block';s2.style.fontWeight='400';t.append(bb,s2);b.append(ee,t);b.onclick=()=>{trMand=m;openTrip();};mb.appendChild(b);});
    else{const p=document.createElement('p');p.className='bpleft';p.textContent='🙋 Chuyến đi tự nguyện — ai bận có thể từ chối. (Chỉ quản lý mới tổ chức chuyến đi bắt buộc được.)';mb.appendChild(p);}
    $('#trModeT').style.display=isM?'':'none';}
-  TRIP_DEST.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className=i===trPick?'on':'';const e=document.createElement('span');e.className='fle';e.textContent=d.e;const n=document.createElement('span');n.textContent=d.n;b.append(e,n);b.onclick=()=>{trPick=i;openTrip();};box.appendChild(b);});
+  if(trLocked(trPick))trPick=Math.max(0,TRIP_DEST.findIndex((d,i)=>!trLocked(i)));
+  TRIP_DEST.forEach((d,i)=>{const lk=trLocked(i),b=document.createElement('button');b.type='button';b.className=(i===trPick?'on':'')+(lk?' trlock':'');const e=document.createElement('span');e.className='fle';e.textContent=lk?'🔒':d.e;const n=document.createElement('span');n.textContent=d.n;b.append(e,n);
+    if(lk){const sm=document.createElement('small');sm.textContent='🌙 Ban đêm đóng cửa';b.appendChild(sm);b.disabled=true;b.title='Biển không mở team building vào ban đêm';}
+    b.onclick=()=>{if(trLocked(i))return;trPick=i;openTrip();};box.appendChild(b);});
   trEl.classList.add('show');}
+// ban đêm (chọn 🌙 hoặc theo giờ thật vào buổi tối): khóa team building ở các điểm biển, chỉ còn Đà Lạt
+function trLocked(i){const d=TRIP_DEST[i];return !!(d&&todName==='night'&&typeof BEACH_DEST!=='undefined'&&BEACH_DEST[d.n]&&BEACH_DEST[d.n].kind!=='dl');}
 $('#trCancel').onclick=()=>trEl.classList.remove('show');
-$('#trGo').onclick=()=>{trEl.classList.remove('show');const me=ME.id&&byId(ME.id),m=me&&me.manager&&trMand?1:0;let w='';
+$('#trGo').onclick=()=>{if(trLocked(trPick)){setStatus('🌙 Ban đêm biển đóng cửa — chỉ đi team building Đà Lạt được thôi nha!');openTrip();return;}trEl.classList.remove('show');const me=ME.id&&byId(ME.id),m=me&&me.manager&&trMand?1:0;let w='';
   if(!m){const cand=present().filter(c=>!isHuman(c)&&!c.manager&&!c.busy&&!c.outside&&!PEERSEL[c.id]).sort(()=>Math.random()-.5);   // nhân vật trống có thể từ chối (máy người tổ chức quyết, gửi chung cho cả phòng)
     w=cand.filter(()=>Math.random()<.3).slice(0,2).map(c=>c.id+'~'+Math.floor(Math.random()*TRIP_NO.length)).join('.');}
   run('trip',null,{v:[trPick,m,w,Math.random().toString(36).slice(2,7)].join('|')});};
