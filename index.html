@@ -5862,7 +5862,7 @@ KPI_WHY.zcure='Chữa khỏi zombie';KPI_WHY.zvax='Hoàn thành vaccine';KPI_WHY
 const ZSK='#a3d98f',ZLEG='#8fc77d',ZINF_M=SKIN.clone();ZINF_M.color.set(ZSK);
 const ZM=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{}));
 const zAdd=(p,g,m,x,y,z)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;p.add(o);return o;};
-const ZPOOL=[...Array(7)].map((_,k)=>{const g=makeGuest({id:'zb'+k,name:k?'🧟 Zombie':'🧟 Zombie Trùm',short:'Zombie',slot:'Khách',hairStyle:['short','sidepart','lowtail'][k%3],hairColor:['#5c5f66','#7d7f86','#4b4e55'][k%3],
+const ZPOOL=[...Array(14)].map((_,k)=>{const g=makeGuest({id:'zb'+k,name:k?'🧟 Zombie':'🧟 Zombie Trùm',short:'Zombie',slot:'Khách',hairStyle:['short','sidepart','lowtail'][k%3],hairColor:['#5c5f66','#7d7f86','#4b4e55'][k%3],
     shirt:['#7a8b6f','#8d7b68','#6c7a89','#8a6f7d'][k%4],skirt:['#4d5547','#5a4e43','#3f4a56'][k%3],tagColor:'#5c940d'});
   const zm=SKIN.clone();zm.color.set(ZSK);g._zm=zm;g.root.traverse(o=>{if(o.isMesh&&o.material===SKIN)o.material=zm;});g.mLeg.color.set(ZLEG);
   for(let q=0;q<3;q++){const p=zAdd(g.body,new THREE.BoxGeometry(.06,.05,.01),ZM('#3b3f36'),(q-1)*.07,.12+q*.05,.152);p.rotation.z=q*.6;p.castShadow=false;}
@@ -5918,8 +5918,8 @@ function zBlock(c){if(!zCanAct(c))return false;if(c._zDrag)return false;
     await wait(15);
     if(CAT_HOST&&Z&&!Z.end){const was=Z.door;Z.door=Math.min(100,Z.door+(isHuman(c)?18:4));if(was<=0&&Z.door>0)zDoorRebuilt();}
     c.think('💺',1.2);
-    if(c.home){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await Promise.race([c.goSit(c.home),wait(8)]);}
-  }finally{c._zDrag=false;if(c.busy&&/Kéo bàn|Quay về chỗ/.test(c.activity||''))end(c,c.home?'working':'standing');zHud();}})();
+    if(c.home){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await c.goSit(c.home);}
+  }finally{c._zDrag=false;if(/Kéo bàn|Quay về chỗ/.test(c.activity||''))end(c,c.home?'working':'standing');zHud();}})();
   return true;}
 function zMask(c){if(!zCanAct(c))return false;if(simTime-(c._zMcd||0)<2)return false;c._zMcd=simTime;
   const list=[c].concat(zHere().filter(x=>x!==c&&!x._zMask&&!x._zInf).sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z)).slice(0,2));
@@ -5932,16 +5932,18 @@ function zHeal(c){const z=c._zInf;if(!z)return;z.sw.forEach(o=>o.material=SKIN);
   if(Z&&!Z.end&&!isHuman(c))begin(c,'🛡️ Chống zombie');if(c.id===ME.id)zHud();}
 function zTagName(g){g.nameEl.textContent=(g._boss?'🧟 Trùm ':'🧟 ')+'💚'.repeat(Math.max(0,g._hp));}
 function zSpawn(g,i){const r=srand(hashStr(Z.key+g.id+i));g._hp=g._boss?8:3;g._state='out';zTagName(g);g._zm.color.set(ZSK);g.mLeg.color.set(ZLEG);g.arms='hold';g.spd=g._boss?.55:.7;
-  g.pos.set(15.5+r()*2,0,1+r()*3.4);g.yaw=-PI/2;g.root.visible=true;g.lookAt=null;
-  (async()=>{await walkDirect(g,[{x:12.65,z:1.9+((i*.47)%1.6)}]);if(g._state==='out')g._state='bang';})();}
+  g._zCnt=false;g.pos.set(15.5+r()*2.5,0,1+r()*3.4);g.yaw=-PI/2;g.root.visible=true;g.lookAt=null;
+  (async()=>{await walkDirect(g,[{x:12.65+(Math.floor(i/2)%3)*.5+r()*.15,z:1.5+((i*.53)%2.4)}]);if(g._state==='out')g._state='bang';})();}
 async function zCure(g){g._state='cured';g.path=[];g.walking=false;g._zm.color.set('#ffe2d2');g.mLeg.color.set('#fde0d1');g.arms='idle';g.root.rotation.z=0;g.nameEl.textContent='🙂 Người qua đường';g.spd=1.4;
   g.think('😳',1.4);g.say(pick(['Ơ… mình bị sao vậy? Cảm ơn nha! 🙇','Tỉnh rồi! Cảm ơn mọi người 🙏','Hết bệnh rồi, cảm ơn nha! 😭']),2.2);g.gesture('bow',1.4);await wait(1.6);
   try{if(g.pos.x<12){await Promise.race([g.goStand(EXIT.in),wait(8)]);await doorIn();await walkDirect(g,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();}else await Promise.race([walkDirect(g,[{x:17.5,z:g.pos.z}]),wait(6)]);}finally{g.root.visible=false;g._state='idle';g.spd=0;}}
 // ---------- cửa ----------
-async function zDoorBreak(){Z.broken=true;ZBAR.visible=false;setStatus('💥 Zombie đã phá rào chắn! Xịt thuốc ngay — quá 3 zombie lọt vào là thua!');beep(false);zSnd('groan');
+async function zDoorBreak(){Z.broken=true;ZBAR.visible=false;setStatus('💥 Zombie đã phá rào chắn! Xịt thuốc ngay — 3 zombie vào tới giữa văn phòng là thua!');beep(false);zSnd('groan');
   await doorIn();zActive().filter(g=>g._state==='bang').forEach((g,k)=>zEnter(g,k));}
 function zDoorRebuilt(){Z.broken=false;ZBAR.visible=true;doorOut();setStatus('🚪 Đã dựng lại rào chắn cửa!');}
-async function zEnter(g,k){if(g._state!=='bang')return;g._state='in';Z.ent=(Z.ent|0)+1;await walkDirect(g,[{x:12.4,z:EXIT.in.z+((k%3)-1)*.3},{x:EXIT.in.x,z:EXIT.in.z+((k%3)-1)*.3}]);zHunt(g);}
+async function zEnter(g,k){if(g._state!=='bang'||(Z.inN|0)>=3)return;Z.inN=(Z.inN|0)+1;const ln=((Z.inN-1)%3)-1;g._state='in';await walkDirect(g,[{x:12.4,z:EXIT.in.z+ln*.3},{x:EXIT.in.x,z:EXIT.in.z+ln*.3}]);
+  if(g._state!=='in'||!Z||Z.end)return;await Promise.race([g.goStand({x:3.5,z:ln*1.2}),wait(12)]);
+  if(g._state!=='in'||!Z||Z.end)return;g._zCnt=true;Z.ent=(Z.ent|0)+1;g.say('Grààà… 🧟',1.4);zSnd('groan');zHud();zHunt(g);}
 async function zHunt(g){while(Z&&!Z.end&&g._state==='in'){const tg=zHere().filter(c=>!c._zInf&&!c._zMask).sort((p,q)=>Math.hypot(p.pos.x-g.pos.x,p.pos.z-g.pos.z)-Math.hypot(q.pos.x-g.pos.x,q.pos.z-g.pos.z))[0];
     if(!tg){await Promise.race([g.goStand({x:2+Math.sin(simTime)*4,z:Math.cos(simTime*.7)*3}),wait(2)]);continue;}
     await Promise.race([g.goStand({x:tg.pos.x,z:tg.pos.z}),wait(1.2)]);if(g._state!=='in'||!Z||Z.end)break;
@@ -5951,14 +5953,14 @@ function zVaxBurst(){if(!Z||Z.bursted)return;Z.bursted=true;setStatus(`💉 ${Z.
   const t0=simTime;const iv=setInterval(()=>{const u=(simTime-t0)/2.2;if(u>=1||!ring.parent){clearInterval(iv);scene.remove(ring);return;}ring.scale.setScalar(1+u*28);ring.material.opacity=.8*(1-u);},50);
   zActive().forEach(g=>{zMist(new THREE.Vector3(g.pos.x,2,g.pos.z),new THREE.Vector3(g.pos.x,.8,g.pos.z),'#b2f2bb');zCure(g);});CHARS.forEach(c=>{if(c._zInf)zHeal(c);});if(CAT_HOST)Z.win='vax';}
 // ---------- HUD ----------
-const ZHUD=(()=>{const el=document.createElement('div');el.className='zhud';el.innerHTML='<div class="zinfo"><span id="zT">⏳ 90s</span><span id="zD">🚪 100%</span><span id="zN">🧟 Lọt vào 0/3</span></div><div class="zhint" id="zHint">Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 · Quá 3 zombie lọt vào là thua</div><div class="zbtns"><button data-z="block">🚪 Chặn cửa</button><button data-z="spray">🧴 Xịt thuốc trị bệnh</button><button data-z="mask">😷 Khẩu trang</button></div>';stage.appendChild(el);
+const ZHUD=(()=>{const el=document.createElement('div');el.className='zhud';el.innerHTML='<div class="zinfo"><span id="zT">⏳ 90s</span><span id="zD">🚪 100%</span><span id="zN">🧟 Lọt vào 0/3</span></div><div class="zhint" id="zHint">Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 · 3 zombie vào giữa văn phòng là thua</div><div class="zbtns"><button data-z="block">🚪 Chặn cửa</button><button data-z="spray">🧴 Xịt thuốc trị bệnh</button><button data-z="mask">😷 Khẩu trang</button></div>';stage.appendChild(el);
   el.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const me=ME.id&&byId(ME.id);if(!zCanAct(me))return;const a=b.dataset.z;
     if(a==='spray'){const t=zNearest(me);if(t)run('zspray',me,{v:t.id});else setStatus('🧴 Chưa có zombie nào trong tầm xịt.');return;}
     run(a==='block'?'zblock':'zmask',me,{v:'1'});});return el;})();
 function zNearest(c){const L=zActive().filter(g=>g._state!=='cured').concat(CHARS.filter(x=>x._zInf&&x!==c));return L.sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z))[0];}
 function zHud(){if(!Z)return;const left=Math.max(0,Math.ceil(90-(simTime-Z.t0)));$('#zT').textContent=`⏳ ${left}s`;$('#zD').textContent=Z.broken?'🚪 Vỡ!':`🚪 ${Math.round(Z.door)}%`;$('#zD').classList.toggle('bad',Z.broken||Z.door<35);
   const nin=Z.ent|0;$('#zN').textContent=`🧟 Lọt vào ${nin}/3`;$('#zN').classList.toggle('bad',nin>=2);const me=ME.id&&byId(ME.id);const inf=me&&me._zInf;
-  ZHUD.classList.toggle('dis',!!inf||!me);$('#zHint').textContent=inf?'🧟 Bạn đã bị nhiễm — chờ đồng nghiệp xịt sát khuẩn cứu nha!':!me?'Chọn nhân vật để tham gia chống dịch':'Chạm vào zombie để xịt thuốc · Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 · Quá 3 zombie lọt vào là thua';}
+  ZHUD.classList.toggle('dis',!!inf||!me);$('#zHint').textContent=inf?'🧟 Bạn đã bị nhiễm — chờ đồng nghiệp xịt sát khuẩn cứu nha!':!me?'Chọn nhân vật để tham gia chống dịch':'Chạm vào zombie để xịt thuốc · Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 · 3 zombie vào giữa văn phòng là thua';}
 // chạm vào zombie (hoặc đồng nghiệp bị nhiễm) để xịt
 {const o=tap;tap=e=>{if(Z&&!Z.end){const me=ME.id&&byId(ME.id);if(zCanAct(me)){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
       const L=zActive().map(g=>g.hit).concat(CHARS.filter(c=>c._zInf&&c!==me).map(c=>c.hit));const h=ray.intersectObjects(L,false)[0];if(h){const t=h.object.userData.char;run('zspray',me,{v:t.id});return;}}}return o(e);};}
@@ -5976,12 +5978,12 @@ function zTick(){zFxTick();if(!Z)return;const t=simTime;
   ZLABG.sc.material.color.setHSL(.36,.6,.45+Math.sin(t*4)*.08);}
 {const o=scrTick;scrTick=(...a)=>{try{zTick();}catch(e){}return o(...a);};}
 // ---------- NPC chống dịch ----------
-function zNpc(k){zHere().forEach((c,i)=>{if(isHuman(c)||c._zInf||c._zGo)return;const r=srand(hashStr(Z.key+c.id+k));const ins=zActive().filter(g=>g._state==='in'),out=zActive().filter(g=>g._state==='bang');
+function zNpc(k){zHere().forEach((c,i)=>{if(isHuman(c)||c._zInf||c._zGo||c._zDrag)return;const r=srand(hashStr(Z.key+c.id+k));const ins=zActive().filter(g=>g._state==='in'),out=zActive().filter(g=>g._state==='bang');
   if(!c._zMask&&Z.broken&&r()<.12){zMaskOn(c,true);c.think('😷',1.4);return;}
   if(ins.length&&r()<.5){const g=ins.sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z))[0];if(Math.hypot(g.pos.x-c.pos.x,g.pos.z-c.pos.z)>4.5){c._zGo=true;Promise.race([c.goStand({x:g.pos.x+1.2,z:g.pos.z}),wait(2)]).then(()=>c._zGo=false);}else zSpray(c,g.id);return;}
   const inf=CHARS.find(x=>x._zInf&&Math.hypot(x.pos.x-c.pos.x,x.pos.z-c.pos.z)<5);if(inf&&r()<.6){zSpray(c,inf.id);return;}
   if(!Z.broken&&Z.door<70&&r()<.35){zBlock(c);return;}if(Z.broken&&r()<.2){zBlock(c);return;}
-  if(out.length&&r()<.22&&Math.hypot(c.pos.x-11,c.pos.z-EXIT.in.z)<4.5)zSpray(c,out[Math.floor(r()*out.length)].id);
+  if(out.length&&r()<.2)zSpray(c,out[Math.floor(r()*out.length)].id);
   else if(r()<.25)c.say(pick(['Zombie bên ngoài kìa! 😱','Giữ chặt cửa nha mọi người! 💺','Ai có bình xịt không? 🧴']),2);});}
 // ---------- sự kiện chính ----------
 function zombieStart(v){if(EV.zombie){setStatus('🧟 Đại dịch đang diễn ra rồi!');return false;}if(evBusy()||danceRunning||meetingOn){setStatus('⏳ Đợi xong hoạt động hiện tại đã nhé!');return false;}if(zHere().length<2){setStatus('🧟 Cần ít nhất 2 người trong văn phòng.');return false;}
@@ -5990,10 +5992,10 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:100,vax:0,broken:fa
   const crew=zHere().filter(c=>!isHuman(c));
   try{stage.classList.add('zmb-on');ZBAR.visible=true;ZHUD.classList.add('show');
     thPop('☣️','DỊCH BỆNH BÙNG PHÁT!','Người bên ngoài đang biến thành zombie! Chặn cửa, xịt thuốc trị bệnh cho zombie trở lại bình thường!','bad');beep(false);zSnd('groan');
-    banner('☣️','Đại dịch zombie!','Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 KPI · Quá 3 zombie lọt vào văn phòng là thua',null,'boss');setTimeout(()=>{if(Z&&/zombie/i.test(evBanT.textContent))bannerOff();},7000);
-    setStatus('☣️ Dịch bệnh bùng phát! Zombie đang kéo tới — chặn cửa, xịt thuốc trị bệnh, đeo khẩu trang. Quá 3 zombie lọt vào văn phòng là thua!');
+    banner('☣️','Đại dịch zombie!','Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 KPI · 3 zombie vào tới giữa văn phòng là thua',null,'boss');setTimeout(()=>{if(Z&&/zombie/i.test(evBanT.textContent))bannerOff();},7000);
+    setStatus('☣️ Dịch bệnh bùng phát! Zombie đang kéo tới — chặn cửa, xịt thuốc trị bệnh, đeo khẩu trang. 3 zombie vào tới giữa văn phòng là thua!');
     crew.forEach((c,i)=>{if(!c.busy)begin(c,'🛡️ Chống zombie');c.think(pick(['😱','😨','🫣']),2);zSprayProp(c).visible=true;});if(typeof CAT!=='undefined'&&CAT.think)CAT.think('🙀',3);
-    const W=[[0,[1,2,3]],[25,[4,5,6,1]],[55,[0,2,3]]];let wi=0,k=0,lastNpc=-1;
+    const W=[[0,[1,2,3,4,5]],[25,[6,7,8,9,10,11]],[55,[0,12,13,2,3]]];let wi=0,k=0,lastNpc=-1;
     while(!Z.end){const el=simTime-Z.t0;
       if(!CAT_HOST){if(Z.result){Z.end=true;break;}if(simTime-Z.t0>160){Z.result='time';Z.end=true;break;}zHud();await wait(.25);continue;}
       while(wi<W.length&&el>=W[wi][0]){const [,ids]=W[wi];ids.forEach((id,j)=>{const g=ZPOOL[id];if(g._state==='idle')zSpawn(g,wi*10+j);else{const alt=ZPOOL.find(x=>x._state==='idle'&&x!==ZPOOL[0]);if(alt)zSpawn(alt,wi*10+j);}});
@@ -6003,7 +6005,7 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:100,vax:0,broken:fa
       const tick=Math.floor(el/1.5);if(tick!==lastNpc){lastNpc=tick;zNpc(tick);}
       if(Math.floor(el)%6===0&&Math.floor(el)!==Z.gT&&zActive().length){Z.gT=Math.floor(el);const g=pick(zActive());g.say(pick(['Grừ… 🧠','Grààà…','Khò khè… 🧟']),1.4);zSnd('groan');}
       const here=zHere(),inf=here.filter(c=>c._zInf).length;
-      const nin=zActive().filter(g=>g._state==='in').length;let res=null;if((Z.ent|0)>3)res='lost';else if(Z.win)res=Z.win;else if(el>=90||(wi>=W.length&&!zActive().length&&!CHARS.some(c=>c._zInf)))res='time';
+      const nin=zActive().filter(g=>g._state==='in').length;let res=null;if((Z.ent|0)>=3)res='lost';else if(Z.win)res=Z.win;else if(el>=90||(wi>=W.length&&!zActive().length&&!CHARS.some(c=>c._zInf)))res='time';
       if(res){zPush();run('zend',null,{v:res+'|'+(Z.vaxBy?Z.vaxBy.id:'')});if(!Z.result)zEnd(res+'|'+(Z.vaxBy?Z.vaxBy.id:''));Z.end=true;break;}
       zHud();await wait(.25);k++;}
     ZHUD.classList.remove('show');Z.lost=Z.result==='lost';
@@ -6015,13 +6017,14 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:100,vax:0,broken:fa
     CHARS.forEach(c=>{if(c._zInf)zHeal(c);if(c._zMask)zMaskOn(c,false);if(c._zSp)c._zSp.visible=false;c._zGo=false;});
     crew.forEach(c=>{if(c.busy&&/Chống zombie|nhiễm zombie/.test(c.activity||''))end(c,'standing');});
     ZPOOL.forEach(g=>{if(g._state!=='idle'&&g._state!=='cured'){g.root.visible=false;g._state='idle';g.path=[];}g.tagEl.style.display='none';});DOC.root.visible=false;DOC.tagEl.style.display='none';NUR.root.visible=false;NUR.tagEl.style.display='none';}}
-async function zDoctor(){setStatus('☣️ Hơn 3 zombie đã tràn vào văn phòng! Bác sĩ và y tá đang tới cứu mọi người…');
+async function zDoctor(){setStatus('☣️ 3 zombie đã vào tới giữa văn phòng! Bác sĩ và y tá đang tới cứu mọi người…');
   zActive().forEach(g=>{g._state='held';g.path=[];g.walking=false;});await wait(2.2);
   const D=DOC,N=NUR;D.pos.set(EXIT.out.x,0,EXIT.out.z);D.yaw=-PI/2;D.root.visible=true;D.spd=2.2;zSprayProp(D).visible=true;D.arms='cup';
   N.pos.set(EXIT.out.x,0,EXIT.out.z+.8);N.yaw=-PI/2;N.root.visible=true;N.spd=2.2;zSprayProp(N).visible=true;N.arms='cup';
   await doorIn();await Promise.all([walkDirect(D,[{x:12.5,z:EXIT.in.z},EXIT.in]),walkDirect(N,[{x:12.5,z:EXIT.in.z+.8},{x:EXIT.in.x,z:EXIT.in.z+.8}])]);D.say('Bác sĩ tới rồi! Mọi người bình tĩnh nha 👩‍⚕️',2.2);N.say('Y tá đây, xịt thuốc cho mọi người nha! 🧴',2.2);
   const list=CHARS.filter(c=>c._zInf).concat(ZPOOL.filter(g=>g._state==='held'));
   for(const [i,t] of list.entries()){const H=i%2?N:D;if(t.pos.x<12)await Promise.race([H.goStand({x:t.pos.x+.9,z:t.pos.z}),wait(3)]);zFace(H,t.pos);zMist(zHandPos(H),new THREE.Vector3(t.pos.x,1,t.pos.z),'#b2f2bb');zSnd('pssh');await wait(.5);if(t._zInf)zHeal(t);else{t._state='bang';zCure(t);}}
+  zActive().filter(g=>g._state==='bang'||g._state==='out').forEach(g=>zCure(g));
   thPop('☣️','Văn phòng thất thủ!','Bác sĩ và y tá đã vào cứu chữa, cả văn phòng đã an toàn 💚 Lần sau nhớ giữ chặt cửa nha!','bad');setStatus('☣️ Văn phòng thất thủ! Bác sĩ và y tá đã chữa khỏi cho cả văn phòng.');
   zHere().forEach(c=>{c.think('🙏',1.6);});await wait(1.5);await Promise.race([D.goStand(EXIT.in),wait(8)]);await Promise.all([walkDirect(D,[{x:12.5,z:EXIT.in.z},EXIT.out]),walkDirect(N,[{x:12.5,z:EXIT.in.z+.8},{x:EXIT.out.x,z:EXIT.out.z+.8}])]);doorOut();D.root.visible=false;N.root.visible=false;N.tagEl.style.display='none';}
 // ngẫu nhiên: thỉnh thoảng có đại dịch
@@ -6040,7 +6043,7 @@ function zSnap(){if(!Z)return null;return{k:Z.key,d:Math.round(Z.door),v:Math.ro
 function zMoveTo(c,x,z,outside){const d=Math.hypot(c.pos.x-x,c.pos.z-z);if(d<.25)return;if(d>3.2){c.path=[];c.walking=false;c.pos.set(x,c.pos.y,z);return;}
   if(outside||c.pos.x>11.9||x>11.9){c.path=[{x,z}];c.walking=true;return;}if(c._zW)return;c._zW=true;Promise.race([c.walkTo(x,z),wait(1.6)]).catch(()=>{}).finally(()=>{c._zW=false;});}
 function zApply(s){if(!Z||CAT_HOST||!s||s.k!==Z.key||Z.end)return;Z.vax=s.v;Z.ent=s.e|0;
-  if(s.b&&!Z.broken){Z.broken=true;ZBAR.visible=false;doorIn();setStatus('💥 Zombie đã phá rào chắn! Xịt thuốc ngay — quá 3 zombie lọt vào là thua!');}
+  if(s.b&&!Z.broken){Z.broken=true;ZBAR.visible=false;doorIn();setStatus('💥 Zombie đã phá rào chắn! Xịt thuốc ngay — 3 zombie vào tới giữa văn phòng là thua!');}
   else if(!s.b&&Z.broken){Z.broken=false;ZBAR.visible=true;doorOut();}Z.door=s.d;
   const seen=new Set();s.g.forEach(([id,st,hp,x,z])=>{const g=ZPOOL.find(q=>q.id===id);if(!g)return;seen.add(g);const S=ZST_R[st]||'idle';
     if(g._state==='idle'&&S!=='idle'&&S!=='cured'){g._boss=g===ZPOOL[0];g._hp=hp;g._zm.color.set(ZSK);g.mLeg.color.set(ZLEG);g.arms='hold';g.spd=g._boss?.55:.7;g.pos.set(x,0,z);g.yaw=-PI/2;g.root.visible=true;g.lookAt=null;}
