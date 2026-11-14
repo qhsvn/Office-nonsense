@@ -4345,7 +4345,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
   if(n==='argue')return runArgue(c);
   if(n==='tod')return todSet(v);
   if(n==='thief')return thiefStart(v);
-  if(n==='thiefcall')return thiefCall(c);
+  if(n==='thiefcall')return thiefCall(c,v);
   if(n==='beachdo')return beachDo(c,v);
   if(n==='bwear')return bwearSet(c,v);
   if(n==='jtsched')return jtSched(v);
@@ -5783,7 +5783,12 @@ function thTick(){const T=THIEF;if(T._escort&&T.root.visible){const y=T.root.rot
 let TH=null;
 function thiefStart(v){if(EV.thief){setStatus('🦹 Đang có trộm trong văn phòng rồi!');return false;}if(evBusy()||danceRunning||meetingOn){setStatus('⏳ Đợi xong hoạt động hiện tại đã nhé!');return false;}
   guard(()=>actThief(v),[]);return true;}
-function thiefCall(c){if(!EV.thief||!TH||!TH.open||TH.called||!c)return false;TH.called=c;TH.open=false;
+// ai bấm trước (theo giờ bấm) thắng; nếu 2 người bấm gần như cùng lúc, mọi máy đều chọn cùng 1 người (bấm sớm hơn, trùng giờ thì theo mã nhân vật)
+function thiefCall(c,v){if(!EV.thief||!TH||!c)return false;const t=+v||Date.now();
+  if(TH.called){const P=TH.called;if(c===P||Date.now()-TH.callAt>5000||!(t<TH.callT||(t===TH.callT&&c.id<P.id)))return false;
+    addKpi(P,-2,'Người khác đã báo cảnh sát trước');TH.called=c;TH.callT=t;addKpi(c,2,KPI_WHY.thiefcall);
+    thPop('👮',`Cảm ơn ${c.name} đã báo cảnh sát kịp thời!`,'+2 KPI · Cảnh sát đang tới, còi hú ò e ò e…','ok');setStatus(`📞 ${c.name} đã báo cảnh sát trước! +2 KPI. Cảnh sát đang tới…`);return true;}
+  if(!TH.open)return false;TH.called=c;TH.callT=t;TH.callAt=Date.now();TH.open=false;bannerOff();
   addKpi(c,2,KPI_WHY.thiefcall);const kp=' · +2 KPI';c.think('📞',1.8);c.say('A lô 113! Văn phòng em có trộm, tới ngay giúp em! 📞',2.6);
   thPop('👮',`Cảm ơn ${c.name} đã báo cảnh sát kịp thời!`,'+2 KPI · Cảnh sát đang tới, còi hú ò e ò e…','ok');
   banner('🚓','Cảnh sát đang tới!',`${c.name} đã gọi 113${kp}`,null,'boss');setStatus(`📞 ${c.name} đã báo cảnh sát kịp thời!${kp} Cảnh sát đang tới…`);thSiren(true);return true;}
@@ -5795,7 +5800,7 @@ async function actThief(v){
     // báo động cho mọi người
     TH.open=true;beep(false);
     const me=ME.id&&byId(ME.id),can=thCanCall(me);
-    banner('🚨','CÓ TRỘM ĐỘT NHẬP!',can?'Bấm báo cảnh sát ngay — người báo đầu tiên được +2 KPI!':'Bạn không ở văn phòng nên không báo được…',can?{t:'📞 Báo cảnh sát',f:()=>{const m=ME.id&&byId(ME.id);if(m&&thCanCall(m))run('thiefcall',m);}}:null,'boss');
+    banner('🚨','CÓ TRỘM ĐỘT NHẬP!',can?'Bấm báo cảnh sát ngay — người báo đầu tiên được +2 KPI!':'Bạn không ở văn phòng nên không báo được…',can?{t:'📞 Báo cảnh sát',f:()=>{const m=ME.id&&byId(ME.id);if(m&&thCanCall(m)&&TH&&TH.open&&!TH.called)run('thiefcall',m,{v:String(Date.now())});}}:null,'boss');
     setStatus('🚨 Có trộm đột nhập văn phòng! Ai báo cảnh sát đầu tiên được +2 KPI — không ai báo thì cả phòng bị trừ 1 KPI!');
     present().forEach((c,i)=>{if(!thCanCall(c))return;wait(.2+i*.15).then(()=>{c.lookAt=T;c.think(pick(['😱','😨','🫣']),2);if(!isHuman(c)&&i%2===0)c.say(pick(['Trộm! Trộm! 😱','Ai đó báo cảnh sát đi! 😨','Ối có người lạ! 🫣']),2.2);});});
     const walk=(async()=>{await T.goStand(TH_DESK);if(TH.called)return;T.yaw=PI/2;T.arms='hold';T.think('🤫',1.4);await wait(1.2);if(TH.called)return;
