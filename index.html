@@ -5770,8 +5770,8 @@ let TH=null;
 function thiefStart(v){if(EV.thief){setStatus('🦹 Đang có trộm trong văn phòng rồi!');return false;}if(evBusy()||danceRunning||meetingOn){setStatus('⏳ Đợi xong hoạt động hiện tại đã nhé!');return false;}
   guard(()=>actThief(v),[]);return true;}
 function thiefCall(c){if(!EV.thief||!TH||!TH.open||TH.called||!c)return false;TH.called=c;TH.open=false;
-  addKpi(c,2,KPI_WHY.thiefcall);const kp=c.manager?'':' · +2 KPI';c.think('📞',1.8);c.say('A lô 113! Văn phòng em có trộm, tới ngay giúp em! 📞',2.6);
-  thPop('👮',`Cảm ơn ${c.name} đã báo cảnh sát kịp thời!`,(c.manager?'':'+2 KPI · ')+'Cảnh sát đang tới, còi hú ò e ò e…','ok');
+  addKpi(c,2,KPI_WHY.thiefcall);const kp=' · +2 KPI';c.think('📞',1.8);c.say('A lô 113! Văn phòng em có trộm, tới ngay giúp em! 📞',2.6);
+  thPop('👮',`Cảm ơn ${c.name} đã báo cảnh sát kịp thời!`,'+2 KPI · Cảnh sát đang tới, còi hú ò e ò e…','ok');
   banner('🚓','Cảnh sát đang tới!',`${c.name} đã gọi 113${kp}`,null,'boss');setStatus(`📞 ${c.name} đã báo cảnh sát kịp thời!${kp} Cảnh sát đang tới…`);thSiren(true);return true;}
 async function actThief(v){
   const T=THIEF;TH={open:false,called:null,stolen:false};EV.thief=TH;EV.lastThief=simTime;
