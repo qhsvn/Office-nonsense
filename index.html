@@ -742,7 +742,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b mint" data-cmd="report">📄 Báo cáo sếp</button>
           <button class="b mint" data-cmd="print">🖨️ In tài liệu</button>
           <button class="b mint" data-cmd="phone">📞 Gọi điện</button>
-          <button class="b mint" data-cmd="meetroom">🚪 Vào phòng họp</button>
+          
           <button class="b mint" data-cmd="clean">🧽 Dọn bàn</button>
           <button class="b mint" data-cmd="sweep">🧹 Quét văn phòng</button>
           <button class="b mint" data-cmd="partner">💼 Gặp đối tác</button>
@@ -6286,6 +6286,8 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
   if(CAMF&&!camAnim&&!window.__altScene){const me=ME.id&&byId(ME.id);if(me&&me.root.visible){const k=1-Math.exp(-dt*3.5);
     const d=new THREE.Vector3(me.pos.x-controls.target.x,.7-controls.target.y,me.pos.z-controls.target.z).multiplyScalar(k);controls.target.add(d);camera.position.add(d);}}
   return o(...a);};}
+// nút Cãi sếp không hiện khi đang chọn quản lý
+{let lastSel=null;const o=updateOverlay;updateOverlay=(...a)=>{const c=selected||null;if(c!==lastSel){lastSel=c;const b=document.querySelector('[data-cmd="argue"]');if(b)b.style.display=(c&&(c===MGR||c.manager))?'none':'';}return o(...a);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
