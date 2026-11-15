@@ -6289,6 +6289,13 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
   return o(...a);};}
 // nút Cãi sếp không hiện khi đang chọn quản lý
 {let lastSel=null;const o=updateOverlay;updateOverlay=(...a)=>{const c=selected||null;if(c!==lastSel){lastSel=c;const b=document.querySelector('[data-cmd="argue"]');if(b)b.style.display=(c&&(c===MGR||c.manager))?'none':'';}return o(...a);};}
+// người chơi làm xong một hoạt động thì đứng yên tại chỗ chờ lệnh tiếp, không tự về bàn (NPC vẫn về chỗ như cũ)
+{const RR=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/,KEEP=/^(🚶|💺) Về chỗ ngồi$/;
+  const o=Chibi.prototype.goSit;Chibi.prototype.goSit=function(seat){
+    if(seat===this.home&&isHuman(this)&&this.busy&&!this.leavingNow&&!this.away&&RR.test(this.activity||'')&&!KEEP.test(this.activity||'')&&!(Z&&!Z.end)){
+      this._stayEnd=true;this.path=[];if(this.pose==='sit'&&this.standUp)this.standUp();return Promise.resolve();}
+    return o.call(this,seat);};
+  const oe=end;end=(c,mode)=>{if(c&&c._stayEnd){c._stayEnd=false;if(mode==='working'||mode==='seated')mode='standing';}return oe(c,mode);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
