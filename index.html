@@ -5974,8 +5974,8 @@ function zBlock(c){if(!zCanAct(c))return false;if(c._zDrag)return false;if(Z.bro
     await wait(15);if(c._zInf)return;
     if(CAT_HOST&&Z&&!Z.end&&!Z.broken){const was=Z.door;Z.door=Math.min(100,Z.door+(was<=0?100:30));if(was<=0){Z.built=true;zDoorRebuilt();zPush();}}
     c.think('💺',1.2);
-    if(c.home&&!c._zInf){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await c.goSit(c.home);}
-  }finally{c._zDrag=false;if(/Kéo bàn|Quay về chỗ/.test(c.activity||''))end(c,c.home?'working':'standing');zHud();}})();
+    if(c.home&&!c._zInf&&!isHuman(c)){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await c.goSit(c.home);}
+  }finally{c._zDrag=false;if(/Kéo bàn|Quay về chỗ/.test(c.activity||''))end(c,c.home&&!isHuman(c)?'working':'standing');zHud();}})();
   return true;}
 function zMask(c){if(!zCanAct(c))return false;if(simTime-(c._zMcd||0)<2)return false;c._zMcd=simTime;
   const list=[c].concat(zHere().filter(x=>x!==c&&!x._zMask&&!x._zInf).sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z)).slice(0,2));
