@@ -6037,10 +6037,9 @@ function zHud(){if(!Z)return;const rd=Z.rd||1,left=Math.max(0,Math.ceil((Z.rlen|
 // chạm vào zombie (hoặc đồng nghiệp bị nhiễm) để xịt
 {const o=tap;tap=e=>{if(Z&&!Z.end){const me=ME.id&&byId(ME.id);if(me&&me._zInf)return;if(zCanAct(me)){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
       const L=zActive().concat(CHARS.filter(c=>c._zInf&&c!==me));const h=ray.intersectObjects(L.map(c=>c.hit),false)[0];let t=h&&h.object.userData.char;
-      if(!t){const W=r.width,H=r.height,px=e.clientX-r.left,py=e.clientY-r.top,v=new THREE.Vector3();let best=Math.max(46,W*.09);
+      if(!t){const W=r.width,H=r.height,px=e.clientX-r.left,py=e.clientY-r.top,v=new THREE.Vector3();let best=Math.max(34,W*.06);
         L.forEach(c=>{v.copy(zAimPt(c));v.project(camera);if(v.z>1)return;const d=Math.hypot((v.x+1)/2*W-px,(1-v.y)/2*H-py);if(d<best){best=d;t=c;}});}
-      if(t){run('zspray',me,{v:t.id});return;}
-      setStatus('👆 Chạm trúng vào zombie để bắn thuốc nha!');return;}}return o(e);};}
+      if(t){run('zspray',me,{v:t.id});return;}}}return o(e);};}
 // tên + bong bóng thoại cho zombie / bác sĩ
 {const o=updateOverlay;const v=new THREE.Vector3();updateOverlay=()=>{o();if(!Z)return;const w=stage.clientWidth,h=stage.clientHeight;
   ZPOOL.concat([DOC]).forEach(b=>{if(!b.root.visible){b.tagEl.style.display='none';return;}b.head.getWorldPosition(v);v.y+=b._boss?.8:.5;v.project(camera);const x=(v.x+1)/2*w,y=(1-v.y)/2*h,vis=v.z<1&&x>-60&&x<w+60&&y>-40&&y<h+90;b.tagEl.style.display=vis?'flex':'none';if(!vis)return;
