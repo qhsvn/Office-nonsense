@@ -588,6 +588,10 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .mddl label{text-align:left;justify-content:flex-start}.mddl label span{text-align:left}
 #bpDone{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff}#bpDone:disabled{background:#eef1f8;color:#8a94a8}
 .bchips.need .mddb{border-color:#ff8787;background:#fff5f5;color:#e03131}
+.mpopts{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px}
+.mpopts button{font:inherit;text-align:left;border:2px solid #e3e9f4;background:#f8fbff;border-radius:14px;padding:11px 12px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;gap:2px}
+.mpopts button b{font-size:14.5px}.mpopts button small{font-size:12px;color:var(--muted)}
+.mpopts button:active{transform:scale(.98)}.mpopts button:hover{border-color:#8fd0ff;background:#eef8ff}
 </style>
 </head>
 <body>
@@ -679,8 +683,8 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
         <button type="button" class="rulesbtn" id="rulesBtn" style="margin:0 0 8px">💡 Lưu ý khi tham gia & cách tránh bị trừ KPI</button>
         <div class="grid3">
           <button class="b pink big" data-cmd="dance">💃 Nhảy múa xả stress<small>Cả team quẩy giữa văn phòng</small></button>
-          <button class="b pink big" data-cmd="meeting">🤝 Họp nhóm<small>Cả team vào phòng họp ngay</small></button>
-          <button class="b pink big" data-cmd="invite">📅 Mời họp<small>Hẹn giờ, mọi người đồng ý là vào họp</small></button>
+          <button class="b pink big" type="button" id="meetPickBtn">🤝 Họp nhóm<small>Họp ngay hoặc hẹn giờ mời họp</small></button><button style="display:none" class="b pink big" data-cmd="meeting">🤝 Họp nhóm<small>Cả team vào phòng họp ngay</small></button>
+          <button style="display:none" class="b pink big" data-cmd="invite">📅 Mời họp<small>Hẹn giờ, mọi người đồng ý là vào họp</small></button>
           <button class="b pink big" data-cmd="lunch">🍱 Ăn trưa<small>Ra góc ăn trưa</small></button>
           <button class="b pink big" data-cmd="birthday">🎂 Sinh nhật<small>Người đang chọn / ngẫu nhiên</small></button>
           <button class="b pink big" data-cmd="break">☕ Giải lao<small>Cà phê cùng nhau</small></button>
@@ -694,7 +698,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b pink big" data-cmd="boss">👨‍💼 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
           <button class="b pink big" data-cmd="incident">💥 Sự cố<small>Mất điện, kẹt giấy, Mochi phá…</small></button>
           <button class="b pink big" data-cmd="zombie">🧟 Đại dịch zombie<small>Chặn cửa, xịt thuốc trị bệnh cho zombie</small></button>
-          <button class="b pink big" data-cmd="thief">🦹 Trộm đột nhập<small>Báo đầu tiên +2 KPI · không ai báo cả phòng −1</small></button>
+          <button class="b pink big" data-cmd="thief">🦹 Trộm đột nhập<small>Kẻ gian lẻn vào lấy chứng từ mật</small></button>
           <button class="b pink big" data-cmd="trip">🚌 Team building<small>Cả team đi du lịch, gắn kết</small></button>
           <button class="b pink big" data-cmd="jobtest">📝 Job Test<small>Quản lý gửi thư hẹn ngày thi</small></button>
         </div>
@@ -6239,6 +6243,12 @@ function zEnd(v){if(!Z)return true;const [res,by]=String(v||'').split('|');if(Z.
 {const o=peerState;peerState=st=>{try{if(st&&st.z)zApply(st.z);}catch(e){}return o(st);};}
 setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.peerState=peerState;}},0);
 window.__zdbg={beams:()=>ZBM.length,inf:id=>zInfect(byId(id)),snap:()=>zSnap(),apply:s=>zApply(s),host:v=>{CAT_HOST=v;},Z:()=>Z,end:v=>zEnd(v)};
+// Họp nhóm + Mời họp gộp chung 1 nút: bấm vào chọn họp ngay hoặc hẹn giờ
+{const M=document.createElement('div');M.id='meetPick';M.className='welcome';M.setAttribute('role','dialog');
+  M.innerHTML='<div class="wcard mcardm"><div class="wlogo">🤝</div><h2>Họp nhóm</h2><p class="wsub">Bạn muốn họp ngay hay hẹn giờ mời mọi người?</p><div class="mpopts"><button type="button" data-m="meeting"><b>🤝 Họp ngay</b><small>Cả team vào phòng họp ngay</small></button><button type="button" data-m="invite"><b>📅 Hẹn giờ mời họp</b><small>Mọi người đồng ý là vào họp</small></button></div><div class="crow"><button type="button" class="cghost" data-m="x">Hủy</button></div></div>';
+  document.body.appendChild(M);
+  M.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{M.classList.remove('show');const k=b.dataset.m;if(k==='x')return;const t=document.querySelector('[data-cmd="'+k+'"]');t&&t.click();});
+  const btn=document.getElementById('meetPickBtn');if(btn)btn.onclick=()=>M.classList.add('show');}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
