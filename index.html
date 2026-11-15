@@ -5944,7 +5944,7 @@ function zSpray(c,v){if(!zCanAct(c))return false;const t=zByIdAny(v);if(!t)retur
   const a=zHandPos(c),b=new THREE.Vector3(t.pos.x,1,t.pos.z);zMist(a,b);zSnd('pssh');
   if(CAT_HOST){Z.fxN=(Z.fxN||0)+1;(Z.fx=Z.fx||[]).push([Z.fxN,c.id,t.id]);if(Z.fx.length>10)Z.fx.shift();}
   if(t._zInf){t._zInf.hp--;t.think('💦',1);if(t._zInf.hp<=0&&CAT_HOST){zHeal(t);addKpi(c,1,KPI_WHY.zcure);c.think('💪',1.2);}return true;}
-  t._hp=Math.max(0,t._hp-1);t.think('💦',1);zTagName(t);if(t._hp<=0&&CAT_HOST){const wasBoss=t._boss;zCure(t);addKpi(c,wasBoss?3:1,KPI_WHY.zcure);c.think('💪',1.2);if(wasBoss){Z.win='win';Z.bossBy=c.id;}if(isHuman(c))setStatus(wasBoss?`👑 ${c.name} đã hạ gục Zombie Chúa!`:`🧴 ${c.name} đã chữa khỏi một zombie!`);}return true;}
+  t._hp=Math.max(0,t._hp-1);t.think('💦',1);zTagName(t);if(t._hp<=0&&CAT_HOST){const wasBoss=t._boss;zCure(t);if(!wasBoss)addKpi(c,1,KPI_WHY.zcure);c.think('💪',1.2);if(wasBoss){Z.win='win';Z.bossBy=c.id;}if(isHuman(c))setStatus(wasBoss?`👑 ${c.name} đã hạ gục Zombie Chúa!`:`🧴 ${c.name} đã chữa khỏi một zombie!`);}return true;}
 function zBlock(c){if(!zCanAct(c))return false;if(c._zDrag)return false;if(Z.broken){if(isHuman(c))setStatus('💥 Cửa đã vỡ rồi, không chặn lại được nữa — xịt thuốc ngay!');return false;}
   if(!isHuman(c)&&CHARS.filter(x=>!isHuman(x)&&x!==c&&x._zDrag).length>=2)return false;
   c._zDrag=true;if(isHuman(c))setStatus('💺 Đang kéo bàn chặn cửa… mất 15 giây!');
