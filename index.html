@@ -5888,7 +5888,7 @@ const ZPOOL=[...Array(14)].map((_,k)=>{const boss=k===0;
   // áo rách, vết máu
   for(let q=0;q<5;q++){const p=zAdd(BD,new THREE.BoxGeometry(.07+q%2*.04,.05+q%3*.02,.01),ZB(q%2?'#6b0f12':'#24201c'),[-.09,.06,-.02,.1,-.07][q],[.08,.15,.24,.03,.2][q],.152);p.rotation.z=q*.7;p.castShadow=false;}
   // khói độc dưới chân
-  g._zFog=[];for(let q=0;q<5;q++){const f=zAdd(D,new THREE.SphereGeometry(.13,8,6),ZT(boss?'#9c36b5':'#74b816',{opacity:.25}),0,.1,0);f.castShadow=false;f.userData.ph=q/5;g._zFog.push(f);}
+  g._zFog=[];for(let q=0;q<3;q++){const f=zAdd(D,new THREE.SphereGeometry(.13,6,4),ZT(boss?'#9c36b5':'#74b816',{opacity:.25}),0,.1,0);f.castShadow=false;f.userData.ph=q/3;g._zFog.push(f);}
   if(boss){g.root.scale.setScalar(1.6);
     // vương miện gai
     const cr=new THREE.Group();cr.position.y=R*.95;HD.add(cr);zAdd(cr,new THREE.CylinderGeometry(R*.62,R*.66,.09,18,1,true),ZM('#c9a227',{roughness:.35,metalness:.6,side:THREE.DoubleSide}),0,0,0);
@@ -6123,6 +6123,10 @@ async function zDoctor(){const big=Z.rd===2,who=big?'Đội 5 bác sĩ và y tá
   zHere().forEach(c=>{c.think('🙏',1.6);});await wait(1.5);
   await Promise.all(T.map((H,i)=>Promise.race([H.goStand({x:EXIT.in.x-(i>>1)*.6,z:EXIT.in.z+(i%3-1)*.6}),wait(8)]).then(()=>walkDirect(H,[{x:12.5,z:EXIT.in.z+(i%3-1)*.6},{x:EXIT.out.x+(i>>1)*.5,z:EXIT.out.z+(i%3-1)*.6}]))));
   doorOut();T.forEach(H=>{H.root.visible=false;H.tagEl.style.display='none';});}
+// đang có zombie / trộm: quản lý không tự đi trao bằng khen hay đi nhắc nhở (nhất là khi người chơi đang điều khiển quản lý)
+{const o=autoTick;autoTick=(...a)=>{if(EV.zombie||EV.thief)return;return o(...a);};}
+{const o=promoTick;promoTick=(...a)=>{if(EV.zombie||EV.thief)return;return o(...a);};}
+{const o=scold;scold=async(...a)=>{if(EV.zombie||EV.thief)return false;return o(...a);};}
 // ngẫu nhiên: thỉnh thoảng có đại dịch
 {const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!danceRunning&&!meetingOn&&zHere().length>=2&&simTime-(EV.lastZombie||-1e9)>900&&Math.random()<.12){EV.nextRand=simTime+rand(150,280);run('zombie',null,{v:Math.random().toString(36).slice(2,7)});return;}return o();};}
 EVCMD.zombie=()=>run('zombie',null,{v:Math.random().toString(36).slice(2,7)});
