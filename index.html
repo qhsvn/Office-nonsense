@@ -5940,10 +5940,11 @@ function zShoot(c,t,col){c.lookAt=null;c._zAim=t;c._zAimT=simTime;c.arms='aim';z
 function zAimArms(c){const R2=c.armR&&c.armR.g,L2=c.armL&&c.armL.g;if(R2){R2.rotation.x=-1.57;R2.rotation.z=.06;}if(L2){L2.rotation.x=-1.25;L2.rotation.z=-.32;}}
 // giữ hướng nhắm và tư thế bắn trong lúc xịt
 {const o=Chibi.prototype.update;Chibi.prototype.update=function(dt){
-  const aiming=this._zAim&&simTime-(this._zAimT||0)<.7;
-  if(aiming){const t=this._zAim;this.yaw=Math.atan2(t.pos.x-this.pos.x,t.pos.z-this.pos.z);this.lookAt=null;}
+  const aiming=this._zAim&&simTime-(this._zAimT||0)<1.1&&this._zAim.root.visible;
+  const face=()=>{const t=this._zAim;this.yaw=Math.atan2(t.pos.x-this.pos.x,t.pos.z-this.pos.z);};
+  if(aiming){face();this.lookAt=null;}
   o.call(this,dt);
-  if(aiming){this.root.rotation.y=this.yaw;zAimArms(this);}
+  if(aiming){face();this.root.rotation.y=this.yaw;zAimArms(this);}
   else if(this._zAim){this._zAim=null;if(this.arms==='aim')this.arms=this._zSp&&this._zSp.visible?'cup':'idle';}};}
 function zFxTick(){zBeamTick();ZFX=ZFX.filter(f=>{const u=(simTime-f.t0)/f.d;if(u<0)return true;if(u>=1){scene.remove(f.s);f.s.material.dispose();return false;}f.s.position.lerpVectors(f.a,f.b,u);f.s.position.y+=Math.sin(u*PI)*.15;f.s.scale.setScalar(.2+u*.45);f.s.material.opacity=1-u*.7;return true;});}
 // âm thanh: zombie gầm gừ, tiếng xịt
@@ -5974,8 +5975,9 @@ function zBlock(c){if(!zCanAct(c))return false;if(c._zDrag)return false;if(Z.bro
     await wait(15);if(c._zInf)return;
     if(CAT_HOST&&Z&&!Z.end&&!Z.broken){const was=Z.door;Z.door=Math.min(100,Z.door+(was<=0?100:30));if(was<=0){Z.built=true;zDoorRebuilt();zPush();}}
     c.think('💺',1.2);
-    if(c.home&&!c._zInf&&!isHuman(c)){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await c.goSit(c.home);}
-  }finally{c._zDrag=false;if(/Kéo bàn|Quay về chỗ/.test(c.activity||''))end(c,c.home&&!isHuman(c)?'working':'standing');zHud();}})();
+    if(isHuman(c)&&!c._zInf&&Z&&!Z.end){setAct(c,'🚶 Lùi ra khỏi cửa');await Promise.race([c.goStand({x:7.6,z:EXIT.in.z+((hashStr(c.id)%5)-2)*.7}),wait(5)]);zFace(c,{x:12,z:EXIT.in.z});}
+    else if(c.home&&!c._zInf&&!isHuman(c)){setAct(c,'🚶 Quay về chỗ');c.standUp&&c.standUp();await c.goSit(c.home);}
+  }finally{c._zDrag=false;if(/Kéo bàn|Quay về chỗ|Lùi ra/.test(c.activity||''))end(c,c.home&&!isHuman(c)?'working':'standing');zHud();}})();
   return true;}
 function zMask(c){if(!zCanAct(c))return false;if(simTime-(c._zMcd||0)<2)return false;c._zMcd=simTime;
   const list=[c].concat(zHere().filter(x=>x!==c&&!x._zMask&&!x._zInf).sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z)).slice(0,2));
