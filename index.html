@@ -3823,10 +3823,11 @@ $('#bobaGo').onclick=()=>{if(BOBA_REQ){setStatus('🥤 Đang chờ mọi ngườ
   if(!ask.length){const sk=Object.keys(picks).filter(k=>picks[k]===-1);run('boba',null,{v:(by||'-')+'|'+Object.keys(picks).filter(k=>picks[k]!==-1).map(k=>k+':'+picks[k].join('+')).join(',')+'|'+sk.join('.')});return;}
   const oid=Math.random().toString(36).slice(2,8),until=Date.now()+BOBA_WAIT;
   BOBA_REQ={oid,by:by||'-',picks,ask:new Set(ask),until};
-  run('bobaask',null,{v:`${oid}|${by||'-'}|${ask.join('.')}|${until}`});
+  BOBA_REQ.sentAt=0;bobaResend();
   BOBA_REQ.iv=setInterval(bobaWaitTick,1000);bobaWaitTick();};
 const BOBA_WAIT=30000;let BOBA_REQ=null,BOBA_ASKED=null;
-function bobaWaitTick(){const R=BOBA_REQ;if(!R)return;const left=Math.max(0,Math.ceil((R.until-Date.now())/1000));
+function bobaResend(){const R=BOBA_REQ;if(!R)return;const left=Math.max(1000,R.until-Date.now());R.sentAt=Date.now();run('bobaask',null,{v:`${R.oid}|${R.by}|${[...R.ask].join('.')}|d${left}`});}
+function bobaWaitTick(){const R=BOBA_REQ;if(!R)return;if(R.ask.size&&Date.now()-R.sentAt>4000)bobaResend();const left=Math.max(0,Math.ceil((R.until-Date.now())/1000));
   const names=[...R.ask].map(id=>byId(id)).filter(Boolean).map(c=>c.name);
   if(!names.length||left<=0){bobaFinish();return;}
   banner('🥤','Đang gom order đồ ăn vặt',`Chờ ${names.join(', ')} chọn món… còn ${left} giây`,{t:'🛵 Đặt luôn',f:()=>bobaFinish()},'boba');}
@@ -3836,22 +3837,24 @@ function bobaFinish(){const R=BOBA_REQ;if(!R)return;BOBA_REQ=null;clearInterval(
   const pk=Object.keys(R.picks).filter(k=>R.picks[k]!==-1).map(k=>k+':'+[].concat(R.picks[k]).join('+')).join(',');
   run('boba',null,{v:R.by+'|'+pk+'|'+skip.join('.')});}
 const bpEl=$('#bobaPick');let bpTimer=0;
-function bobaAsk(v){const [oid,by,askS,untilS]=String(v||'').split('|');const ask=(askS||'').split('.'),until=+untilS||Date.now()+BOBA_WAIT;
+const BOBA_DONE=new Set();
+function bobaAsk(v){const [oid,by,askS,untilS]=String(v||'').split('|');const ask=(askS||'').split('.'),us=String(untilS||''),until=us[0]==='d'?Date.now()+(+us.slice(1)||BOBA_WAIT):(+us||Date.now()+BOBA_WAIT);
   if(BOBA_REQ&&BOBA_REQ.oid===oid)return true;          // máy người đặt
+  if(BOBA_DONE.has(oid)||(BOBA_ASKED&&BOBA_ASKED.oid===oid))return true;   // đã hiện / đã trả lời lời mời này rồi (lời mời được gửi lại vài lần)
   const bc=byId(by),byName=bc?bc.name:'Đồng nghiệp';
   if(ME.id&&ask.includes(ME.id)){BOBA_ASKED={oid,until};
     $('#bpSub').textContent=`${byName} đang đặt đồ ăn vặt cho cả team. Bạn có tham gia không? Chọn món, hoặc bấm Không gọi món.`;
     const g=$('#bpGrid');g.textContent='';g.classList.add('bpdd');g.append(mddMake('d',[],bpDoneUpd),mddMake('f',[],bpDoneUpd));
     let dn=$('#bpDone');if(!dn){dn=document.createElement('button');dn.type='button';dn.id='bpDone';$('#bpSkip').parentNode.appendChild(dn);dn.onclick=()=>{const on=[...document.querySelectorAll('#bpGrid .mdd')].flatMap(mddSel);if(on.length)bobaPick(on);};}bpDoneUpd();
     bpEl.classList.add('show');clearInterval(bpTimer);
-    const tk=()=>{const left=Math.max(0,Math.ceil((until-Date.now())/1000));$('#bpLeft').textContent=`Còn ${left} giây — hết giờ người đặt sẽ chọn giúp bạn.`;if(left<=0){clearInterval(bpTimer);bpEl.classList.remove('show');BOBA_ASKED=null;}};tk();bpTimer=setInterval(tk,1000);beep(true);}
+    const tk=()=>{const left=Math.max(0,Math.ceil((until-Date.now())/1000));$('#bpLeft').textContent=`Còn ${left} giây — hết giờ người đặt sẽ chọn giúp bạn.`;if(left<=0){clearInterval(bpTimer);bpEl.classList.remove('show');if(BOBA_ASKED)BOBA_DONE.add(BOBA_ASKED.oid);BOBA_ASKED=null;}};tk();bpTimer=setInterval(tk,1000);beep(true);}
   else banner('🥤','Đang gom order đồ ăn vặt',`${byName} đang chờ mọi người chọn món…`,null,'boba');
   setTimeout(()=>{if(!EV.boba&&evBanT.textContent==='Đang gom order đồ ăn vặt')bannerOff();},until-Date.now()+15000);
   return true;}
 function bpDoneUpd(){const dn=$('#bpDone');if(!dn)return;const n=document.querySelectorAll('#bpGrid .mdd input:checked').length;dn.disabled=!n;dn.textContent=n?`✅ Xong (${n} món)`:'Chọn ít nhất 1 món';}
-function bobaPick(list){const A=BOBA_ASKED;if(!A)return;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');list=[].concat(list);
+function bobaPick(list){const A=BOBA_ASKED;if(!A)return;BOBA_ASKED=null;BOBA_DONE.add(A.oid);clearInterval(bpTimer);bpEl.classList.remove('show');list=[].concat(list);
   const c=ME.id&&byId(ME.id);if(!c)return;run('bobapick',c,{v:A.oid+':'+list.join('+')});setStatus(`🛍️ Bạn đã chọn ${list.map(i=>BOBA_MENU[i].e+' '+BOBA_MENU[i].n).join(', ')} — chờ shipper giao nhé!`);}
-$('#bpSkip').onclick=()=>{const A=BOBA_ASKED;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');const c=ME.id&&byId(ME.id);if(A&&c){run('bobapick',c,{v:A.oid+':-1'});setStatus('🙅 Bạn không gọi món lần này — nhân vật của bạn ở lại làm việc.');}};
+$('#bpSkip').onclick=()=>{const A=BOBA_ASKED;BOBA_ASKED=null;if(A)BOBA_DONE.add(A.oid);clearInterval(bpTimer);bpEl.classList.remove('show');const c=ME.id&&byId(ME.id);if(A&&c){run('bobapick',c,{v:A.oid+':-1'});setStatus('🙅 Bạn không gọi món lần này — nhân vật của bạn ở lại làm việc.');}};
 function bobaPicked(c,v){const [oid,i]=String(v||'').split(':');const R=BOBA_REQ;
   if(R&&R.oid===oid&&c&&R.ask.has(c.id)){const k=+i;R.ask.delete(c.id);if(k<0){R.picks[c.id]=-1;c.think('🙅',2);}else{R.picks[c.id]=String(i).split('+').map(x=>clamp(x|0,0,BOBA_MENU.length-1));c.think(R.picks[c.id].map(x=>BOBA_MENU[x].e).join(''),2);}setTimeout(bobaWaitTick,0);}   // chạy ngoài lượt lệnh từ xa để lệnh đặt hàng được gửi cho mọi người
   return true;}
