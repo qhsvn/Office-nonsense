@@ -587,6 +587,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .mddl label span{flex:1;min-width:0}
 .mddl label{text-align:left;justify-content:flex-start}.mddl label span{text-align:left}
 #bpDone{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff}#bpDone:disabled{background:#eef1f8;color:#8a94a8}
+.bchips.need .mddb{border-color:#ff8787;background:#fff5f5;color:#e03131}
 </style>
 </head>
 <body>
@@ -3793,7 +3794,7 @@ function openBoba(){
     const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');row.appendChild(nm);
     if(isHuman(c)&&c.id!==ME.id){const w=document.createElement('span');w.className='bwait';w.dataset.ask=c.id;w.textContent='⏳ Bạn ấy tự chọn món';row.appendChild(w);list.appendChild(row);return;}
     row.classList.add('bmulti');const ch=document.createElement('div');ch.className='bchips';ch.dataset.id=c.id;const d0=hashStr(c.id+todayKey())%BOBA_MENU.length;
-    const DR=BOBA_MENU.map((m,i)=>m.f?-1:i).filter(i=>i>=0);ch.append(mddMake('d',[DR[d0%DR.length]]),mddMake('f',[]));row.appendChild(ch);list.appendChild(row);});
+    ch.append(mddMake('d',[]),mddMake('f',[]));row.appendChild(ch);list.appendChild(row);});
   const nAsk=document.querySelectorAll('#bobaList .bwait').length;
   $('#bobaNote').textContent=nAsk?`📲 ${nAsk} người đang chơi sẽ nhận thông báo để tự chọn món (chờ tối đa ${BOBA_WAIT/1000} giây).`:'';bobaEl.classList.add('show');}
 // ô thả xuống chọn nhiều món: một ô đồ uống, một ô đồ ăn
@@ -3802,13 +3803,14 @@ function mddMake(kind,sel,onCh){const W=document.createElement('div');W.classNam
     const t=document.createElement('span');t.textContent=m.e+' '+m.n;lb.append(cb,t);L.appendChild(lb);});
   B.onclick=()=>{const op=!W.classList.contains('open');document.querySelectorAll('.mdd.open').forEach(x=>x.classList.remove('open'));W.classList.toggle('open',op);};
   W.append(B,L);mddUpd(W);return W;}
-function mddUpd(W){const on=mddSel(W).map(i=>BOBA_MENU[i]);W.querySelector('.mddb').textContent=(W.dataset.k==='f'?'🍔 Đồ ăn: ':'🥤 Đồ uống: ')+(on.length?on.map(m=>m.e+' '+m.n).join(', '):'Không chọn')+' ▾';W.classList.toggle('has',!!on.length);}
+function mddUpd(W){const on=mddSel(W).map(i=>BOBA_MENU[i]);W.querySelector('.mddb').textContent=(W.dataset.k==='f'?'🍔 Đồ ăn: ':'🥤 Đồ uống: ')+(on.length?on.map(m=>m.e+' '+m.n).join(', '):'Vui lòng chọn món')+' ▾';W.classList.toggle('has',!!on.length);const ch=W.closest('.bchips');if(ch&&on.length)ch.classList.remove('need');}
 function mddSel(W){return [...W.querySelectorAll('input:checked')].map(x=>x.value|0);}
 function mddSet(W,list){W.querySelectorAll('input').forEach(x=>x.checked=list.includes(x.value|0));mddUpd(W);}
 $('#bobaRand').onclick=()=>document.querySelectorAll('#bobaList .bchips').forEach(ch=>{ch.querySelectorAll('.mdd').forEach(W=>{const all=[...W.querySelectorAll('input')].map(x=>x.value|0);mddSet(W,shuffle(all.slice()).slice(0,Math.floor(Math.random()*(W.dataset.k==='f'?3:2))+(W.dataset.k==='f'?0:1)));});});
 $('#bobaCancel').onclick=()=>bobaEl.classList.remove('show');
 $('#bobaGo').onclick=()=>{if(BOBA_REQ){setStatus('🥤 Đang chờ mọi người chọn món rồi!');return;}
-  const picks={};document.querySelectorAll('#bobaList .bchips').forEach(ch=>{const on=[...ch.querySelectorAll('.mdd')].flatMap(mddSel);picks[ch.dataset.id]=on.length?on:-1;});
+  const picks={};let miss=0;document.querySelectorAll('#bobaList .bchips').forEach(ch=>{const on=[...ch.querySelectorAll('.mdd')].flatMap(mddSel);picks[ch.dataset.id]=on.length?on:-1;ch.classList.toggle('need',!on.length);if(!on.length)miss++;});
+  if(miss){$('#bobaNote').textContent=`⚠️ Còn ${miss} người chưa chọn món — mỗi người chọn ít nhất 1 món (đồ uống hoặc đồ ăn), hoặc bấm Ngẫu nhiên.`;const f=document.querySelector('#bobaList .bchips.need');f&&f.scrollIntoView({block:'center',behavior:'smooth'});return;}
   const ask=[...document.querySelectorAll('#bobaList .bwait')].map(e=>e.dataset.ask).filter(id=>byId(id));
   const by=ME.id&&byId(ME.id)&&!byId(ME.id).away?ME.id:'';bobaEl.classList.remove('show');
   if(!ask.length){const sk=Object.keys(picks).filter(k=>picks[k]===-1);run('boba',null,{v:(by||'-')+'|'+Object.keys(picks).filter(k=>picks[k]!==-1).map(k=>k+':'+picks[k].join('+')).join(',')+'|'+sk.join('.')});return;}
