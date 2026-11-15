@@ -666,7 +666,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
           <button class="b pink big" data-cmd="leave">🏠 Tan làm<small>Ai tăng ca thì ở lại, còn lại ra về</small></button>
           <button class="b pink big" data-cmd="payday">💰 Ngày lương<small id="paySub">Cuối tháng nhận lương &amp; thưởng</small></button>
           <button class="b pink big" data-cmd="newday">☀️ Sáng hôm sau<small>Mọi người (trừ ai ốm) đi làm</small></button>
-          <button class="b pink big" data-cmd="boba">🥤 Trà sữa<small>Chọn món, shipper giao tận nơi</small></button>
+          <button class="b pink big" data-cmd="boba">🍟 Đặt đồ ăn vặt<small>Trà sữa, fast food · shipper giao tận nơi</small></button>
           <button class="b pink big" data-cmd="quiz">🎮 Minigame<small>Đố vui cả phòng cùng chơi</small></button>
           <button class="b pink big" data-cmd="yep">🎊 Tiệc tất niên<small>Karaoke &amp; bốc thăm trúng thưởng</small></button>
           <button class="b pink big" data-cmd="boss">👨‍💼 Sếp tổng ghé<small>Kiểm tra bất ngờ, ai lười bị trừ KPI</small></button>
@@ -844,7 +844,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li><b>🖥️ Rời bàn không tắt màn hình.</b></li>
       <li><b>🥤 Làm đổ đồ uống</b> mà không tự lau trong 15 giây.</li>
       <li><b>😤 Cãi sếp</b> — lần 3 trong ngày bị trừ KPI và cảnh cáo, lần 4 bị sa thải ngay.</li>
-      <li><b>👨‍💼 Sếp tổng bắt gặp</b> đang lười, uống trà sữa, bàn bừa bộn hoặc văn phòng còn rác.</li>
+      <li><b>👨‍💼 Sếp tổng bắt gặp</b> đang lười, ăn vặt trong giờ, bàn bừa bộn hoặc văn phòng còn rác.</li>
       <li><b>🦹 Để trộm lấy mất chứng từ mật</b> — có trộm mà không ai bấm 📞 Báo cảnh sát trong <b>20 giây</b>: cả phòng (mọi nhân vật) bị trừ <b>1 KPI</b>.</li>
       <li><b>📄 KPI tháng âm</b> — nhắc nhở lần 1, lần 2, sau đó quản lý duyệt sa thải hoặc cho cơ hội.</li>
       <li><b>📉 KPI âm</b> thì lương bị trừ.</li>
@@ -879,11 +879,11 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 </div>
 
 <div id="bobaModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="bTitle"><div class="wcard mcardm">
-  <div class="wlogo">🥤</div><h2 id="bTitle">Đặt trà sữa cả team</h2><p class="wsub">Chọn món cho từng người. Shipper giao tới cửa văn phòng, cả team ra bàn ăn uống cùng nhau.</p>
+  <div class="wlogo">🍟</div><h2 id="bTitle">Đặt đồ ăn vặt cả team</h2><p class="wsub">Chọn món cho từng người. Shipper giao tới cửa văn phòng, cả team ra bàn ăn uống cùng nhau.</p>
   <div class="blist" id="bobaList"></div><div class="wnote" id="bobaNote"></div>
   <div class="crow"><button type="button" id="bobaRand" class="cghost">Ngẫu nhiên</button><button type="button" id="bobaCancel" class="cghost">Hủy</button><button type="button" id="bobaGo">Đặt hàng 🛵</button></div></div></div>
 <div id="bobaPick" class="welcome" role="dialog" aria-modal="true" aria-labelledby="bpTitle"><div class="wcard mcardm">
-  <div class="wlogo">🥤</div><h2 id="bpTitle">Chọn món trà sữa của bạn</h2><p class="wsub" id="bpSub"></p>
+  <div class="wlogo">🍟</div><h2 id="bpTitle">Chọn món ăn vặt của bạn</h2><p class="wsub" id="bpSub"></p>
   <div class="bpgrid" id="bpGrid"></div><div class="bpleft" id="bpLeft"></div>
   <div class="crow"><button type="button" id="bpSkip" class="cghost">🙅 Không uống lần này</button></div></div></div>
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
@@ -3719,7 +3719,9 @@ const BOSS=makeGuest({id:'boss',name:'👨‍💼 Sếp tổng',short:'Sếp t�
 
 /* ---- props: cốc trà sữa, micro ---- */
 const BOBA_MENU=[{n:'Trà sữa trân châu đường đen',e:'🥤',c:'#c08a5c'},{n:'Trà đào cam sả',e:'🍑',c:'#ffb27a'},{n:'Matcha latte',e:'🍵',c:'#9fd18b'},
-  {n:'Trà sữa khoai môn',e:'💜',c:'#c3a6ea'},{n:'Hồng trà kem cheese',e:'🧀',c:'#d9774f'},{n:'Cà phê muối',e:'☕',c:'#a47552'}];
+  {n:'Trà sữa khoai môn',e:'💜',c:'#c3a6ea'},{n:'Hồng trà kem cheese',e:'🧀',c:'#d9774f'},{n:'Cà phê muối',e:'☕',c:'#a47552'},
+  {n:'Gà rán giòn cay',e:'🍗',c:'#d9822b',f:'chicken'},{n:'Burger bò phô mai',e:'🍔',c:'#c9772f',f:'burger'},{n:'Khoai tây chiên',e:'🍟',c:'#f2c94c',f:'fries'},
+  {n:'Pizza xúc xích',e:'🍕',c:'#e8a33d',f:'pizza'},{n:'Xiên que chiên',e:'🍢',c:'#c0573a',f:'skewer'}];
 const BOBA_MATS=BOBA_MENU.map(m=>mat(m.c,{roughness:.4}));
 CHARS.forEach(c=>{const g=new THREE.Group();g.position.set(0,.03,.05);c.armR.hand.add(g);g.visible=false;c.boba=g;
   cyl(.052,.042,.13,mat('#ffffff',{transparent:true,opacity:.55,roughness:.1}),0,.04,0,g,14);
@@ -3727,9 +3729,22 @@ CHARS.forEach(c=>{const g=new THREE.Group();g.position.set(0,.03,.05);c.armR.han
   for(let i=0;i<5;i++)sph(.011,mat('#2a1a14'),Math.cos(i*1.3)*.024,-.012,Math.sin(i*1.3)*.024,g,6,5).castShadow=false;
   cyl(.054,.054,.008,mat('#ffffff',{transparent:true,opacity:.8}),0,.106,0,g,14);
   const st=cyl(.006,.006,.12,mat('#ff6f9f'),.012,.15,0,g,6);st.rotation.z=-.15;
+  const sn=new THREE.Group();sn.position.set(0,.03,.05);c.armR.hand.add(sn);sn.visible=false;c.snack=sn;c.snackK={};
+  {const k=new THREE.Group();sn.add(k);c.snackK.burger=k;const bun=mat('#d9953f',{roughness:.6});
+    cyl(.05,.046,.022,bun,0,0,0,k,16);cyl(.054,.054,.016,mat('#5a3320',{roughness:.8}),0,.019,0,k,16);cyl(.057,.057,.006,mat('#7bc043'),0,.03,0,k,16);
+    const ch=mk(new THREE.BoxGeometry(.095,.005,.095),mat('#ffcc33'),0,.035,0,k);ch.rotation.y=.6;
+    const top=sph(.051,bun,0,.04,0,k,16,10);top.scale.y=.65;for(let i=0;i<6;i++)sph(.005,mat('#fff5d6'),Math.cos(i)*.03,.068,Math.sin(i)*.03,k,5,4).castShadow=false;}
+  {const k=new THREE.Group();sn.add(k);c.snackK.fries=k;mk(new THREE.BoxGeometry(.075,.075,.04),mat('#e03131',{roughness:.6}),0,.02,0,k);
+    for(let i=0;i<9;i++){const f=mk(new THREE.BoxGeometry(.01,.075,.01),mat('#ffd43b',{roughness:.7}),(i%3-1)*.022,.07+(i%2)*.012,((i/3|0)-1)*.01,k);f.rotation.z=(i%3-1)*.12;f.castShadow=false;}}
+  {const k=new THREE.Group();sn.add(k);c.snackK.chicken=k;const m1=sph(.042,mat('#c06a1f',{roughness:.85}),0,.045,0,k,12,10);m1.scale.set(1,1.35,1);
+    cyl(.009,.009,.06,mat('#fff8e7'),0,-.02,0,k,8);sph(.014,mat('#fff8e7'),0,-.052,0,k,8,6);}
+  {const k=new THREE.Group();sn.add(k);c.snackK.pizza=k;const sl=mk(new THREE.CylinderGeometry(.12,.12,.012,12,1,false,0,.75),mat('#f4c542',{roughness:.6}),0,.03,-.04,k);sl.rotation.x=-1.25;
+    const cr=mk(new THREE.CylinderGeometry(.122,.122,.02,12,1,true,0,.75),mat('#c9772f'),0,.03,-.04,k);cr.rotation.x=-1.25;for(let i=0;i<3;i++){const pp=cyl(.013,.013,.004,mat('#c92a2a'),.03+i*.012,.06+i*.025,.0,k,10);pp.rotation.x=.3;pp.castShadow=false;}}
+  {const k=new THREE.Group();sn.add(k);c.snackK.skewer=k;cyl(.004,.004,.2,mat('#d4a373'),0,.06,0,k,6);for(let i=0;i<3;i++)sph(.022,mat(['#c0573a','#e8a33d','#a0522d'][i],{roughness:.7}),0,.04+i*.045,0,k,10,8);}
   const mic=new THREE.Group();mic.position.set(0,.02,.05);c.armR.hand.add(mic);mic.visible=false;c.mic=mic;
   cyl(.016,.012,.12,mat('#2b2b33',{metalness:.4,roughness:.3}),0,.02,0,mic,10);sph(.03,mat('#c9ced8',{metalness:.6,roughness:.25}),0,.1,0,mic,12,10);});
-function bobaOff(c){if(c.boba)c.boba.visible=false;}
+function bobaOff(c){if(c.boba)c.boba.visible=false;if(c.snack)c.snack.visible=false;}
+function snackShow(c,k){const m=BOBA_MENU[k];if(m&&m.f&&c.snack){c.boba.visible=false;Object.entries(c.snackK).forEach(([n,g])=>g.visible=n===m.f);c.snack.visible=true;}else{if(c.snack)c.snack.visible=false;c.bobaTea.material=BOBA_MATS[k];c.boba.visible=true;}}
 {const o=end;end=(c,mode)=>{bobaOff(c);if(c.mic)c.mic.visible=false;o(c,mode);};}
 
 /* ---- tủ điện (dùng cho sự cố mất điện) ---- */
@@ -3748,7 +3763,7 @@ const SMOKE=[0,1,2].map(()=>emoSprite('💨',.42)),SPARK=emoSprite('⚡',.5);
 /* ================= 1. Trà sữa ================= */
 const bobaEl=$('#bobaModal');
 function openBoba(){
-  if(EV.boba){setStatus('🥤 Trà sữa đang trên đường giao rồi, đợi chút nhé!');return;}
+  if(EV.boba){setStatus('🛵 Đồ ăn vặt đang trên đường giao rồi, đợi chút nhé!');return;}
   const ppl=present();if(ppl.length<2){setStatus('🥤 Văn phòng ít người quá, chưa order chung được.');return;}
   const list=$('#bobaList');list.textContent='';
   ppl.forEach(c=>{const row=document.createElement('div');row.className='brow';
@@ -3774,7 +3789,7 @@ const BOBA_WAIT=30000;let BOBA_REQ=null,BOBA_ASKED=null;
 function bobaWaitTick(){const R=BOBA_REQ;if(!R)return;const left=Math.max(0,Math.ceil((R.until-Date.now())/1000));
   const names=[...R.ask].map(id=>byId(id)).filter(Boolean).map(c=>c.name);
   if(!names.length||left<=0){bobaFinish();return;}
-  banner('🥤','Đang gom order trà sữa',`Chờ ${names.join(', ')} chọn món… còn ${left} giây`,{t:'🛵 Đặt luôn',f:()=>bobaFinish()},'boba');}
+  banner('🥤','Đang gom order đồ ăn vặt',`Chờ ${names.join(', ')} chọn món… còn ${left} giây`,{t:'🛵 Đặt luôn',f:()=>bobaFinish()},'boba');}
 function bobaFinish(){const R=BOBA_REQ;if(!R)return;BOBA_REQ=null;clearInterval(R.iv);bannerOff();
   const skip=[...R.ask].concat(Object.keys(R.picks).filter(k=>R.picks[k]<0));      // không trả lời / không uống: nhân vật không bị kéo đi
   present().forEach(c=>{if(R.picks[c.id]===undefined&&!skip.includes(c.id))R.picks[c.id]=hashStr(c.id+todayKey())%BOBA_MENU.length;});
@@ -3785,15 +3800,15 @@ function bobaAsk(v){const [oid,by,askS,untilS]=String(v||'').split('|');const as
   if(BOBA_REQ&&BOBA_REQ.oid===oid)return true;          // máy người đặt
   const bc=byId(by),byName=bc?bc.name:'Đồng nghiệp';
   if(ME.id&&ask.includes(ME.id)){BOBA_ASKED={oid,until};
-    $('#bpSub').textContent=`${byName} đang order trà sữa cho cả team. Bạn muốn uống gì?`;
+    $('#bpSub').textContent=`${byName} đang đặt đồ ăn vặt cho cả team. Bạn muốn ăn uống gì?`;
     const g=$('#bpGrid');g.textContent='';BOBA_MENU.forEach((m,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML='';const e=document.createElement('span');e.className='bpe';e.textContent=m.e;const t=document.createElement('span');t.textContent=m.n;b.append(e,t);b.onclick=()=>bobaPick(i);g.appendChild(b);});
     bpEl.classList.add('show');clearInterval(bpTimer);
     const tk=()=>{const left=Math.max(0,Math.ceil((until-Date.now())/1000));$('#bpLeft').textContent=`Còn ${left} giây — hết giờ người đặt sẽ chọn giúp bạn.`;if(left<=0){clearInterval(bpTimer);bpEl.classList.remove('show');BOBA_ASKED=null;}};tk();bpTimer=setInterval(tk,1000);beep(true);}
-  else banner('🥤','Đang gom order trà sữa',`${byName} đang chờ mọi người chọn món…`,null,'boba');
-  setTimeout(()=>{if(!EV.boba&&evBanT.textContent==='Đang gom order trà sữa')bannerOff();},until-Date.now()+15000);
+  else banner('🥤','Đang gom order đồ ăn vặt',`${byName} đang chờ mọi người chọn món…`,null,'boba');
+  setTimeout(()=>{if(!EV.boba&&evBanT.textContent==='Đang gom order đồ ăn vặt')bannerOff();},until-Date.now()+15000);
   return true;}
 function bobaPick(i){const A=BOBA_ASKED;if(!A)return;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');
-  const c=ME.id&&byId(ME.id);if(!c)return;run('bobapick',c,{v:A.oid+':'+i});setStatus(`🥤 Bạn đã chọn ${BOBA_MENU[i].e} ${BOBA_MENU[i].n} — chờ shipper giao nhé!`);}
+  const c=ME.id&&byId(ME.id);if(!c)return;run('bobapick',c,{v:A.oid+':'+i});setStatus(`🛍️ Bạn đã chọn ${BOBA_MENU[i].e} ${BOBA_MENU[i].n} — chờ shipper giao nhé!`);}
 $('#bpSkip').onclick=()=>{const A=BOBA_ASKED;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');const c=ME.id&&byId(ME.id);if(A&&c){run('bobapick',c,{v:A.oid+':-1'});setStatus('🙅 Bạn không uống lần này — nhân vật của bạn ở lại làm việc.');}};
 function bobaPicked(c,v){const [oid,i]=String(v||'').split(':');const R=BOBA_REQ;
   if(R&&R.oid===oid&&c&&R.ask.has(c.id)){const k=+i;R.ask.delete(c.id);if(k<0){R.picks[c.id]=-1;c.think('🙅',2);}else{R.picks[c.id]=clamp(k|0,0,BOBA_MENU.length-1);c.think(BOBA_MENU[R.picks[c.id]].e,2);}setTimeout(bobaWaitTick,0);}   // chạy ngoài lượt lệnh từ xa để lệnh đặt hàng được gửi cho mọi người
@@ -3804,18 +3819,18 @@ async function actBoba(v){if(BOBA_ASKED){BOBA_ASKED=null;clearInterval(bpTimer);
   try{
     const by=byId(byS)&&!byId(byS).away?byId(byS):null;
     const n=Object.keys(order).length;
-    setStatus(`📱 ${by?by.name:'Cả team'} vừa đặt ${n} ly trà sữa trên app — shipper đang tới 🛵`);
+    setStatus(`📱 ${by?by.name:'Cả team'} vừa đặt ${n} phần đồ ăn vặt trên app — shipper đang tới 🛵`);
     if(by&&!by.busy){by.phone.visible=true;by.arms='text';by.think('📱',2);await wait(1.6);if(!by.busy){by.phone.visible=false;by.arms=by.pose==='sit'?'type':'idle';}}
-    banner('🛵','Trà sữa đang được giao','Shipper sắp tới cửa văn phòng…',null,'boba');
+    banner('🛵','Đồ ăn vặt đang được giao','Shipper sắp tới cửa văn phòng…',null,'boba');
     present().forEach(c=>{if(!c.busy&&Math.random()<.6)c.think(pick(['🥤','🤤','😋']),1.8);});
     await wait(6);
     const S=SHIPPER;S.pos.set(EXIT.out.x,0,EXIT.out.z);S.yaw=-PI/2;S.root.visible=true;S.arms='hold';S.dbag.visible=true;
     await doorIn();await walkDirect(S,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();
     await S.goStand({x:10.3,z:2.7});S.yaw=-PI/2;
-    banner('🛵','Shipper tới rồi!','Có người ra nhận trà sữa nhé',null,'boba');
-    await S.say('Giao trà sữa ạ! Ai nhận giúp em với ạ 🥤',2.4);
+    banner('🛵','Shipper tới rồi!','Có người ra nhận đồ ăn vặt nhé',null,'boba');
+    await S.say('Giao đồ ăn vặt ạ! Ai nhận giúp em với ạ 🛍️',2.4);
     const cands=freeEmp().filter(c=>!c.manager&&!skip.has(c.id)&&!(isHuman(c)&&c.id!==ME.id&&c!==by));const rc=(by&&!by.busy&&!by.away)?by:(cands.length?pick(cands):null);
-    if(rc){begin(rc,'🥤 Ra nhận trà sữa');await rc.goStand({x:9.55,z:2.7});rc.faceTo(S);S.faceTo(rc);
+    if(rc){begin(rc,'🛍️ Ra nhận đồ ăn vặt');await rc.goStand({x:9.55,z:2.7});rc.faceTo(S);S.faceTo(rc);
       await rc.say('Em đây ạ! Bao nhiêu tiền vậy anh?',2);await S.say(`Dạ ${n} ly, em đã nhận thanh toán qua ví rồi ạ!`,2.4);
       S.dbag.visible=false;S.arms='idle';rc.bagG.visible=true;rc.arms='hold';await rc.say('Cảm ơn anh nha! 🙏',1.4);}
     else{S.dbag.visible=false;S.arms='idle';}
@@ -3823,17 +3838,17 @@ async function actBoba(v){if(BOBA_ASKED){BOBA_ASKED=null;clearInterval(bpTimer);
     const back=(async()=>{await S.goStand(EXIT.in);await doorIn();await walkDirect(S,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();S.root.visible=false;})();
     // chia trà sữa ở bàn ăn
     const ppl=present().filter(c=>(!c.busy||c===rc)&&!skip.has(c.id));if(rc&&!ppl.includes(rc))ppl.push(rc);
-    ppl.forEach(c=>{if(c!==rc)begin(c,'🥤 Ra lấy trà sữa');});
-    bannerOff();setStatus('🥤 Trà sữa tới rồi! Mọi người ra bàn ăn lấy ly của mình.');
+    ppl.forEach(c=>{if(c!==rc)begin(c,'🍟 Ra lấy đồ ăn vặt');});
+    bannerOff();setStatus('🍟 Đồ ăn vặt tới rồi! Mọi người ra bàn ăn lấy phần của mình.');
     const seats=diningBusy?BREAK_SPOTS.map(s=>({x:s.x,z:s.z,stand:true})):DINE;const usingDine=!diningBusy;if(usingDine)diningBusy=true;
     await Promise.all(ppl.map((c,i)=>{const s=seats[i%seats.length];return s.stand?c.goStand(s):c.goSit(s);}));
     if(rc){rc.bagG.visible=false;}
-    catAttract(.3,-3.4,'Meo? Mochi cũng muốn uống 🥤');
-    for(const c of ppl){const k=order[c.id]!==undefined?order[c.id]:hashStr(c.id)%BOBA_MENU.length;c.bobaTea.material=BOBA_MATS[k];c.boba.visible=true;c.arms='cup';setAct(c,`${BOBA_MENU[k].e} Uống ${BOBA_MENU[k].n}`);}
-    const lines=shuffle(['Ngon xỉu! 😋','Ly này nhiều trân châu ghê 🥤','Ai uống thử của mình không?','Uống xong tỉnh hẳn, làm tiếp thôi 💪','Chiều nào cũng order nha cả nhà! 😆','Cảm ơn người đặt nhaaa 💕']);
+    catAttract(.3,-3.4,'Meo? Mochi cũng muốn ăn gà rán 🍗');
+    for(const c of ppl){const k=order[c.id]!==undefined?order[c.id]:hashStr(c.id)%BOBA_MENU.length;snackShow(c,k);c.arms='cup';setAct(c,`${BOBA_MENU[k].e} ${BOBA_MENU[k].f?'Ăn':'Uống'} ${BOBA_MENU[k].n}`);}
+    const lines=shuffle(['Ngon xỉu! 😋','Gà rán giòn rụm luôn 🍗','Ai uống thử của mình không?','Uống xong tỉnh hẳn, làm tiếp thôi 💪','Chiều nào cũng order nha cả nhà! 😆','Cảm ơn người đặt nhaaa 💕']);
     for(let k=0;k<Math.min(5,ppl.length+1);k++){const s=ppl[k%ppl.length],m=BOBA_MENU[order[s.id]!==undefined?order[s.id]:0];ppl.forEach(o=>o.lookAt=o===s?null:s);
       await s.say(k<ppl.length&&Math.random()<.5?`${m.e} ${m.n} của mình nè!`:lines[k%lines.length],2.1);}
-    catRelease();setStatus('🥤 Uống xong rồi, mọi người quay về chỗ làm việc.');
+    catRelease();setStatus('🍟 Ăn uống xong rồi, mọi người quay về chỗ làm việc.');
     ppl.forEach(c=>{c.lookAt=null;setAct(c,'🚶 Quay về chỗ');});
     await Promise.all(ppl.map(async c=>{await c.goSit(c.home);end(c,'working');}));
     if(usingDine)diningBusy=false;await back;
@@ -3914,7 +3929,7 @@ function incTick(){const I=EV.inc;if(!I)return;
 const rtOn=()=>{try{return !!RT.tod;}catch(e){return true;}};
 const lunchHour=()=>rtOn()&&nowMin()>=720&&nowMin()<780;               // giờ thật 12:00–12:59 là giờ nghỉ trưa hợp lệ
 const lunchy=c=>/Đi ăn trưa|Ăn trưa|🍱|Ngủ trưa|🛏️/.test(c.activity||'');
-const bobaOn=c=>!!(c.boba&&c.boba.visible);
+const bobaOn=c=>!!((c.boba&&c.boba.visible)||(c.snack&&c.snack.visible));
 const lazyOf=c=>bobaOn(c)||(lunchy(c)&&!lunchHour())||(c.eyesShut&&!(lunchy(c)&&lunchHour()))||c.danceOn||c.mode==='sofa'||!!c.sofaAct||/Ngủ gật|trêu|Khều|khều|sofa|Nhảy|nhảy/.test(c.activity||'');
 async function actBoss(){
   EV.boss=true;EV.lastBoss=simTime;
@@ -3950,7 +3965,7 @@ async function actBoss(){
       const spot=lazyOf(e)&&!e.atHome()?{x:e.pos.x+.7,z:e.pos.z+.5}:{x:e.home.x-Math.sign(e.home.x)*.9,z:e.home.z+(e.home.face===0?-.55:.55)};
       await B.goStand(spot);B.faceTo(e);B.lookAt=e;e.lookAt=B;
       if(lazyOf(e)){bad++;B.gesture('think',1.6);
-        const why=bobaOn(e)?'Giờ làm mà ngồi uống trà sữa à? 🥤😤':lunchy(e)?(/Ngủ trưa|🛏️/.test(e.activity||'')?'Hết giờ nghỉ trưa rồi mà còn ngủ à? 😠':'Giờ này mà còn ăn trưa à? 🍱😤'):e.eyesShut?'Giờ làm mà ngủ gật à? 😠':e.danceOn?'Đang giờ làm mà nhảy nhót à? 😤':(e.mode==='sofa'||e.sofaAct)?'Sofa êm quá nhỉ? Về bàn làm việc đi em! 😤':'Trêu nhau trong giờ làm à? 🤨';
+        const why=bobaOn(e)?'Giờ làm mà ngồi ăn vặt à? 🍟😤':lunchy(e)?(/Ngủ trưa|🛏️/.test(e.activity||'')?'Hết giờ nghỉ trưa rồi mà còn ngủ à? 😠':'Giờ này mà còn ăn trưa à? 🍱😤'):e.eyesShut?'Giờ làm mà ngủ gật à? 😠':e.danceOn?'Đang giờ làm mà nhảy nhót à? 😤':(e.mode==='sofa'||e.sofaAct)?'Sofa êm quá nhỉ? Về bàn làm việc đi em! 😤':'Trêu nhau trong giờ làm à? 🤨';
         await B.say(`${e.name}! ${why} Trừ ${-KPI_PTS.bossbad} KPI!`,2.8);
         if(e.eyesShut){e.eyesShut=false;e.gest=null;}e.think('😳',1.6);addKpi(e,KPI_PTS.bossbad,KPI_WHY.bossbad);
         await e.say(pick(['Dạ em xin lỗi sếp tổng ạ 😭','Em hứa không dám nữa ạ 🙇','Dạ em làm việc ngay đây ạ! 😰']),2);}
@@ -4295,7 +4310,7 @@ const RET_RE=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/;
   return o.call(this,seat);};}
 // có lệnh mới lúc đang về chỗ: kết thúc phần cũ ngay (vẫn được cộng KPI), bỏ qua lệnh end() của việc cũ
 {const o=begin;begin=(c,a)=>{if(c.returning){c.returning=false;const r=c._retRes;c._retRes=null;if(r){c._skipEnds=(c._skipEnds||0)+1;r();}
-  c.doc.visible=false;c.cupG.visible=false;c.canG.visible=false;c.bagG.visible=false;c.chopG.visible=false;if(c.boba)c.boba.visible=false;if(c.mic)c.mic.visible=false;c.arms='idle';}o(c,a);};}
+  c.doc.visible=false;c.cupG.visible=false;c.canG.visible=false;c.bagG.visible=false;c.chopG.visible=false;if(c.boba)c.boba.visible=false;if(c.snack)c.snack.visible=false;if(c.mic)c.mic.visible=false;c.arms='idle';}o(c,a);};}
 {const o=end;end=(c,mode)=>{if(c._skipEnds>0){c._skipEnds--;return;}o(c,mode);};}
 
 /* ================= quản lý yêu cầu báo cáo ================= */
@@ -4374,7 +4389,7 @@ const EV_GROUP=['boba','bobaask','incident','boss','yep','quiz','trip'];
     if(!v)return false;guard(()=>actTrip(v),[]);return true;}
   if(n==='quiz'){if(!v)return false;return quizStart(v);}
   if(n==='incident'){if(!v)return false;return incStart(v);}
-  if(n==='boba'){if(EV.boba){setStatus('🥤 Trà sữa đang được giao rồi!');return false;}if(!v)return false;guard(()=>actBoba(v),[]);return true;}
+  if(n==='boba'){if(EV.boba){setStatus('🛵 Đồ ăn vặt đang được giao rồi!');return false;}if(!v)return false;guard(()=>actBoba(v),[]);return true;}
   if(n==='boss'){if(EV.boss){setStatus('👨‍💼 Sếp tổng đang ở văn phòng rồi!');return false;}if(EV.yep){setStatus('🎊 Đang tiệc tất niên, sếp tổng để hôm khác ghé nhé!');return false;}
     if(!EMP.some(e=>!e.away)){setStatus('👨‍💼 Văn phòng không có ai, sếp tổng không ghé nữa.');return false;}guard(actBoss,[]);return true;}
   if(n==='yep'){if(EV.yep){setStatus('🎊 Tiệc tất niên đang diễn ra rồi!');return false;}if(danceRunning||EV.boss){setStatus('⏳ Đợi xong hoạt động hiện tại rồi mở tiệc nhé!');return false;}
@@ -4394,7 +4409,7 @@ function evRandTick(){
   if(simTime-EV.lastBoss>420&&Math.random()<.3&&EMP.some(e=>!e.away))EVCMD.boss();else EVCMD.incident();}
 function evTick(dt){
   VISITORS.forEach(v=>{if(v.root.visible)v.update(dt);});
-  CHARS.forEach(c=>{if(c.boba&&c.boba.visible)c.boba.rotation.copy(c.cupG.rotation);});
+  CHARS.forEach(c=>{if(c.boba&&c.boba.visible)c.boba.rotation.copy(c.cupG.rotation);if(c.snack&&c.snack.visible)c.snack.rotation.copy(c.cupG.rotation);});
   if(YEPD.g.visible){const t=simTime;YEPD.parts.forEach(b=>{b.position.y+=Math.sin(t*1.6+b.userData.bob)*.0015;});YEPD.bulbs.forEach((b,i)=>{b.visible=(Math.floor(t*3)+i)%3!==0;});}
   incTick();quizTick();evRandTick();flowerTick(dt);reqTick();scrTick();
 }
