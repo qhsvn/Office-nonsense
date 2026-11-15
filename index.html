@@ -6125,6 +6125,7 @@ async function zDoctor(){const big=Z.rd===2,who=big?'Đội 5 bác sĩ và y tá
   doorOut();T.forEach(H=>{H.root.visible=false;H.tagEl.style.display='none';});}
 // đang có zombie / trộm: quản lý không tự đi trao bằng khen hay đi nhắc nhở (nhất là khi người chơi đang điều khiển quản lý)
 {const o=autoTick;autoTick=(...a)=>{if(EV.zombie||EV.thief)return;return o(...a);};}
+{const o=setStatus;setStatus=(m,...a)=>{if((EV.zombie||EV.thief)&&/^🎓/.test(String(m||'')))return;return o(m,...a);};}
 {const o=promoTick;promoTick=(...a)=>{if(EV.zombie||EV.thief)return;return o(...a);};}
 {const o=scold;scold=async(...a)=>{if(EV.zombie||EV.thief)return false;return o(...a);};}
 // ngẫu nhiên: thỉnh thoảng có đại dịch
