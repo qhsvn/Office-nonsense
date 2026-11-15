@@ -5271,7 +5271,7 @@ function buildBeach(key){
     BL.loungers.push({x:lx,z:lz});for(const dz of[-.6,0,.6])B_OBS.push({x:lx,z:lz+dz,r:.4});B_OBS.push({x:lx-.75,z:lz+.3,r:.1});B_PLAN.push({x:lx,z:lz,r:.95});}
   // quầy cocktail
   {const g=new THREE.Group();g.position.set(BL.bar.x,0,BL.bar.z-1.4);S.add(g);const w=bMat('#c08a52');
-    bMk(new THREE.BoxGeometry(2.6,.72,.7),w,0,.36,0,g);bMk(new THREE.BoxGeometry(2.8,.08,.9),bMat('#e9c48f'),0,.76,0,g);bMk(new THREE.BoxGeometry(2.4,.28,.8),bMat('#a0703f'),0,.14,-.95,g);   // bục đứng cho bartender
+    bMk(new THREE.BoxGeometry(2.6,.72,.7),w,0,.36,0,g);bMk(new THREE.BoxGeometry(2.8,.08,.9),bMat('#e9c48f'),0,.76,0,g);bMk(new THREE.BoxGeometry(2.4,.28,.6),bMat('#a0703f'),0,.14,-.72,g);   // bục đứng cho bartender
     for(const sx of[-1.2,1.2])bMk(new THREE.CylinderGeometry(.06,.06,2.4,8),w,sx,1.2,-.2,g);
     bMk(new THREE.ConeGeometry(2.1,.9,8),bMat('#d9b36a'),0,2.75,-.2,g);
     const glass=bMat('#ffffff',{transparent:true,opacity:.45,roughness:.1}),drinks=['#ff922b','#ff6b9a','#74c0fc','#ffd43b'];
@@ -5521,7 +5521,7 @@ function bBartender(S){
     const sk=new THREE.Group();sk.position.set(0,.02,.02);b.armR.hand.add(sk);const met=bMat('#ced4da',{metalness:.6,roughness:.25});
     bMk(new THREE.CylinderGeometry(.05,.04,.17,12),met,0,.08,0,sk);bMk(new THREE.CylinderGeometry(.028,.05,.06,12),met,0,.195,0,sk);bMk(new THREE.SphereGeometry(.025,8,6),met,0,.235,0,sk);b._shaker=sk;}
   const b=BARTENDER;S.add(b.root);b.root.visible=true;b.busy=true;b.pose='stand';b.seat=null;b.path=[];b.walking=false;b.lying=false;
-  b.pos.set(BL.bar.x,.28,-.9);b.yaw=0;b.root.rotation.set(0,0,0);b.arms='cup';b._shakeT=0;BEACH.bt=b;bBartLife();}
+  b.pos.set(BL.bar.x,.28,-.62);b.yaw=0;b.root.rotation.set(0,0,0);b.arms='cup';b._shakeT=0;BEACH.bt=b;bBartLife();}
 const DL_BT_LINES=['Cà phê phin nóng hổi đây! ☕','Trời lạnh uống sữa đậu nành nha 🥛','Ai uống cà phê sữa không nè? ☕','Bánh tráng nướng sắp có nha 😋'];
 const BT_LINES=['Mojito mát lạnh có ngay! 🍹','Ai uống dừa tươi không nè? 🥥','Cocktail đặc biệt của quán nha! 🍸','Thêm đá cho mát nè 🧊','Sinh tố xoài ngon lắm đó! 🥭'];
 async function bBartLife(){let slot=0;while(BEACH.on&&BEACH.bt){const b=BEACH.bt,r=srand(hashStr(BEACH.key+'bt'+slot++));
@@ -6297,6 +6297,17 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
       this._stayEnd=true;this.path=[];if(this.pose==='sit'&&this.standUp)this.standUp();return Promise.resolve();}
     return o.call(this,seat);};
   const oe=end;end=(c,mode)=>{if(c&&c._stayEnd){c._stayEnd=false;if(mode==='working'||mode==='seated')mode='standing';}return oe(c,mode);};}
+// không đi xuyên qua nhau: nhân vật đang đi gặp người khác thì né sang bên; mèo cũng không chui xuyên qua người
+{const o=Chibi.prototype.update;Chibi.prototype.update=function(dt){o.call(this,dt);
+  if(this.root.visible===false||!this.walking||this.pose==='sit'||this.lying||this._sunbathe||this._swim||this._thMv||this._zInf||ZPOOL.includes(this))return;
+  const me=this,R0=.5,par=me.root.parent;
+  CHARS.concat(VISITORS).forEach(c=>{if(c===me||c.root.visible===false||(typeof par==='object'&&c.root.parent!==par)||c.lying||c._sunbathe||c._swim)return;
+    const dx=me.pos.x-c.pos.x,dz=me.pos.z-c.pos.z,d=Math.hypot(dx,dz);if(d>=R0||d<1e-4)return;
+    const k=(R0-d),nx=dx/d,nz=dz/d,fx=Math.sin(me.yaw),fz=Math.cos(me.yaw);let px=nz,pz=-nx;if(px*fx+pz*fz<0){px=-px;pz=-pz;}
+    const head=-(nx*fx+nz*fz);me.pos.x+=nx*k+(head>.1?px*k*1.8:0);me.pos.z+=nz*k+(head>.1?pz*k*1.8:0);});};}
+{const o=updateOverlay;updateOverlay=(...a)=>{if(typeof CAT!=='undefined'&&CAT.g&&CAT.g.visible!==false&&!CAT.hold&&!window.__altScene){const P=CAT.g.position,R0=.42;
+    CHARS.concat(VISITORS).forEach(c=>{if(c.root.visible===false||(typeof CAT.g.parent==='object'&&c.root.parent!==CAT.g.parent)||c.lying)return;const dx=P.x-c.pos.x,dz=P.z-c.pos.z,d=Math.hypot(dx,dz);if(d<R0&&d>1e-4){const k=R0-d;P.x+=dx/d*k;P.z+=dz/d*k;}});}
+  return o(...a);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
