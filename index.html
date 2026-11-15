@@ -569,15 +569,12 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 
 .brow.bmulti{flex-wrap:wrap}.brow.bmulti b{flex:1 1 60%}
 .bchips{display:flex;flex-wrap:wrap;gap:4px;width:100%;margin-top:4px}
-.bchips button{font-size:18px;line-height:1;width:34px;height:34px;border-radius:10px;border:2px solid #e3e9f4;background:#fff;cursor:pointer;padding:0;filter:grayscale(.6);opacity:.7}
-.bchips button.on{border-color:#ff8fb8;background:#fff0f6;filter:none;opacity:1;box-shadow:0 2px 6px rgba(255,111,159,.3)}
-.bchips .bpicked{width:100%;font-size:11.5px;color:var(--muted);margin-top:2px}
 .bpgrid button.on{border-color:#ff8fb8;background:#fff0f6;box-shadow:0 2px 8px rgba(255,111,159,.3)}
 #bpDone{font:inherit;font-weight:800}#bpDone:disabled{opacity:.5}
 
 .bchips{flex-direction:column;flex-wrap:nowrap;gap:5px}
 .mdd{width:100%}
-.mddb{width:100%;text-align:left;font:inherit;font-size:12.5px;font-weight:600;border:2px solid #e3e9f4;border-radius:12px;padding:8px 10px;background:#fff;color:var(--muted);cursor:pointer;white-space:normal;line-height:1.35}
+.mdd .mddb{width:100%;height:auto;min-height:38px;display:block;filter:none;opacity:1;letter-spacing:0;word-break:normal;text-align:left;font:inherit;font-size:12.5px;font-weight:600;border:2px solid #e3e9f4;border-radius:12px;padding:8px 10px;background:#fff;color:var(--muted);cursor:pointer;white-space:normal;line-height:1.35}
 .mdd.has .mddb{color:var(--ink);border-color:#ffc2d9;background:#fff7fb}
 .mdd.open .mddb{border-color:#8fd0ff;border-bottom-left-radius:4px;border-bottom-right-radius:4px}
 .mddl{display:none;flex-direction:column;border:2px solid #8fd0ff;border-top:0;border-radius:0 0 12px 12px;background:#fff;padding:4px 6px;margin-top:-2px}
@@ -585,6 +582,11 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .mddl label{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 4px;border-bottom:1px solid #f0f3f8;cursor:pointer}
 .mddl label:last-child{border-bottom:0}.mddl input{width:18px;height:18px;accent-color:#ff6f9f}
 .bpgrid.bpdd{display:flex;flex-direction:column;gap:8px}
+
+.brow.bmulti{align-items:center}.brow.bmulti .bchips{flex:1 1 100%;min-width:0}
+.mddl label span{flex:1;min-width:0}
+.mddl label{text-align:left;justify-content:flex-start}.mddl label span{text-align:left}
+#bpDone{background:linear-gradient(135deg,#8fd0ff,#ff8fb8);color:#fff}#bpDone:disabled{background:#eef1f8;color:#8a94a8}
 </style>
 </head>
 <body>
@@ -905,7 +907,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 <div id="bobaPick" class="welcome" role="dialog" aria-modal="true" aria-labelledby="bpTitle"><div class="wcard mcardm">
   <div class="wlogo">🍟</div><h2 id="bpTitle">Chọn món ăn vặt của bạn</h2><p class="wsub" id="bpSub"></p>
   <div class="bpgrid" id="bpGrid"></div><div class="bpleft" id="bpLeft"></div>
-  <div class="crow"><button type="button" id="bpSkip" class="cghost">🙅 Không uống lần này</button></div></div></div>
+  <div class="crow"><button type="button" id="bpSkip" class="cghost">🙅 Không gọi món</button></div></div></div>
 <div id="grpAsk" class="welcome" role="dialog" aria-modal="true" aria-labelledby="gaTitle"><div class="wcard mcardm">
   <div class="wlogo" id="gaIcon">🎉</div><h2 id="gaTitle"></h2><p class="wsub" id="gaSub"></p><div class="bpleft" id="gaLeft"></div><div class="soopts" id="gaWhy" style="display:none"></div>
   <div class="crow"><button type="button" id="gaNo" class="cghost">🙅 Không tham gia</button><button type="button" id="gaYes">✅ Tham gia</button></div></div></div>
@@ -3840,7 +3842,7 @@ function bobaAsk(v){const [oid,by,askS,untilS]=String(v||'').split('|');const as
 function bpDoneUpd(){const dn=$('#bpDone');if(!dn)return;const n=document.querySelectorAll('#bpGrid .mdd input:checked').length;dn.disabled=!n;dn.textContent=n?`✅ Xong (${n} món)`:'Chọn ít nhất 1 món';}
 function bobaPick(list){const A=BOBA_ASKED;if(!A)return;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');list=[].concat(list);
   const c=ME.id&&byId(ME.id);if(!c)return;run('bobapick',c,{v:A.oid+':'+list.join('+')});setStatus(`🛍️ Bạn đã chọn ${list.map(i=>BOBA_MENU[i].e+' '+BOBA_MENU[i].n).join(', ')} — chờ shipper giao nhé!`);}
-$('#bpSkip').onclick=()=>{const A=BOBA_ASKED;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');const c=ME.id&&byId(ME.id);if(A&&c){run('bobapick',c,{v:A.oid+':-1'});setStatus('🙅 Bạn không uống lần này — nhân vật của bạn ở lại làm việc.');}};
+$('#bpSkip').onclick=()=>{const A=BOBA_ASKED;BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');const c=ME.id&&byId(ME.id);if(A&&c){run('bobapick',c,{v:A.oid+':-1'});setStatus('🙅 Bạn không gọi món lần này — nhân vật của bạn ở lại làm việc.');}};
 function bobaPicked(c,v){const [oid,i]=String(v||'').split(':');const R=BOBA_REQ;
   if(R&&R.oid===oid&&c&&R.ask.has(c.id)){const k=+i;R.ask.delete(c.id);if(k<0){R.picks[c.id]=-1;c.think('🙅',2);}else{R.picks[c.id]=String(i).split('+').map(x=>clamp(x|0,0,BOBA_MENU.length-1));c.think(R.picks[c.id].map(x=>BOBA_MENU[x].e).join(''),2);}setTimeout(bobaWaitTick,0);}   // chạy ngoài lượt lệnh từ xa để lệnh đặt hàng được gửi cho mọi người
   return true;}
