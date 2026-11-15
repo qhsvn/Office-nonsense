@@ -592,6 +592,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .mpopts button{font:inherit;text-align:left;border:2px solid #e3e9f4;background:#f8fbff;border-radius:14px;padding:11px 12px;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;gap:2px}
 .mpopts button b{font-size:14.5px}.mpopts button small{font-size:12px;color:var(--muted)}
 .mpopts button:active{transform:scale(.98)}.mpopts button:hover{border-color:#8fd0ff;background:#eef8ff}
+.bchips.bauto .bautot{font-size:12.5px;font-weight:600;color:var(--ink);background:#f1f7ff;border:2px dashed #cfe3f7;border-radius:12px;padding:8px 10px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -906,7 +907,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 </div>
 
 <div id="bobaModal" class="welcome" role="dialog" aria-modal="true" aria-labelledby="bTitle"><div class="wcard mcardm">
-  <div class="wlogo">🍟</div><h2 id="bTitle">Đặt đồ ăn vặt cả team</h2><p class="wsub">Chọn món cho từng người. Shipper giao tới cửa văn phòng, cả team ra bàn ăn uống cùng nhau.</p>
+  <div class="wlogo">🍟</div><h2 id="bTitle">Đặt đồ ăn vặt cả team</h2><p class="wsub">NPC tự chọn món, bạn chọn món của mình. Người chơi khác sẽ được hỏi có tham gia không.</p>
   <div class="blist" id="bobaList"></div><div class="wnote" id="bobaNote"></div>
   <div class="crow"><button type="button" id="bobaRand" class="cghost">Ngẫu nhiên</button><button type="button" id="bobaCancel" class="cghost">Hủy</button><button type="button" id="bobaGo">Đặt hàng 🛵</button></div></div></div>
 <div id="bobaPick" class="welcome" role="dialog" aria-modal="true" aria-labelledby="bpTitle"><div class="wcard mcardm">
@@ -3796,9 +3797,10 @@ function openBoba(){
   ppl.forEach(c=>{const row=document.createElement('div');row.className='brow';
     const av=document.createElement('span');av.className='av3';setAvatar(av,c);av._k='';row.appendChild(av);
     const nm=document.createElement('b');nm.textContent=c.name+(c.id===ME.id?' (bạn)':'');row.appendChild(nm);
-    if(isHuman(c)&&c.id!==ME.id){const w=document.createElement('span');w.className='bwait';w.dataset.ask=c.id;w.textContent='⏳ Bạn ấy tự chọn món';row.appendChild(w);list.appendChild(row);return;}
-    row.classList.add('bmulti');const ch=document.createElement('div');ch.className='bchips';ch.dataset.id=c.id;const d0=hashStr(c.id+todayKey())%BOBA_MENU.length;
-    ch.append(mddMake('d',[]),mddMake('f',[]));row.appendChild(ch);list.appendChild(row);});
+    if(isHuman(c)&&c.id!==ME.id){const w=document.createElement('span');w.className='bwait';w.dataset.ask=c.id;w.textContent='⏳ Sẽ được hỏi có tham gia không';row.appendChild(w);list.appendChild(row);return;}
+    row.classList.add('bmulti');const ch=document.createElement('div');ch.className='bchips';ch.dataset.id=c.id;
+    if(!isHuman(c)){const L=bobaNpcPick(c);ch.dataset.auto=L.join('+');ch.classList.add('bauto');const t=document.createElement('div');t.className='bautot';t.textContent='🤖 Tự chọn: '+L.map(i=>BOBA_MENU[i].e+' '+BOBA_MENU[i].n).join(' · ');ch.appendChild(t);}
+    else ch.append(mddMake('d',[]),mddMake('f',[]));row.appendChild(ch);list.appendChild(row);});
   const nAsk=document.querySelectorAll('#bobaList .bwait').length;
   $('#bobaNote').textContent=nAsk?`📲 ${nAsk} người đang chơi sẽ nhận thông báo để tự chọn món (chờ tối đa ${BOBA_WAIT/1000} giây).`:'';bobaEl.classList.add('show');}
 // ô thả xuống chọn nhiều món: một ô đồ uống, một ô đồ ăn
@@ -3810,11 +3812,12 @@ function mddMake(kind,sel,onCh){const W=document.createElement('div');W.classNam
 function mddUpd(W){const on=mddSel(W).map(i=>BOBA_MENU[i]);W.querySelector('.mddb').textContent=(W.dataset.k==='f'?'🍔 Đồ ăn: ':'🥤 Đồ uống: ')+(on.length?on.map(m=>m.e+' '+m.n).join(', '):'Vui lòng chọn món')+' ▾';W.classList.toggle('has',!!on.length);const ch=W.closest('.bchips');if(ch&&on.length)ch.classList.remove('need');}
 function mddSel(W){return [...W.querySelectorAll('input:checked')].map(x=>x.value|0);}
 function mddSet(W,list){W.querySelectorAll('input').forEach(x=>x.checked=list.includes(x.value|0));mddUpd(W);}
-$('#bobaRand').onclick=()=>document.querySelectorAll('#bobaList .bchips').forEach(ch=>{ch.querySelectorAll('.mdd').forEach(W=>{const all=[...W.querySelectorAll('input')].map(x=>x.value|0);mddSet(W,shuffle(all.slice()).slice(0,Math.floor(Math.random()*(W.dataset.k==='f'?3:2))+(W.dataset.k==='f'?0:1)));});});
+function bobaNpcPick(c){const D=BOBA_MENU.map((m,i)=>m.f?-1:i).filter(i=>i>=0),F=BOBA_MENU.map((m,i)=>m.f?i:-1).filter(i=>i>=0);const L=[pick(D)];if(Math.random()<.6)L.push(pick(F));if(Math.random()<.2)L.push(pick(F.filter(x=>!L.includes(x))));return L;}
+$('#bobaRand').onclick=()=>document.querySelectorAll('#bobaList .bchips:not(.bauto)').forEach(ch=>{ch.querySelectorAll('.mdd').forEach(W=>{const all=[...W.querySelectorAll('input')].map(x=>x.value|0);mddSet(W,shuffle(all.slice()).slice(0,Math.floor(Math.random()*(W.dataset.k==='f'?3:2))+(W.dataset.k==='f'?0:1)));});});
 $('#bobaCancel').onclick=()=>bobaEl.classList.remove('show');
 $('#bobaGo').onclick=()=>{if(BOBA_REQ){setStatus('🥤 Đang chờ mọi người chọn món rồi!');return;}
-  const picks={};let miss=0;document.querySelectorAll('#bobaList .bchips').forEach(ch=>{const on=[...ch.querySelectorAll('.mdd')].flatMap(mddSel);picks[ch.dataset.id]=on.length?on:-1;ch.classList.toggle('need',!on.length);if(!on.length)miss++;});
-  if(miss){$('#bobaNote').textContent=`⚠️ Còn ${miss} người chưa chọn món — mỗi người chọn ít nhất 1 món (đồ uống hoặc đồ ăn), hoặc bấm Ngẫu nhiên.`;const f=document.querySelector('#bobaList .bchips.need');f&&f.scrollIntoView({block:'center',behavior:'smooth'});return;}
+  const picks={};let miss=0;document.querySelectorAll('#bobaList .bchips').forEach(ch=>{const on=ch.dataset.auto?ch.dataset.auto.split('+').map(x=>x|0):[...ch.querySelectorAll('.mdd')].flatMap(mddSel);picks[ch.dataset.id]=on.length?on:-1;ch.classList.toggle('need',!on.length);if(!on.length)miss++;});
+  if(miss){$('#bobaNote').textContent='⚠️ Bạn chưa chọn món — chọn ít nhất 1 món (đồ uống hoặc đồ ăn), hoặc bấm Ngẫu nhiên.';const f=document.querySelector('#bobaList .bchips.need');f&&f.scrollIntoView({block:'center',behavior:'smooth'});return;}
   const ask=[...document.querySelectorAll('#bobaList .bwait')].map(e=>e.dataset.ask).filter(id=>byId(id));
   const by=ME.id&&byId(ME.id)&&!byId(ME.id).away?ME.id:'';bobaEl.classList.remove('show');
   if(!ask.length){const sk=Object.keys(picks).filter(k=>picks[k]===-1);run('boba',null,{v:(by||'-')+'|'+Object.keys(picks).filter(k=>picks[k]!==-1).map(k=>k+':'+picks[k].join('+')).join(',')+'|'+sk.join('.')});return;}
@@ -3837,7 +3840,7 @@ function bobaAsk(v){const [oid,by,askS,untilS]=String(v||'').split('|');const as
   if(BOBA_REQ&&BOBA_REQ.oid===oid)return true;          // máy người đặt
   const bc=byId(by),byName=bc?bc.name:'Đồng nghiệp';
   if(ME.id&&ask.includes(ME.id)){BOBA_ASKED={oid,until};
-    $('#bpSub').textContent=`${byName} đang đặt đồ ăn vặt cho cả team. Bạn muốn ăn uống gì?`;
+    $('#bpSub').textContent=`${byName} đang đặt đồ ăn vặt cho cả team. Bạn có tham gia không? Chọn món, hoặc bấm Không gọi món.`;
     const g=$('#bpGrid');g.textContent='';g.classList.add('bpdd');g.append(mddMake('d',[],bpDoneUpd),mddMake('f',[],bpDoneUpd));
     let dn=$('#bpDone');if(!dn){dn=document.createElement('button');dn.type='button';dn.id='bpDone';$('#bpSkip').parentNode.appendChild(dn);dn.onclick=()=>{const on=[...document.querySelectorAll('#bpGrid .mdd')].flatMap(mddSel);if(on.length)bobaPick(on);};}bpDoneUpd();
     bpEl.classList.add('show');clearInterval(bpTimer);
@@ -3854,21 +3857,21 @@ function bobaPicked(c,v){const [oid,i]=String(v||'').split(':');const R=BOBA_REQ
   return true;}
 async function actBoba(v){if(BOBA_ASKED){BOBA_ASKED=null;clearInterval(bpTimer);bpEl.classList.remove('show');}
   const [byS,ordS,skS]=String(v||'').split('|'),order={},skip=new Set((skS||'').split('.').filter(Boolean));(ordS||'').split(',').forEach(p=>{const [id,i]=p.split(':');if(byId(id)&&i!=null)order[id]=String(i).split('+').map(x=>clamp(x|0,0,BOBA_MENU.length-1));});
-  EV.boba=true;
+  EV.boba=true;let _sd=hashStr(String(v))>>>0||1;const R=()=>{_sd=(_sd+0x6D2B79F5)>>>0;let t=_sd;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};const rpick=a=>a[Math.floor(R()*a.length)];
   try{
     const by=byId(byS)&&!byId(byS).away?byId(byS):null;
     const n=Object.values(order).reduce((s,a)=>s+a.length,0);
     setStatus(`📱 ${by?by.name:'Cả team'} vừa đặt ${n} phần đồ ăn vặt trên app — shipper đang tới 🛵`);
     if(by&&!by.busy){by.phone.visible=true;by.arms='text';by.think('📱',2);await wait(1.6);if(!by.busy){by.phone.visible=false;by.arms=by.pose==='sit'?'type':'idle';}}
     banner('🛵','Đồ ăn vặt đang được giao','Shipper sắp tới cửa văn phòng…',null,'boba');
-    present().forEach(c=>{if(!c.busy&&Math.random()<.6)c.think(pick(['🥤','🤤','😋']),1.8);});
+    present().forEach(c=>{if(!c.busy&&R()<.6)c.think(rpick(['🥤','🤤','😋']),1.8);});
     await wait(6);
     const S=SHIPPER;S.pos.set(EXIT.out.x,0,EXIT.out.z);S.yaw=-PI/2;S.root.visible=true;S.arms='hold';S.dbag.visible=true;
     await doorIn();await walkDirect(S,[{x:12.5,z:EXIT.in.z},EXIT.in]);doorOut();
     await S.goStand({x:10.3,z:2.7});S.yaw=-PI/2;
     banner('🛵','Shipper tới rồi!','Có người ra nhận đồ ăn vặt nhé',null,'boba');
     await S.say('Giao đồ ăn vặt ạ! Ai nhận giúp em với ạ 🛍️',2.4);
-    const cands=freeEmp().filter(c=>!c.manager&&!skip.has(c.id)&&!(isHuman(c)&&c.id!==ME.id&&c!==by));const rc=(by&&!by.busy&&!by.away)?by:(cands.length?pick(cands):null);
+    const cands=freeEmp().filter(c=>!c.manager&&!skip.has(c.id)&&!(isHuman(c)&&c!==by)).sort((a,b)=>a.id<b.id?-1:1);const rc=(by&&!by.busy&&!by.away)?by:(cands.length?rpick(cands):null);
     if(rc){begin(rc,'🛍️ Ra nhận đồ ăn vặt');await rc.goStand({x:9.55,z:2.7});rc.faceTo(S);S.faceTo(rc);
       await rc.say('Em đây ạ! Bao nhiêu tiền vậy anh?',2);await S.say(`Dạ ${n} ly, em đã nhận thanh toán qua ví rồi ạ!`,2.4);
       S.dbag.visible=false;S.arms='idle';rc.bagG.visible=true;rc.arms='hold';await rc.say('Cảm ơn anh nha! 🙏',1.4);}
@@ -3886,9 +3889,9 @@ async function actBoba(v){if(BOBA_ASKED){BOBA_ASKED=null;clearInterval(bpTimer);
     const ordOf=c=>order[c.id]&&order[c.id].length?order[c.id]:[hashStr(c.id)%BOBA_MENU.length];
     for(const c of ppl){const L=ordOf(c),k=L[0];snackShow(c,k);c.arms='cup';setAct(c,L.length>1?`${L.map(x=>BOBA_MENU[x].e).join('')} Ăn uống ${L.length} món`:`${BOBA_MENU[k].e} ${BOBA_MENU[k].f?'Ăn':'Uống'} ${BOBA_MENU[k].n}`);}
     let cyc=0;const nextItem=()=>{cyc++;ppl.forEach(c=>{const L=ordOf(c);if(L.length>1&&(c.boba.visible||c.snack.visible))snackShow(c,L[cyc%L.length]);});};
-    const lines=shuffle(['Ngon xỉu! 😋','Gà rán giòn rụm luôn 🍗','Ai uống thử của mình không?','Uống xong tỉnh hẳn, làm tiếp thôi 💪','Chiều nào cũng order nha cả nhà! 😆','Cảm ơn người đặt nhaaa 💕']);
+    const lines=((a)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;})(['Ngon xỉu! 😋','Gà rán giòn rụm luôn 🍗','Ai uống thử của mình không?','Uống xong tỉnh hẳn, làm tiếp thôi 💪','Chiều nào cũng order nha cả nhà! 😆','Cảm ơn người đặt nhaaa 💕']);
     for(let k=0;k<Math.min(5,ppl.length+1);k++){const s=ppl[k%ppl.length],L=ordOf(s),m=BOBA_MENU[L[0]];ppl.forEach(o=>o.lookAt=o===s?null:s);
-      if(k)nextItem();await s.say(k<ppl.length&&Math.random()<.5?(L.length>1?`Mình gọi tận ${L.length} món luôn ${L.map(x=>BOBA_MENU[x].e).join('')} 😋`:`${m.e} ${m.n} của mình nè!`):lines[k%lines.length],2.1);}
+      if(k)nextItem();await s.say(k<ppl.length&&R()<.5?(L.length>1?`Mình gọi tận ${L.length} món luôn ${L.map(x=>BOBA_MENU[x].e).join('')} 😋`:`${m.e} ${m.n} của mình nè!`):lines[k%lines.length],2.1);}
     if(ppl.some(c=>ordOf(c).length>2)){for(let q=0;q<2;q++){nextItem();await wait(1.8);}}
     catRelease();setStatus('🍟 Ăn uống xong rồi, mọi người quay về chỗ làm việc.');
     ppl.forEach(c=>{c.lookAt=null;setAct(c,'🚶 Quay về chỗ');});
