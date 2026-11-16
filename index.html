@@ -894,7 +894,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <li>💼 Gặp đối tác <b>+15</b> (ký được hợp đồng) / <b>+6</b> · 🚌 Team building <b>+10</b></li>
       <li>💐 Cắm hoa <b>+3</b> · 🧽 Dọn bàn <b>+4</b> · 🌱 Tưới cây, 🐟 chăm Mochi, 🧺 dọn cát <b>+3</b></li>
       <li>🦹 Có trộm đột nhập: người <b>bấm 📞 Báo cảnh sát đầu tiên</b> trong 20 giây <b>+2</b></li>
-      <li>🧟 Đại dịch zombie: bắn thuốc chữa khỏi mỗi zombie <b>+1</b> · vượt qua cả 2 round (zombie thường và Zombie Chúa) thì cả phòng <b>+2</b></li>
+      <li>🧟 Đại dịch zombie: bắn thuốc chữa khỏi mỗi zombie <b>+1</b> · hạ được Zombie Chúa ở round 2 (trong 30 giây) thì cả phòng <b>+2</b></li>
       <li>🎯 Mỗi ngày có <b>3 nhiệm vụ</b> (tab Cá nhân): xong mỗi cái <b>+20</b>, xong cả 3 mở <b>🎁 hộp quà KPI ngẫu nhiên (+15 đến +50)</b>.</li>
     </ul>
     <button type="button" id="rOk">Đã hiểu, vào làm thôi! ✓</button>
@@ -6369,7 +6369,7 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:0,built:false,vax:0
       if(Z.rd===1&&allInf){zPush();run('zr1f',null,{v:Z.key});if(Z.r1p)await Z.r1p;if(!Z||Z.end)break;   // round 1 thất thủ: bác sĩ vào cứu xong mới tới round 2
         Z.rd=1.5;Z.rt0=simTime;Z.rlen=3;zRoundFx(1.5);zPush();await wait(3);if(!Z||Z.end)break;
         Z.rd=2;Z.rt0=simTime+2.6;Z.rlen=30;Z.ent=0;zRoundFx(2);zPush();await wait(2.6);if(!Z||Z.end)break;Z.rt0=simTime;zR2Spawn(0);zSnd('groan');zPush();continue;}
-      let res=null;if(Z.rd===2&&allInf)res='lost';else if(Z.win)res=Z.win;else if(Z.rd===2&&rel>=Z.rlen){res='fled';Z.bossFled=true;}
+      let res=null;if(Z.rd===2&&allInf)res='lost';else if(Z.win)res=Z.win;else if(Z.rd===2&&rel>=Z.rlen){res='lost';Z.bossTime=true;}
       if(res){zPush();run('zend',null,{v:res+'|'+(Z.vaxBy?Z.vaxBy.id:'')});if(!Z.result)zEnd(res+'|'+(Z.vaxBy?Z.vaxBy.id:''));Z.end=true;break;}
       zHud();await wait(.25);k++;}
     ZHUD.classList.remove('show');Z.lost=Z.result==='lost';
@@ -6398,10 +6398,10 @@ function zFanfare(){if(!MUSIC.on)return;const c=audioCtx();if(!c)return;const t=
   N.forEach(([f,st,d])=>{const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(0,t+st);g.gain.linearRampToValueAtTime(.13,t+st+.02);g.gain.exponentialRampToValueAtTime(.001,t+st+d);o.start(t+st);o.stop(t+st+d+.05);});
   for(let k=0;k<14;k++){const n=c.createBufferSource(),b=c.createBuffer(1,Math.floor(c.sampleRate*.08),c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);n.buffer=b;const g=c.createGain(),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=1800;n.connect(hp);hp.connect(g);g.connect(c.destination);g.gain.value=.05;n.start(t+1.9+k*.09+Math.random()*.05);}}
 function zRoundFx(rd){if(rd===1.5&&Z&&Z.r1fail){setStatus('🩺 Mọi người đã được chữa khỏi… Chuẩn bị đối đầu Zombie Chúa!');zHud();return;}if(rd===1.5){thPop('✅','Round 1 hoàn thành!','Cả team đã cầm cự qua đợt zombie thường… Nhưng có thứ gì đó đáng sợ hơn đang tới 👑','ok',2500);setStatus('✅ Round 1 xong! Chuẩn bị đối đầu Zombie Chúa…');zHere().forEach(c=>c.think(pick(['😌','💪','😰']),2));}
-  else if(rd===2){zSnd('groan');beep(false);thPop('👑','ROUND 2: ZOMBIE CHÚA XUẤT HIỆN!','Zombie Chúa dẫn theo cả đàn zombie con! Cầm cự 30 giây, bắn thuốc liên tục — đừng để cả văn phòng bị nhiễm!','bad',2500);banner('👑','Zombie Chúa + đàn zombie!','Round 2 · Cầm cự 30 giây',null,'boss');setTimeout(()=>{if(Z&&/Chúa/.test(evBanT.textContent))bannerOff();},3000);
-    setStatus('👑 Zombie Chúa cùng đàn zombie con xuất hiện! Bắn thuốc liên tục, đừng để cả văn phòng bị nhiễm!');zHere().forEach(c=>c.think(pick(['😱','😨','🫣']),2));}zHud();}
+  else if(rd===2){zSnd('groan');beep(false);thPop('👑','ROUND 2: ZOMBIE CHÚA XUẤT HIỆN!','Zombie Chúa dẫn theo cả đàn zombie con! Phải hạ Zombie Chúa trong 30 giây — hết giờ mà nó còn sống là thua!','bad',2500);banner('👑','Zombie Chúa + đàn zombie!','Round 2 · Hạ Zombie Chúa trong 30 giây',null,'boss');setTimeout(()=>{if(Z&&/Chúa/.test(evBanT.textContent))bannerOff();},3000);
+    setStatus('👑 Zombie Chúa cùng đàn zombie con xuất hiện! Hạ Zombie Chúa trong 30 giây, hết giờ mà nó còn sống là thua!');zHere().forEach(c=>c.think(pick(['😱','😨','🫣']),2));}zHud();}
 async function zDoctor(r1){const big=!r1&&Z.rd===2,who=big?'Đội 5 bác sĩ và y tá':'Bác sĩ và y tá';Z.docOn=true;CHARS.forEach(c=>{if(c._zInf){c.path=[];c.walking=false;}});
-  const why='Tất cả nhân viên đã bị nhiễm zombie.';
+  const H1=zHere(),why=(!r1&&big&&H1.some(c=>!c._zInf))?'Hết 30 giây mà chưa hạ được Zombie Chúa.':'Tất cả nhân viên đã bị nhiễm zombie.';
   setStatus(`☣️ ${why} ${who} đang tới cứu mọi người…`);
   zActive().forEach(g=>{g._state='held';g.path=[];g.walking=false;});await wait(2.2);
   const T=big?[DOC,NUR].concat(NURX):[DOC,NUR];
