@@ -727,7 +727,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
       <div class="box">
         <div class="ttl">Mô phỏng</div>
         <button class="b" id="autoBtn" style="width:100%">🤖 Tự động: Tắt</button>
-        <label class="msync"><input type="checkbox" id="evRand" checked> Sự kiện ngẫu nhiên<small>Thỉnh thoảng có sự cố hoặc sếp tổng ghé bất ngờ</small></label>
+        <label class="msync"><input type="checkbox" id="evRand" checked> Sự kiện ngẫu nhiên<small>Thỉnh thoảng có sự cố, sếp tổng ghé, trộm đột nhập hoặc đại dịch zombie</small></label>
         <label class="speed">⏩ Tốc độ <input type="range" id="speed" min="0.5" max="3" step="0.25" value="1"><span id="speedVal">1x</span></label>
       </div>
     </section>
@@ -5413,6 +5413,15 @@ function bBarSetup(){const bar=$('#beachBar'),dl=BEACH.kind==='dl';bar.classList
    :'<button data-bact="swim">🏊 Bơi</button><button data-bact="sun">😎 Phơi nắng</button><button data-bact="drink">🍹 Uống nước</button><button data-bact="volley">🏐 Bóng chuyền</button><button data-bact="walk">🚶 Đi dạo</button><button class="bdr" data-bact="drink:cocktail">🍹 Cocktail</button><button class="bdr" data-bact="drink:coco">🥥 Dừa tươi</button><button class="bdr" data-bact="back">↩︎</button>';
   bar.querySelectorAll('[data-bact]').forEach(b=>b.onclick=()=>{const me=ME.id&&byId(ME.id);if(!me)return;const a=b.dataset.bact;
     if(a==='drink'){bar.classList.toggle('pick');return;}if(a==='back'){bar.classList.remove('pick');return;}bar.classList.remove('pick');run('beachdo',me,{v:a});});}
+// tự canh khung ảnh: lùi máy ảnh cho đủ mọi người trong khung (ảnh cắt 3:2 từ giữa màn hình)
+function pbFit(ppl,T,C){if(!ppl.length)return;const xs=ppl.map(c=>c.pos.x),zs=ppl.map(c=>c.pos.z);const cx=(Math.min(...xs)+Math.max(...xs))/2,cz=zs.reduce((a,b)=>a+b,0)/zs.length;
+  const dir=C.clone().sub(T);const d0=dir.length();dir.normalize();const side=new THREE.Vector3(dir.z,0,-dir.x).normalize();
+  // dời tâm khung theo chiều ngang về giữa nhóm
+  const off=new THREE.Vector3(cx-T.x,0,cz-T.z);const sh=off.dot(side);T.addScaledVector(side,sh);
+  let halfW=.55;ppl.forEach(c=>{const v=new THREE.Vector3(c.pos.x-T.x,0,c.pos.z-T.z);halfW=Math.max(halfW,Math.abs(v.dot(side))+.6);});
+  const el=renderer.domElement,sw=el.width||1,shh=el.height||1,cropH=Math.min(shh,sw/1.5),cropW=cropH*1.5;
+  const vf=THREE.MathUtils.degToRad(camera.fov)/2,tv=Math.tan(vf)*(cropH/shh),th=Math.tan(vf)*(sw/shh)*(cropW/sw);
+  const need=Math.max(d0,halfW/th*1.04,1.25/tv);C.copy(T).addScaledVector(dir,need);}
 // photobook
 const pbEl=$('#pbook');let PB=[];
 function pbShot(n,cap){let url='';
@@ -5482,7 +5491,7 @@ async function beachTrip(ppl,dest,v,rp){
     const O=OFF[k],F2=sp?sp.f:i=>{const f=FORM[n](i);return{x:f.x+O.x,z:f.z+O.z};},CM=sp?sp.cam:[CAM[n][0]+O.x,CAM[n][1],CAM[n][2]+O.z];
     await Promise.race([Promise.all(order.map((c,i)=>{bReset(c);const f=F2(i);const tok=c._bTok=(c._bTok||0)+1;return bWalk(c,f.x,f.z,tok);})),wait(k?3.2:2.2)]);
     order.forEach((c,i)=>{const f=F2(i);c.path=[];c.walking=false;c.pose='stand';c.pos.set(f.x,0,f.z);c.yaw=Math.atan2(CM[0]-f.x,CM[2]-f.z)*.7;c.root.rotation.y=c.yaw;});
-    camera.position.set(...CM);if(sp)controls.target.set(...sp.tgt);else controls.target.set(O.x,1,BL.row-.3+O.z);controls.update();
+    {const T0=sp?new THREE.Vector3(...sp.tgt):new THREE.Vector3(O.x,1,BL.row-.3+O.z),C0=new THREE.Vector3(...CM);pbFit(order,T0,C0);camera.position.copy(C0);controls.target.copy(T0);controls.update();}
     if(sp&&!DLK&&k===2&&BEACH.bt){const bt=BEACH.bt;bt.yaw=0;bt.gesture('wave',2.8);bt.think('🍹',2);}
     if(sp)order.forEach((c,i)=>{if(sp.hold){c.arms='cup';bHold(c,sp.hold);}c.gesture(sp.ges[i%2],2.8);if(i%2===0)c.think(sp.th[i%3],2);});
     else order.forEach((c,i)=>{const g=MIX[n][(i+n)%5];if(g==='cup'){c.arms='cup';bHold(c,CUPS.includes(c._bLast)?c._bLast:CUPS[i%2]);if(i%2)c.gesture('cheer',2.4);}else if(g==='jump'){c._jumpT=simTime+i*.06;c.gesture('jump',1.4);}else c.gesture(g,2.8);
@@ -5966,7 +5975,7 @@ async function thCatch(){const T=THIEF;await wait(2.8);{const pp=document.queryS
   thPop('🚔','Đã bắt được kẻ trộm!','Cảnh sát đã còng tay, áp giải kẻ trộm ra xe · Chứng từ mật được trả lại 📁 · Cảm ơn '+(TH&&TH.called?TH.called.name:'cả phòng')+' đã báo kịp thời 👏','ok',3000);setStatus('🚔 Đã bắt được kẻ trộm! Cảnh sát đã áp giải ra xe, chứng từ mật an toàn 📁');await wait(3);}
 // trộm xuất hiện ngẫu nhiên: ban đêm hoặc lúc văn phòng vắng
 function thOfficeEmpty(){const out=CHARS.filter(c=>c.away||c.outside||/Ngủ trưa|Đi ăn trưa|🛏️|🍱/.test(c.activity||'')).length;return out>=Math.ceil(CHARS.length/2);}
-{const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!EV.thief&&!danceRunning&&!meetingOn&&(todName==='night'||thOfficeEmpty())&&simTime-(EV.lastThief||-1e9)>600&&Math.random()<.35){EV.nextRand=simTime+rand(150,280);run('thief',null,{v:'1'});return;}return o();};}
+{const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!EV.thief&&!danceRunning&&!meetingOn&&simTime-(EV.lastThief||-1e9)>600&&Math.random()<((todName==='night'||thOfficeEmpty())?.35:.22)){EV.nextRand=simTime+rand(150,280);run('thief',null,{v:'1'});return;}return o();};}
 EVCMD.thief=()=>run('thief',null,{v:'1'});
 
 // né người: trộm và cảnh sát không đi xuyên qua nhân viên
@@ -6271,7 +6280,7 @@ async function zDoctor(){const big=Z.rd===2,who=big?'Đội 5 bác sĩ và y tá
 {const o=promoTick;promoTick=(...a)=>{if(EV.zombie||EV.thief)return;return o(...a);};}
 {const o=scold;scold=async(...a)=>{if(EV.zombie||EV.thief)return false;return o(...a);};}
 // ngẫu nhiên: thỉnh thoảng có đại dịch
-{const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!danceRunning&&!meetingOn&&zHere().length>=2&&simTime-(EV.lastZombie||-1e9)>900&&Math.random()<.12){EV.nextRand=simTime+rand(150,280);run('zombie',null,{v:Math.random().toString(36).slice(2,7)});return;}return o();};}
+{const o=evRandTick;evRandTick=()=>{if(EV.rand&&CAT_HOST&&simTime>=EV.nextRand&&!evBusy()&&!danceRunning&&!meetingOn&&zHere().length>=2&&simTime-(EV.lastZombie||-1e9)>720&&Math.random()<.22){EV.nextRand=simTime+rand(150,280);run('zombie',null,{v:Math.random().toString(36).slice(2,7)});return;}return o();};}
 EVCMD.zombie=()=>run('zombie',null,{v:Math.random().toString(36).slice(2,7)});
 // đang chống zombie / có trộm thì rời bàn không bị nhắc tắt màn hình
 {const o=scrLeave;scrLeave=c=>{if(EV.zombie||EV.thief){c.leftAt=Date.now();c.scrOff=true;return;}return o(c);};}
@@ -6312,7 +6321,7 @@ window.__zdbg={beams:()=>ZBM.length,inf:id=>zInfect(byId(id)),snap:()=>zSnap(),a
   M.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{M.classList.remove('show');const k=b.dataset.m;if(k==='x')return;const t=document.querySelector('[data-cmd="'+k+'"]');t&&t.click();});
   const btn=document.getElementById('meetPickBtn');if(btn)btn.onclick=()=>M.classList.add('show');}
 // camera bám theo nhân vật người chơi: nhân vật đi tới đâu, khung hình theo tới đó
-let CAMF=false,camfT=performance.now();
+let CAMF=false,camfT=performance.now(),camfAlt=false;
 function camfDist(){return camera.aspect<.9?10.5:8.5;}
 function camfOn(fly){const me=ME.id&&byId(ME.id);if(!me){setStatus('🎯 Hãy chọn nhân vật của bạn trước để camera đi theo.');return;}CAMF=true;
   document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view==='me'));
@@ -6322,7 +6331,8 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
 {const o=goView;goView=name=>{if(name==='me'){camfOn(true);return;}camfOff();o(name);};}
 {const o=claimMe;claimMe=(id,name)=>{const r=o(id,name);setTimeout(()=>camfOn(true),400);return r;};}
 {const o=updateOverlay;updateOverlay=(...a)=>{const now=performance.now(),dt=Math.min(.1,(now-camfT)/1000);camfT=now;
-  if(CAMF&&!camAnim&&!window.__altScene){const me=ME.id&&byId(ME.id);if(me&&me.root.visible){const k=1-Math.exp(-dt*3.5);
+  {const alt=!!window.__altScene;if(alt!==camfAlt){camfAlt=alt;if(CAMF)setTimeout(()=>{if(CAMF)camfOn(true);},alt?900:600);}}
+  if(CAMF&&!camAnim&&!(window.__altScene&&typeof BEACH!=='undefined'&&BEACH.photo)){const me=ME.id&&byId(ME.id);if(me&&me.root.visible!==false&&(!window.__altScene||(typeof BEACH!=='undefined'&&BEACH.ppl.includes(me)))){const k=1-Math.exp(-dt*3.5);
     const d=new THREE.Vector3(me.pos.x-controls.target.x,.7-controls.target.y,me.pos.z-controls.target.z).multiplyScalar(k);controls.target.add(d);camera.position.add(d);}}
   return o(...a);};}
 // nút Cãi sếp không hiện khi đang chọn quản lý
