@@ -5474,7 +5474,7 @@ async function beachTrip(ppl,dest,v,rp){
     2:{f:i=>{const a=-PI/2+(i/Math.max(1,N-1)-.5)*2.1;return{x:FX+Math.cos(a)*1.45,z:FZ+Math.sin(a)*1.45};},cam:[FX,2.6,FZ+5],tgt:[FX,.9,FZ-.6],hold:null,ges:['heart','heart'],th:['❤️','🔥','🥰'],name:'Thả tim bên lửa trại',cap:'Yêu team bên ánh lửa ❤️🔥'}}
    :{1:{f:i=>({x:(i-(N-1)/2)*.85+7.8,z:6.95}),cam:[7.8,2.5,12.6],tgt:[7.8,1,5.6],hold:'basket',ges:['cheer','wave'],th:['🍓','🧺','😋'],name:'Khoe giỏ dâu nào',cap:'Hái dâu cùng cả team 🍓'}};
   const SPEC_B={0:{f:i=>({x:(i-(N-1)/2)*.82,z:1.75}),cam:[0,2.3,7.4],tgt:[0,1.35,.8],hold:null,ges:['wave','cheer'],th:['😆','📸','🥰'],name:'Check-in trước cổng',cap:`Check-in ${dest.n} cùng cả team! 🥰`},
-    1:{f:i=>({x:-6.45+i*.78,z:4.25}),cam:[-5.2,2.7,10.6],tgt:[-6.2,1.9,3.9],hold:'coco',ges:['cheer','wave'],th:['🌴','🥥','😎'],name:'Chụp bên cây dừa',cap:'Bên cây dừa xanh mát 🌴'},
+    1:{f:i=>({x:-6.45+i*.78,z:4.3}),cam:[-5.3,2.05,9.6],tgt:[-5.9,1.25,4.1],hold:'coco',ges:['cheer','wave'],th:['🌴','🥥','😎'],name:'Chụp bên cây dừa',cap:'Bên cây dừa xanh mát 🌴'},
     2:{f:i=>({x:BL.bar.x+(i-(N-1)/2)*.74,z:1.5}),cam:[BL.bar.x,2.3,6.8],tgt:[BL.bar.x,1.15,.2],hold:'cocktail',ges:['cheer','cheer'],th:['🍹','🥂','😋'],name:'Cạn ly bên quầy bar',cap:'Cạn ly bên quầy bar 🍹'}};
   if(!DLK)Object.assign(SPEC,SPEC_B);
   const SHOTS=[0,2,4];for(let k=0;k<3;k++){const n=SHOTS[k],sp=SPEC[k];
@@ -6337,11 +6337,14 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
 // không đi xuyên qua nhau: nhân vật đang đi gặp người khác thì né sang bên; mèo cũng không chui xuyên qua người
 {const o=Chibi.prototype.update;Chibi.prototype.update=function(dt){o.call(this,dt);
   if(this.root.visible===false||!this.walking||this.pose==='sit'||this.lying||this._sunbathe||this._swim||this._thMv||this._zInf||ZPOOL.includes(this))return;
-  const me=this,R0=.5,par=me.root.parent;
+  const me=this,R0=.5,par=me.root.parent;if(me._sepOff&&simTime<me._sepOff)return;
+  {const L=me.path&&me.path[me.path.length-1];if(L&&Math.hypot(L.x-me.pos.x,L.z-me.pos.z)<1.1)return;}     // sắp tới nơi: không né để khỏi kẹt khi nhiều người cùng tới một chỗ
+  if(Math.hypot(me.pos.x-11,me.pos.z-2.7)<2.2)return;     // khu cửa ra vào: cho đi qua để không kẹt cửa
   CHARS.concat(VISITORS).forEach(c=>{if(c===me||c.root.visible===false||(typeof par==='object'&&c.root.parent!==par)||c.lying||c._sunbathe||c._swim)return;
     const dx=me.pos.x-c.pos.x,dz=me.pos.z-c.pos.z,d=Math.hypot(dx,dz);if(d>=R0||d<1e-4)return;
     const k=(R0-d),nx=dx/d,nz=dz/d,fx=Math.sin(me.yaw),fz=Math.cos(me.yaw);let px=nz,pz=-nx;if(px*fx+pz*fz<0){px=-px;pz=-pz;}
-    const head=-(nx*fx+nz*fz);me.pos.x+=nx*k+(head>.1?px*k*1.8:0);me.pos.z+=nz*k+(head>.1?pz*k*1.8:0);});};}
+    const head=-(nx*fx+nz*fz);me.pos.x+=nx*k+(head>.1?px*k*1.8:0);me.pos.z+=nz*k+(head>.1?pz*k*1.8:0);me._sepAcc=(me._sepAcc||0)+dt;});
+  if(me._sepAcc>2.5){me._sepAcc=0;me._sepOff=simTime+4;}else if(me._sepAcc>0)me._sepAcc=Math.max(0,me._sepAcc-dt*.25);};}
 {const o=updateOverlay;updateOverlay=(...a)=>{if(typeof CAT!=='undefined'&&CAT.g&&CAT.g.visible!==false&&!CAT.hold&&!window.__altScene){const P=CAT.g.position,R0=.42;
     CHARS.concat(VISITORS).forEach(c=>{if(c.root.visible===false||(typeof CAT.g.parent==='object'&&c.root.parent!==CAT.g.parent)||c.lying)return;const dx=P.x-c.pos.x,dz=P.z-c.pos.z,d=Math.hypot(dx,dz);if(d<R0&&d>1e-4){const k=R0-d;P.x+=dx/d*k;P.z+=dz/d*k;}});}
   return o(...a);};}
