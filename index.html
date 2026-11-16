@@ -6316,7 +6316,7 @@ function zEnd(v){if(!Z)return true;const [res,by]=String(v||'').split('|');if(Z.
 {const o=roomState;roomState=()=>{const s=o();if(s&&Z&&!Z.end)s.z=zSnap();return s;};}
 {const o=peerState;peerState=st=>{try{if(st&&st.z)zApply(st.z);}catch(e){}return o(st);};}
 setTimeout(()=>{if(window.OFFICE){OFFICE.roomState=roomState;OFFICE.peerState=peerState;}},0);
-window.__zdbg={beams:()=>ZBM.length,inf:id=>zInfect(byId(id)),snap:()=>zSnap(),apply:s=>zApply(s),host:v=>{CAT_HOST=v;},Z:()=>Z,end:v=>zEnd(v)};
+window.__zdbg={cat:()=>({x:+CAT.g.position.x.toFixed(2),z:+CAT.g.position.z.toFixed(2),s:CAT.state,p:CAT.path.length}),beams:()=>ZBM.length,inf:id=>zInfect(byId(id)),snap:()=>zSnap(),apply:s=>zApply(s),host:v=>{CAT_HOST=v;},Z:()=>Z,end:v=>zEnd(v)};
 // Họp nhóm + Mời họp gộp chung 1 nút: bấm vào chọn họp ngay hoặc hẹn giờ
 {const M=document.createElement('div');M.id='meetPick';M.className='welcome';M.setAttribute('role','dialog');
   M.innerHTML='<div class="wcard mcardm"><div class="wlogo">🤝</div><h2>Họp nhóm</h2><p class="wsub">Bạn muốn họp ngay hay hẹn giờ mời mọi người?</p><div class="mpopts"><button type="button" data-m="meeting"><b>🤝 Họp ngay</b><small>Cả team vào phòng họp ngay</small></button><button type="button" data-m="invite"><b>📅 Hẹn giờ mời họp</b><small>Mọi người đồng ý là vào họp</small></button></div><div class="crow"><button type="button" class="cghost" data-m="x">Hủy</button></div></div>';
@@ -6341,7 +6341,7 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
 // nút Cãi sếp không hiện khi đang chọn quản lý
 {let lastSel=null;const o=updateOverlay;updateOverlay=(...a)=>{const c=selected||null;if(c!==lastSel){lastSel=c;const b=document.querySelector('[data-cmd="argue"]');if(b)b.style.display=(c&&(c===MGR||c.manager))?'none':'';}return o(...a);};}
 // người chơi làm xong một hoạt động thì đứng yên tại chỗ chờ lệnh tiếp, không tự về bàn (NPC vẫn về chỗ như cũ)
-{const RR=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/,KEEP=/^(🚶|💺) Về chỗ ngồi$/;
+{const RR=/Quay về|về chỗ|về bàn|Về chỗ|Về bàn/,KEEP=/^(🚶|💺) Về chỗ ngồi$|Về bàn làm việc|Đi làm việc|Vào làm/;
   const o=Chibi.prototype.goSit;Chibi.prototype.goSit=function(seat){
     if(seat===this.home&&isHuman(this)&&this.busy&&!this.leavingNow&&!this.away&&RR.test(this.activity||'')&&!KEEP.test(this.activity||'')&&!(Z&&!Z.end)){
       this._stayEnd=true;this.path=[];if(this.pose==='sit'&&this.standUp)this.standUp();return Promise.resolve();}
@@ -6359,7 +6359,10 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
     const head=-(nx*fx+nz*fz);me.pos.x+=nx*k+(head>.1?px*k*1.8:0);me.pos.z+=nz*k+(head>.1?pz*k*1.8:0);me._sepAcc=(me._sepAcc||0)+dt;});
   if(me._sepAcc>2.5){me._sepAcc=0;me._sepOff=simTime+4;}else if(me._sepAcc>0)me._sepAcc=Math.max(0,me._sepAcc-dt*.25);};}
 {const o=updateOverlay;updateOverlay=(...a)=>{if(typeof CAT!=='undefined'&&CAT.g&&CAT.g.visible!==false&&!CAT.hold&&!window.__altScene){const P=CAT.g.position,R0=.42;
-    CHARS.concat(VISITORS).forEach(c=>{if(c.root.visible===false||(typeof CAT.g.parent==='object'&&c.root.parent!==CAT.g.parent)||c.lying)return;const dx=P.x-c.pos.x,dz=P.z-c.pos.z,d=Math.hypot(dx,dz);if(d<R0&&d>1e-4){const k=R0-d;P.x+=dx/d*k;P.z+=dz/d*k;}});}
+    if(CAT.path&&CAT.path.length){const L=CAT.path[CAT.path.length-1];
+      CHARS.concat(VISITORS).forEach(c=>{if(c.root.visible===false||(typeof CAT.g.parent==='object'&&c.root.parent!==CAT.g.parent)||c.lying)return;const dx=P.x-c.pos.x,dz=P.z-c.pos.z,d=Math.hypot(dx,dz);
+        if(d<R0+.25&&Math.hypot(L.x-c.pos.x,L.z-c.pos.z)<R0+.35){CAT.path=[];catArrive();return;}      // điểm đến sát người (ví dụ người đang ngồi bàn): đứng yên bên cạnh luôn
+        if(c.pose==='sit')return;if(d<R0&&d>1e-4){const k=R0-d;P.x+=dx/d*k;P.z+=dz/d*k;}});}}
   return o(...a);};}
 
 // tăng ca: ở lại tăng ca đủ 1 phút là được cộng KPI (không đợi tới lúc ra về)
@@ -6371,6 +6374,16 @@ setInterval(()=>{CHARS.forEach(c=>{if(!c.ot||c.away||c.leavingNow){c._otT0=null;
   const c=CHARS.find(x=>x.promoPending&&!x.busy&&!x.away&&!x.homeAfter);if(!c)return;c.promoPending=false;run('promo',c);};}
 {const o=run;run=(n,c,...a)=>{if(n==='promo'){if(!c)return false;c.promoPending=false;if(LEVELS[c.lv+1]){guard(()=>actPromote(c),[c,MGR]);}return true;}return o(n,c,...a);};}
 setTimeout(()=>{try{SYNC_SOLO.add('promo');}catch(e){}},0);
+
+// Mochi thấy zombie thì chạy trốn vào góc phòng, nấp tới khi hết dịch
+const CAT_HIDE={x:2.2,z:-6.45};
+{const o=catGo;catGo=(x,z,st)=>{if(Z&&!Z.end&&st!=='hide')return;return o(x,z,st);};}
+{const o=catArrive;catArrive=(...a)=>{if(CAT.state==='hide'){CAT.next=4;CAT.yaw=0;catThink('🙀',1.6);return;}return o(...a);};}
+{const o=updateOverlay;updateOverlay=(...a)=>{if(Z&&!Z.end&&typeof CAT!=='undefined'&&CAT.g&&!CAT.hold){const P=CAT.g.position,d=Math.hypot(P.x-CAT_HIDE.x,P.z-CAT_HIDE.z);
+    if(CAT.state!=='hide'||(d>.5&&!(CAT.path&&CAT.path.length))){CAT.sleep=false;CAT.attract=null;catGo(CAT_HIDE.x,CAT_HIDE.z,'hide');if(CAT.state!=='hide')CAT.state='hide';if(!CAT._hideMsg){CAT._hideMsg=1;catSay('Meo!! 🙀 Zombie kìa, Mochi trốn đây!',2);}}
+    CAT.next=Math.max(CAT.next||0,2);}
+  else if(typeof CAT!=='undefined'&&CAT.state==='hide'&&!(Z&&!Z.end)){CAT.state='idle';CAT.next=2;CAT._hideMsg=0;}
+  return o(...a);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
