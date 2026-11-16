@@ -602,6 +602,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
 .views button.vme{font-weight:700}
 .rlv .lv b{flex:none;white-space:nowrap}.rlv .lv small{flex:1;min-width:0}
 #zD{display:none!important}
+#zT{display:none!important}
 </style>
 </head>
 <body>
@@ -887,7 +888,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     </ul>
     <div class="rsec">✅ Cách cộng KPI</div>
     <ul class="rlist">
-      <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
+      <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca đủ 1 phút <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
       <li>🖨️ In tài liệu <b>+6</b> · 📞 Gọi khách <b>+6</b> · 💬 Trao đổi <b>+5</b> · 🧹 Quét văn phòng <b>+5</b></li>
       <li>🛠️ Xử lý sự cố <b>+8</b> · 👨‍💼 Sếp tổng khen <b>+5</b> (bắt lười <b>−8</b>) · 🎮 Minigame top 3 <b>+20/+10/+5</b></li>
       <li>💼 Gặp đối tác <b>+15</b> (ký được hợp đồng) / <b>+6</b> · 🚌 Team building <b>+10</b></li>
@@ -5028,7 +5029,9 @@ function leaveGo(c,P){leaveAdd(c,leaveDaysInMonth(P.f,P.t));
 // tới ngày nghỉ đã đăng ký: nhân vật không ở văn phòng
 setInterval(()=>{const o=schedStore(),k=todayK();let ch=false;
   for(const id in o){const e=o[id],c=byId(id);if(!c||e.t<k){delete o[id];ch=true;continue;}
-    if(e.f<=k&&!c.away&&!c.leavingNow&&!c.busy&&!c.coming&&c._schedDay!==k){c._schedDay=k;const left=kDiff(k,e.t)+1;guard(()=>actDayoff(c,e.ri,left),[c]);}}
+    if(isHuman(c)){if(c.id===ME.id&&e.f<=k&&c._schedDay!==k){c._schedDay=k;setStatus(`📅 Hôm nay ${c.name} có lịch nghỉ phép đã đăng ký — nếu muốn nghỉ thì bấm 📝 Đăng ký nghỉ phép nhé.`);}continue;}   // người chơi tự quyết, không tự cho nghỉ
+    if(!CAT_HOST)continue;   // chỉ máy chủ phòng cho NPC nghỉ theo lịch, rồi đồng bộ cho mọi máy
+    if(e.f<=k&&!c.away&&!c.leavingNow&&!c.busy&&!c.coming&&c._schedDay!==k){c._schedDay=k;const left=kDiff(k,e.t)+1;run('dayoff',c,{v:e.ri+'.'+(left>=2?2:1)});}}
   if(ch)schedSave(o);},5000);
 
 /* ===== nhân viên cãi sếp: lần 3 trừ 20 KPI + cảnh cáo, lần 4 trong ngày bị sa thải ngay ===== */
@@ -6216,7 +6219,7 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:0,built:false,vax:0
         Z.rd=1.5;Z.rt0=simTime;Z.rlen=5;zRoundFx(1.5);zPush();await wait(5);if(!Z||Z.end)break;
         Z.rd=2;Z.rt0=simTime+2.6;Z.rlen=30;Z.ent=0;zRoundFx(2);zPush();await wait(2.6);if(!Z||Z.end)break;Z.rt0=simTime;zSpawn(ZPOOL[0],99);zSnd('groan');zPush();continue;}
       if(Z.rd===1.5){zHud();await wait(.25);continue;}
-      const bang=zActive().filter(g=>g._state==='bang');if(!Z.broken&&bang.length){if(Z.door<=0&&!Z.built){const hold=CHARS.some(c=>c._zDrag&&!c._zInf&&Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)<1.8);if(!hold)await zDoorBreak();}else{Z.door=Math.max(0,Z.door-bang.reduce((s,g)=>s+(g._boss?14:1.8),0)*.25);if(Z.door<=0)await zDoorBreak();}}
+      const bang=zActive().filter(g=>g._state==='bang');if(!Z.broken&&bang.length){if(Z.door<=0&&!Z.built){const hold=CHARS.some(c=>c._zDrag&&!c._zInf&&Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)<1.8);if(!hold)await zDoorBreak();}else{if(!Z.bangT0)Z.bangT0=simTime;Z.door=Math.max(0,100-(simTime-Z.bangT0)/20*100);if(Z.door<=0||simTime-Z.bangT0>=20)await zDoorBreak();}}
       if(Z.broken)bang.forEach((g,j)=>zEnter(g,j));
       const tick=Math.floor(el/1.5);if(tick!==lastNpc){lastNpc=tick;zNpc(tick);}
       if(Math.floor(el)%6===0&&Math.floor(el)!==Z.gT&&zActive().length){Z.gT=Math.floor(el);const g=pick(zActive());g.say(pick(['Grừ… 🧠','Grààà…','Khò khè… 🧟']),1.4);zSnd('groan');}
@@ -6346,7 +6349,7 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
   const oe=end;end=(c,mode)=>{if(c&&c._stayEnd){c._stayEnd=false;if(mode==='working'||mode==='seated')mode='standing';}return oe(c,mode);};}
 // không đi xuyên qua nhau: nhân vật đang đi gặp người khác thì né sang bên; mèo cũng không chui xuyên qua người
 {const o=Chibi.prototype.update;Chibi.prototype.update=function(dt){o.call(this,dt);
-  if(this.root.visible===false||!this.walking||this.pose==='sit'||this.lying||this._sunbathe||this._swim||this._thMv||this._zInf||ZPOOL.includes(this))return;
+  if((isHuman(this)&&this.id!==ME.id)||this.root.visible===false||!this.walking||this.pose==='sit'||this.lying||this._sunbathe||this._swim||this._thMv||this._zInf||ZPOOL.includes(this))return;
   const me=this,R0=.5,par=me.root.parent;if(me._sepOff&&simTime<me._sepOff)return;
   {const L=me.path&&me.path[me.path.length-1];if(L&&Math.hypot(L.x-me.pos.x,L.z-me.pos.z)<1.1)return;}     // sắp tới nơi: không né để khỏi kẹt khi nhiều người cùng tới một chỗ
   if(Math.hypot(me.pos.x-11,me.pos.z-2.7)<2.2)return;     // khu cửa ra vào: cho đi qua để không kẹt cửa
@@ -6358,6 +6361,16 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
 {const o=updateOverlay;updateOverlay=(...a)=>{if(typeof CAT!=='undefined'&&CAT.g&&CAT.g.visible!==false&&!CAT.hold&&!window.__altScene){const P=CAT.g.position,R0=.42;
     CHARS.concat(VISITORS).forEach(c=>{if(c.root.visible===false||(typeof CAT.g.parent==='object'&&c.root.parent!==CAT.g.parent)||c.lying)return;const dx=P.x-c.pos.x,dz=P.z-c.pos.z,d=Math.hypot(dx,dz);if(d<R0&&d>1e-4){const k=R0-d;P.x+=dx/d*k;P.z+=dz/d*k;}});}
   return o(...a);};}
+
+// tăng ca: ở lại tăng ca đủ 1 phút là được cộng KPI (không đợi tới lúc ra về)
+{const o=kpiEvent;kpiEvent=(c,k,...a)=>{if(k==='ot'&&c&&!c._otAward)return;if(k==='ot'&&c)c._otAward=false;return o(c,k,...a);};}
+setInterval(()=>{CHARS.forEach(c=>{if(!c.ot||c.away||c.leavingNow){c._otT0=null;if(!c.ot)c._otPaid=false;return;}
+  if(c._otT0==null)c._otT0=simTime;if(!c._otPaid&&simTime-c._otT0>=60){c._otPaid=true;c._otAward=true;kpiEvent(c,'ot');c.think('🌙',1.6);setStatus(`🌙 ${c.name} đã tăng ca đủ 1 phút — được ghi nhận KPI tăng ca!`);}});},1000);
+// lên cấp: chỉ máy chủ phòng quyết định lúc trao bằng khen, rồi đồng bộ cho mọi máy (tránh lúc hiện cấp mới lúc hiện cấp cũ)
+{const o=promoTick;promoTick=(...a)=>{if(!CAT_HOST)return;if(EV.zombie||EV.thief)return;if(MGR.busy||MGR.away)return;
+  const c=CHARS.find(x=>x.promoPending&&!x.busy&&!x.away&&!x.homeAfter);if(!c)return;c.promoPending=false;run('promo',c);};}
+{const o=run;run=(n,c,...a)=>{if(n==='promo'){if(!c)return false;c.promoPending=false;if(LEVELS[c.lv+1]){guard(()=>actPromote(c),[c,MGR]);}return true;}return o(n,c,...a);};}
+setTimeout(()=>{try{SYNC_SOLO.add('promo');}catch(e){}},0);
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
