@@ -6591,9 +6591,9 @@ function css(){if($o('#orxCss'))return;const st=document.createElement('style');
 .orx .pg .zs{position:absolute;top:0;bottom:0;border-radius:6px;opacity:.55}.orx .pg .fl{position:absolute;right:-14px;top:-7px;font-size:20px}
 .orx .pg .mk{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #fff;font-size:9px;line-height:12px;text-align:center;font-weight:900;color:#13235b;transition:left .1s linear}
 .orx .pg .mk.me{width:22px;height:22px;border-color:#ff922b;z-index:2;line-height:18px;font-size:11px}
-.orx .tl{position:absolute;left:10px;top:34px;background:rgba(19,35,91,.8);border:2px solid #a5d8ff;border-radius:14px;padding:6px 12px;min-width:120px}
+.orx .tl{position:absolute;left:10px;top:48px;background:rgba(19,35,91,.8);border:2px solid #a5d8ff;border-radius:14px;padding:6px 12px;min-width:120px}
 .orx .tl .pl{font-size:30px;font-weight:900;color:#ffd43b;line-height:1}.orx .tl .pl small{font-size:15px;color:#fff}.orx .tl .tm{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}.orx .tl .zn{font-size:11px;font-weight:800;margin-top:2px;color:#a5d8ff}
-.orx .rk{position:absolute;right:10px;top:34px;background:rgba(19,35,91,.8);border:2px solid #a5d8ff;border-radius:14px;padding:6px 8px;font-size:12px;font-weight:700;min-width:150px}
+.orx .rk{position:absolute;right:10px;top:52px;background:rgba(19,35,91,.8);border:2px solid #a5d8ff;border-radius:14px;padding:6px 8px;font-size:12px;font-weight:700;min-width:150px}
 .orx .rk div{display:flex;align-items:center;gap:5px;padding:2px 3px;border-radius:7px}.orx .rk div.me{background:#ff922b}.orx .rk b{width:16px;color:#ffd43b}.orx .rk i{width:10px;height:10px;border-radius:50%;display:inline-block}.orx .rk span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.orx .rk em{font-style:normal;font-size:10px;opacity:.85}
 .orx .bl{position:absolute;left:10px;bottom:12px;display:flex;gap:8px;align-items:flex-end}
 .orx .sl{width:66px;height:66px;border-radius:16px;background:rgba(19,35,91,.85);border:3px solid #ffd43b;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:26px;overflow:hidden;pointer-events:auto;cursor:pointer}
@@ -6605,7 +6605,7 @@ function css(){if($o('#orxCss'))return;const st=document.createElement('style');
 .orx .tb{position:absolute;right:10px;top:10px;display:flex;gap:6px;pointer-events:auto;z-index:5}.orx .tb button{width:34px;height:34px;border-radius:10px;border:2px solid #a5d8ff;background:rgba(19,35,91,.85);color:#fff;font-size:16px;cursor:pointer}
 .orx .ban{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%) scale(.6);opacity:0;transition:all .25s;background:linear-gradient(90deg,#ff922b,#ffd43b);color:#13235b;font-weight:900;font-size:clamp(16px,3.4vw,30px);padding:10px 22px;border-radius:18px;border:3px solid #fff;text-align:center;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:88vw}
 .orx .ban.on{opacity:1;transform:translate(-50%,-50%) scale(1)}.orx .ban small{display:block;font-size:.5em;font-weight:800}
-.orx .feed{position:absolute;left:10px;top:150px;display:flex;flex-direction:column;gap:3px;pointer-events:none}.orx .feed div{background:rgba(19,35,91,.8);border-left:4px solid #ffd43b;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;animation:orxf 3s forwards}
+.orx .feed{position:absolute;left:10px;top:168px;display:flex;flex-direction:column;gap:3px;pointer-events:none}.orx .feed div{background:rgba(19,35,91,.8);border-left:4px solid #ffd43b;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;animation:orxf 3s forwards}
 @keyframes orxf{0%{opacity:0;transform:translateX(-20px)}10%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
 .orx .cnt{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:clamp(70px,16vw,150px);font-weight:900;color:#ffd43b;text-shadow:0 6px 0 #ff922b,0 10px 30px rgba(0,0,0,.4);pointer-events:none;display:none}
 .orx .cnt.on{display:block;animation:orxc .9s ease-out}@keyframes orxc{0%{transform:translate(-50%,-50%) scale(2.2);opacity:0}30%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(.9);opacity:.9}}
@@ -6627,7 +6627,7 @@ function css(){if($o('#orxCss'))return;const st=document.createElement('style');
 .orx .tc{position:absolute;inset:0;pointer-events:none;display:none}.orx.touch.run .tc{display:block}
 .orx .tc button{position:absolute;pointer-events:auto;border-radius:50%;border:3px solid rgba(255,255,255,.8);background:rgba(19,35,91,.55);color:#fff;font-size:24px;font-weight:900;width:64px;height:64px}
 .orx .tc button.on{background:rgba(255,146,43,.75)}
-.orx.touch .bl{bottom:90px}.orx.touch .st{bottom:96px}
+.orx.touch .bl{left:auto;right:12px;bottom:122px;flex-direction:row-reverse}.orx.touch .bl .sl{width:56px;height:56px;font-size:22px}.orx.touch .sl .ky{display:none}.orx.touch .st{bottom:auto;top:34px;height:8px}.orx.touch .st:after{content:'';}.orx.touch .bf{position:absolute;right:0;bottom:64px}
 `;document.head.appendChild(st);}
 function ui(){if($o('#orx'))return;css();const d=document.createElement('div');d.id='orx';d.className='orx';d.innerHTML=`
 <canvas id="orxCv"></canvas><div id="orxLb"></div>
@@ -6639,13 +6639,12 @@ function ui(){if($o('#orx'))return;css();const d=document.createElement('div');d
  <div class="st"><i id="orxSt"></i></div></div>
 <div class="tb" id="orxTb"><button type="button" id="orxPause" title="Tạm dừng">⏸</button><button type="button" id="orxMute" title="Âm thanh">🔊</button><button type="button" id="orxX" title="Thoát">✕</button></div>
 <div class="ban" id="orxBan"></div><div class="cnt" id="orxCnt"></div>
-<div class="tc" id="orxTc"><button type="button" data-k="l" style="left:12px;bottom:12px">◀</button><button type="button" data-k="r" style="left:86px;bottom:12px">▶</button>
- <button type="button" data-k="j" style="right:12px;bottom:12px;width:74px;height:74px">⤒</button><button type="button" data-k="s" style="right:96px;bottom:12px">💨</button>
- <button type="button" data-k="q" style="right:12px;bottom:98px;width:54px;height:54px;font-size:20px">Q</button><button type="button" data-k="e" style="right:76px;bottom:98px;width:54px;height:54px;font-size:20px">E</button></div>
+<div class="tc" id="orxTc"><button type="button" data-k="u" style="left:72px;bottom:118px">▲</button><button type="button" data-k="l" style="left:10px;bottom:62px">◀</button><button type="button" data-k="r" style="left:134px;bottom:62px">▶</button><button type="button" data-k="d" style="left:72px;bottom:6px">▼</button>
+ <button type="button" data-k="j" style="right:14px;bottom:22px;width:88px;height:88px;font-size:20px">⤒<br><small style="font-size:11px">NHẢY</small></button></div>
 <div class="scr on" id="orxTitle"><div class="logo">OFFICE<br>RACE</div><div class="sub">🏃 AI NHANH NGƯỜI ĐÓ THOÁT DEADLINE! 🏃</div><div class="sub2">OFFICE NONSENSE – CÔNG SỞ VÔ TRI</div>
  <button type="button" class="bt" id="orxPlay">▶ PLAY</button><button type="button" class="bt g" id="orxQuit1">↩ Về văn phòng</button></div>
 <div class="scr" id="orxSel"><h2>Chọn tay đua</h2><div class="cards" id="orxCards"></div>
- <div class="help"><b>🎮 Điều khiển:</b> <kbd>W</kbd>/<kbd>↑</kbd> chạy · <kbd>S</kbd>/<kbd>↓</kbd> chậm lại · <kbd>A</kbd><kbd>D</kbd>/<kbd>←</kbd><kbd>→</kbd> né trái phải · <kbd>SPACE</kbd> nhảy · <kbd>SHIFT</kbd> tăng tốc · <kbd>Q</kbd> kỹ năng · <kbd>E</kbd> thả chuối · <kbd>P</kbd>/<kbd>Esc</kbd> tạm dừng<br>
+ <div class="help"><b>🎮 Điều khiển:</b> <kbd>W</kbd>/<kbd>↑</kbd> chạy · <kbd>S</kbd>/<kbd>↓</kbd> chậm lại · <kbd>A</kbd><kbd>D</kbd>/<kbd>←</kbd><kbd>→</kbd> né trái phải · <kbd>SPACE</kbd> nhảy · <kbd>SHIFT</kbd> tăng tốc · <kbd>Q</kbd> kỹ năng · <kbd>E</kbd> thả chuối · <kbd>P</kbd>/<kbd>Esc</kbd> tạm dừng<br>📱 Điện thoại: giữ <kbd>▲</kbd> để chạy (giữ lâu tự tăng tốc) · <kbd>▼</kbd> chậm lại · <kbd>◀</kbd><kbd>▶</kbd> né · nút <kbd>NHẢY</kbd> · chạm ô ⚡ để dùng kỹ năng, ô 🍌 để thả chuối<br>
  📦 Nhặt hộp vật phẩm: ⚡ tăng tốc · 🛡️ lá chắn · 🧲 nam châm · 🍌 bẫy chuối · 🦘 siêu nhảy. Va chạm chỉ bị chậm lại, không bị loại!<br>🗺️ 3 khu: 🏢 Office Zone → ⚠️ Chaos Zone → 👑 Final Boss Zone. Coi chừng sếp, họp đột xuất và deadline rơi từ trời!</div>
  <button type="button" class="bt" id="orxGo">🏁 VÀO VẠCH XUẤT PHÁT</button></div>
 <div class="scr" id="orxLobby"><h2>🏃 Chờ người chơi vào đua <span id="orxLbT"></span></h2><div class="help" id="orxLbL"></div><div class="sub2" id="orxLbS"></div><button type="button" class="bt" id="orxLbGo">🏁 BẮT ĐẦU NGAY</button><button type="button" class="bt g" id="orxLbX">↩ Rời phòng chờ</button></div>
@@ -6658,8 +6657,8 @@ function ui(){if($o('#orx'))return;css();const d=document.createElement('div');d
   on('#orxMute',()=>{S.mute=!S.mute;$o('#orxMute').textContent=S.mute?'🔇':'🔊';if(S.mute)bgmStop();else if(S.state==='run'||S.state==='count')bgmStart();});
   on('#orxSk',()=>{if(S.me)useSkill(S.me);});on('#orxIt',()=>{if(S.me)useItem(S.me);});
   if('ontouchstart' in window||navigator.maxTouchPoints>0)d.classList.add('touch');
-  d.querySelectorAll('#orxTc button').forEach(b=>{const k=b.dataset.k;const dn=e=>{e.preventDefault();e.stopPropagation();b.classList.add('on');if(k==='l')S.key.l=1;if(k==='r')S.key.r=1;if(k==='s')S.key.sh=1;if(k==='j')S.key.jp=1;if(k==='q'&&S.me)useSkill(S.me);if(k==='e'&&S.me)useItem(S.me);};
-    const up=e=>{e.preventDefault();b.classList.remove('on');if(k==='l')S.key.l=0;if(k==='r')S.key.r=0;if(k==='s')S.key.sh=0;};
+  d.querySelectorAll('#orxTc button').forEach(b=>{const k=b.dataset.k;const dn=e=>{e.preventDefault();e.stopPropagation();b.classList.add('on');if(k==='l')S.key.l=1;if(k==='r')S.key.r=1;if(k==='u'){S.key.f=1;S.upT=performance.now();}if(k==='d')S.key.b=1;if(k==='j')S.key.jp=1;};
+    const up=e=>{e.preventDefault();b.classList.remove('on');if(k==='l')S.key.l=0;if(k==='r')S.key.r=0;if(k==='u')S.key.f=0;if(k==='d')S.key.b=0;};
     b.addEventListener('touchstart',dn,{passive:false});b.addEventListener('touchend',up,{passive:false});b.addEventListener('touchcancel',up,{passive:false});b.addEventListener('mousedown',dn);b.addEventListener('mouseup',up);b.addEventListener('mouseleave',up);});
   const KM={KeyW:'f',ArrowUp:'f',KeyS:'b',ArrowDown:'b',KeyA:'l',ArrowLeft:'l',KeyD:'r',ArrowRight:'r',ShiftLeft:'sh',ShiftRight:'sh'};
   window.addEventListener('keydown',e=>{if(!S||!S.open)return;e.stopPropagation();const k=KM[e.code];
@@ -6790,7 +6789,10 @@ function mkItem(z,x,k){for(const o of OB)if(o.solid&&Math.abs(o.z-z)<1.3&&Math.a
 /* ---------- tay đua ---------- */
 function bibTex(n,col){return txt(128,96,(x,W,H)=>{x.fillStyle='#fff';x.fillRect(0,0,W,H);x.strokeStyle=col;x.lineWidth=10;x.strokeRect(5,5,W-10,H-10);x.fillStyle='#13235b';x.font='900 56px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(String(n),W/2,H/2+4);});}
 function mkRacer(i){const src=CHARS[i],col=src.manager?'#8e86c9':(src.tagColor||'#ff8fb8');let obj=null,P={};
-  try{obj=src.root.clone(true);const MP=new Map();(function mp(a,b){MP.set(a,b);const n=Math.min(a.children.length,b.children.length);for(let k=0;k<n;k++)mp(a.children[k],b.children[k]);})(src.root,obj);
+  try{const MP=new Map();const cl=a=>{let b;if(a.isMesh)b=new THREE.Mesh(a.geometry,a.material);else if(a.isSprite)b=new THREE.Sprite(a.material);else if(a.isLine)b=new THREE.Line(a.geometry,a.material);else if(a.isPoints)b=new THREE.Points(a.geometry,a.material);else b=new THREE.Group();
+      b.position.copy(a.position);b.quaternion.copy(a.quaternion);b.scale.copy(a.scale);b.visible=a.visible;b.castShadow=a.castShadow;b.receiveShadow=a.receiveShadow;b.renderOrder=a.renderOrder||0;b.frustumCulled=a.frustumCulled;MP.set(a,b);
+      for(const ch of a.children){if(ch.isLight||ch.isCamera)continue;try{b.add(cl(ch));}catch(e){}}return b;};
+    obj=cl(src.root);
     P.legL=MP.get(src.legL);P.legR=MP.get(src.legR);P.armL=src.armL&&MP.get(src.armL.g);P.armR=src.armR&&MP.get(src.armR.g);P.hips=MP.get(src.hips);P.body=MP.get(src.body);P.head=MP.get(src.head);
     ['cupG','phone','chopG','canG','bagG','pack','doc','broom','_bCup','_bCoco','_zSp','awaySp','_zMaskG','_mask','snackG'].forEach(k=>{const o=src[k];const m=o&&o.isObject3D?MP.get(o):null;if(m)m.visible=false;});}catch(e){obj=null;}
   if(!obj||!obj.isObject3D){obj=new THREE.Group();mk(new THREE.CylinderGeometry(.2,.25,.7,12),M(col),0,.6,0,obj);mk(new THREE.SphereGeometry(.3,14,10),M('#ffe0cc'),0,1.15,0,obj);}
@@ -6856,7 +6858,7 @@ function updObs(dt){const t=(S.state==='run'||S.state==='count'||S.state==='resu
   if(S.state==='run'&&Math.random()<dt*10)S.winds.forEach(w=>{if(Math.abs(w.z0-(S.me?S.me.z:0))<25)part((Math.random()-.5)*2*HW,.3+Math.random()*1.4,w.z1,{vz:-9,col:'#e7f5ff',sz:.06,life:.7,stretch:1});});}
 
 /* ---------- điều khiển người chơi ---------- */
-function input(r){const k=S.key,touch=$o('#orx').classList.contains('touch');r.inX=(k.r?1:0)-(k.l?1:0);r.inF=k.b?.25:(k.f||touch)?1:0;r.inSp=!!k.sh;r.inJ=!!k.jp;k.jp=0;}
+function input(r){const k=S.key,touch=$o('#orx').classList.contains('touch');r.inX=(k.r?1:0)-(k.l?1:0);r.inF=k.b?.25:k.f?1:0;r.inSp=!!k.sh||(touch&&k.f&&performance.now()-(S.upT||0)>700&&r.sta>20);r.inJ=!!k.jp;k.jp=0;}
 /* ---------- AI ---------- */
 function blocks(o,x,z0,z1,m){if(!o.on||!o.solid&&!['slip','wet','spinout','slow'].includes(o.eff))return false;if(o.k==='doorctl')return false;if(o.z<z0||o.z>z1)return false;const w=(o.hw!=null?o.hw:o.r)+m;return Math.abs(o.x-x)<w;}
 function ai(r,dt){r.ai.rt-=dt;const ahead=7.5;
