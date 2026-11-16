@@ -6133,7 +6133,7 @@ function zHeal(c){const z=c._zInf;if(!z)return;z.sw.forEach(o=>o.material=SKIN);
   if(Z&&!Z.end&&!isHuman(c))begin(c,'🛡️ Chống zombie');if(c.id===ME.id)zHud();}
 function zTagName(g){const hp=Math.max(0,g._hp);g.nameEl.textContent=g._boss?'👑 Zombie Chúa '+'▰'.repeat(Math.ceil(hp/3))+'▱'.repeat(10-Math.ceil(hp/3)):'🧟 '+'💚'.repeat(hp);}
 function zSpawn(g,i){const r=srand(hashStr(Z.key+g.id+i));g._hp=g._boss?30:3;g._state='out';zTagName(g);g._zm.color.set(g._sk);g.mLeg.color.set(g._lg);zDeco(g,true);g.arms='hold';g.spd=g._boss?.55:.38;
-  g._zCnt=false;g.pos.set(g._boss?15.2:14.6+r()*2,0,g._boss?2.6:1+r()*3.4);g.yaw=-PI/2;g.root.visible=true;g.lookAt=null;
+  g._zCnt=false;g.pos.set(g._boss?15.2:(Z&&Z.rd===1&&i<10?14.7+r()*.5:14.6+r()*2),0,g._boss?2.6:1+r()*3.4);g.yaw=-PI/2;g.root.visible=true;g.lookAt=null;
   (async()=>{await walkDirect(g,[{x:12.65+(Math.floor(i/2)%3)*.5+r()*.15,z:1.5+((i*.53)%2.4)}]);if(g._state==='out')g._state='bang';})();}
 async function zCure(g){zDeco(g,false);g._state='cured';g.path=[];g.walking=false;g._zm.color.set('#ffe2d2');g.mLeg.color.set('#fde0d1');g.arms='idle';g.root.rotation.z=0;g.nameEl.textContent='🙂 Người qua đường';g.spd=1.4;
   g.think('😳',1.4);g.say(pick(['Ơ… mình bị sao vậy? Cảm ơn nha! 🙇','Tỉnh rồi! Cảm ơn mọi người 🙏','Hết bệnh rồi, cảm ơn nha! 😭']),2.2);g.gesture('bow',1.4);await wait(1.6);
@@ -6209,7 +6209,7 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:0,built:false,vax:0
     setStatus('🚨 Zombie sắp tới! Kéo bàn chặn cửa ngay! Khi zombie phá cửa thì chạm vào zombie để bắn thuốc. Round 1: cầm cự 40 giây, đừng để 3 zombie vào giữa văn phòng!');
     CHARS.forEach(c=>zMaskOn(c,true));[DOC,NUR].concat(NURX).forEach(c=>zMaskOn(c,true));
     crew.forEach((c,i)=>{if(!c.busy)begin(c,'🛡️ Chống zombie');c.think(pick(['😱','😨','🫣']),2);zSprayProp(c).visible=true;});if(typeof CAT!=='undefined'&&CAT.think)CAT.think('🙀',3);
-    const W=[[12,[1,2,3,4]],[19,[5,6,7,8]],[26,[9,10,11,12]]];let wi=0,k=0,lastNpc=-1;Z.rd=1;Z.rt0=simTime;Z.rlen=40;
+    const W=[[0,[1,2,3,4]],[14,[5,6,7,8]],[24,[9,10,11,12]]];let wi=0,k=0,lastNpc=-1;Z.rd=1;Z.rt0=simTime;Z.rlen=40;
     while(!Z.end){const el=simTime-Z.t0,rel=simTime-Z.rt0;
       if(!CAT_HOST){if(Z.result){Z.end=true;break;}if(simTime-Z.t0>220){Z.result='lost';Z.end=true;break;}zHud();await wait(.25);continue;}
       if(Z.rd===1)while(wi<W.length&&rel>=W[wi][0]){const [,ids]=W[wi];ids.forEach((id,j)=>{const g=ZPOOL[id];if(g._state==='idle')zSpawn(g,wi*10+j);else{const alt=ZPOOL.find(x=>x._state==='idle'&&x!==ZPOOL[0]);if(alt)zSpawn(alt,wi*10+j);}});
@@ -6219,7 +6219,7 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:0,built:false,vax:0
         Z.rd=1.5;Z.rt0=simTime;Z.rlen=5;zRoundFx(1.5);zPush();await wait(5);if(!Z||Z.end)break;
         Z.rd=2;Z.rt0=simTime+2.6;Z.rlen=30;Z.ent=0;zRoundFx(2);zPush();await wait(2.6);if(!Z||Z.end)break;Z.rt0=simTime;zSpawn(ZPOOL[0],99);zSnd('groan');zPush();continue;}
       if(Z.rd===1.5){zHud();await wait(.25);continue;}
-      const bang=zActive().filter(g=>g._state==='bang');if(!Z.broken&&bang.length){if(Z.door<=0&&!Z.built){const hold=CHARS.some(c=>c._zDrag&&!c._zInf&&Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)<1.8);if(!hold)await zDoorBreak();}else{if(!Z.bangT0)Z.bangT0=simTime;Z.door=Math.max(0,100-(simTime-Z.bangT0)/20*100);if(Z.door<=0||simTime-Z.bangT0>=20)await zDoorBreak();}}
+      const bang=zActive().filter(g=>g._state==='bang');if(!Z.broken&&bang.length){if(!Z.bangT0)Z.bangT0=simTime;if(Z.door<=0&&!Z.built){const hold=CHARS.some(c=>c._zDrag&&!c._zInf&&Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)<1.8);if(!hold&&!Z.held)await zDoorBreak();else{Z.held=true;if(simTime-Z.bangT0>=15)await zDoorBreak();}}else{Z.door=Math.max(0,100-(simTime-Z.bangT0)/15*100);if(simTime-Z.bangT0>=15)await zDoorBreak();}}
       if(Z.broken)bang.forEach((g,j)=>zEnter(g,j));
       const tick=Math.floor(el/1.5);if(tick!==lastNpc){lastNpc=tick;zNpc(tick);}
       if(Math.floor(el)%6===0&&Math.floor(el)!==Z.gT&&zActive().length){Z.gT=Math.floor(el);const g=pick(zActive());g.say(pick(['Grừ… 🧠','Grààà…','Khò khè… 🧟']),1.4);zSnd('groan');}
