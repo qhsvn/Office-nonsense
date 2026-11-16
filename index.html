@@ -6700,10 +6700,10 @@ function floorTex(kind){return txt(256,256,(x,W,H)=>{if(kind===0){x.fillStyle='#
   else{x.fillStyle='#8b1e2d';x.fillRect(0,0,W,H);x.strokeStyle='#c92a3e';x.lineWidth=3;for(let i=-H;i<W;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i+H,H);x.stroke();}x.fillStyle='rgba(255,212,59,.35)';x.fillRect(0,0,W,6);x.fillRect(0,H-6,W,6);}});}
 function checker(){return txt(256,64,(x,W,H)=>{for(let i=0;i<16;i++)for(let j=0;j<4;j++){x.fillStyle=(i+j)%2?'#111':'#fff';x.fillRect(i*16,j*16,16,16);}});}
 function arch(z,t1,t2,bg){const g=new THREE.Group();g.position.set(0,0,z);S.dyn.add(g);const pm=M('#13235b',{roughness:.5});
-  for(const s of[-1,1]){mk(new THREE.BoxGeometry(.4,3.6,.4),pm,s*(HW+.5),1.8,0,g);mk(new THREE.SphereGeometry(.32,12,10),M('#ffd43b',{emissive:'#7a5a00'}),s*(HW+.5),3.75,0,g);}
-  const b=mk(new THREE.BoxGeometry(2*HW+1.4,.95,.18),M('#ffffff'),0,3.2,0,g);const bm=MB('#ffffff',{map:banTex(t1,t2,bg)});const f=new THREE.Mesh(new THREE.PlaneGeometry(2*HW+1.3,.9),bm);f.position.set(0,3.2,-.1);f.rotation.y=PI;g.add(f);
-  const f2=f.clone();f2.position.z=.1;f2.rotation.y=0;g.add(f2);return g;}
-function buildTrack(rand){const D=S.dyn;
+  for(const s of[-1,1]){mk(new THREE.BoxGeometry(.4,5.2,.4),pm,s*(HW+.5),2.6,0,g);mk(new THREE.SphereGeometry(.32,12,10),M('#ffd43b',{emissive:'#7a5a00'}),s*(HW+.5),5.35,0,g);}
+  const top=new THREE.Group();g.add(top);const tm=M('#ffffff',{transparent:true});const b=mk(new THREE.BoxGeometry(2*HW+1.4,.95,.18),tm,0,4.75,0,top);const bm=MB('#ffffff',{map:banTex(t1,t2,bg),transparent:true});const f=new THREE.Mesh(new THREE.PlaneGeometry(2*HW+1.3,.9),bm);f.position.set(0,4.75,-.1);f.rotation.y=PI;top.add(f);
+  const f2=new THREE.Mesh(f.geometry,bm);f2.position.set(0,4.75,.1);top.add(f2);S.arches.push({z,mats:[tm,bm],top});return g;}
+function buildTrack(rand){const D=S.dyn;S.arches=[];
   // nền ngoài + sàn từng khu
   const base=mk(new THREE.PlaneGeometry(60,L+80),M('#dfe7f2',{roughness:.95}),0,-.02,L/2,D,false);base.rotation.x=-PI/2;
   ZN.forEach((zn,k)=>{const t=floorTex(k);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,(zn.z1-zn.z0)/4);const f=mk(new THREE.PlaneGeometry(2*HW+.4,zn.z1-zn.z0),M('#ffffff',{map:t,roughness:.85}),0,0,(zn.z0+zn.z1)/2,D,false);f.rotation.x=-PI/2;
@@ -7003,7 +7003,7 @@ const EV_FN={
   phone:(z,R,tg)=>{(tg||[]).forEach(i=>{const r=S.rac[i];if(!r||r.fin)return;if(isLoc(r))r.phone=1.7;if(r.me){sfx('phone');banner('📱 ĐIỆN THOẠI REO!','Sếp gọi… mất tập trung, chạy chậm lại!');}else feed(`📱 ${r.short} bị điện thoại làm phân tâm!`);});},
   elevator:(z,R)=>{const g=new THREE.Group();g.position.set(0,0,z);S.dyn.add(g);const wm=M('#868e96',{metalness:.4,roughness:.35}),dm=M('#ced4da',{metalness:.6,roughness:.25});const xs=[-2.1,0,2.1],ow=.75;
     const segs=[[-HW-.2,-2.1-ow],[-2.1+ow,-ow],[ow,2.1-ow],[2.1+ow,HW+.2]];segs.forEach(([a,b])=>{const w=b-a;mk(new THREE.BoxGeometry(w,2.6,.35),wm,(a+b)/2,1.3,0,g);S.dynOb.push({k:'elev',x:(a+b)/2,z,hw:w/2,hd:.18,h:3,solid:1,eff:'stop',on:true,id:++OBID,ev:g});});
-    mk(new THREE.BoxGeometry(2*HW+.4,.4,.4),wm,0,2.8,0,g);const sg=sprite(txt(256,64,(c,W,H)=>{c.fillStyle='#13235b';c.fillRect(0,0,W,H);c.fillStyle='#ffd43b';c.font='900 30px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('🛗 THANG MÁY',W/2,H/2);}),1,g);sg.scale.set(2.4,.6,1);sg.position.y=3.4;
+    mk(new THREE.BoxGeometry(2*HW+.4,.4,.4),wm,0,2.8,0,g);const sg=sprite(txt(256,64,(c,W,H)=>{c.fillStyle='#13235b';c.fillRect(0,0,W,H);c.fillStyle='#ffd43b';c.font='900 30px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('🛗 THANG MÁY',W/2,H/2);}),1,g);sg.scale.set(2.4,.6,1);sg.position.y=2.95;
     const open=Math.floor(R()*3),close=[0,1,2].filter(i=>i!==open&&(R()<.75));if(!close.length)close.push((open+1)%3);
     const doors=xs.map((x,i)=>{const L1=mk(new THREE.BoxGeometry(ow,2.3,.1),dm,x-ow,1.15,0,g),R1=mk(new THREE.BoxGeometry(ow,2.3,.1),dm,x+ow,1.15,0,g);const o={k:'elevD',x,z,hw:ow,hd:.15,h:3,solid:1,eff:'stop',on:false,id:++OBID};S.dynOb.push(o);
       const lt=sprite(emojiTex(close.includes(i)?'⛔':'✅'),.45,g);lt.position.set(x,2.45,-.25);return{L1,R1,o,x,c:close.includes(i)};});
@@ -7091,6 +7091,7 @@ function render(){if(!S.R)return;const cam=S.cam;let P,T;
   if(!S.camP){S.camP=P.clone();S.camT=T.clone();}const k=S.state==='run'?.12:.06;S.camP.lerp(P,k);S.camT.lerp(T,k);cam.position.copy(S.camP);cam.lookAt(S.camT);
   if(S.dl){S.dl.position.set(S.camT.x+6,14,S.camT.z-4);S.dl.target.position.set(S.camT.x,0,S.camT.z+4);}
   const zk=S.camT.z<ZN[1].z0?0:S.camT.z<ZN[2].z0?1:2;const bg=['#bfe3ff','#ffe8cc','#3b1a2a'][zk];if(S.bgK!==zk){S.bgK=zk;S.scene.background.set(bg);S.scene.fog.color.set(bg);}
+  (S.arches||[]).forEach(a=>{const d=a.z-cam.position.z,o=d<-.5?1:clamp((d-1.5)/9,.08,1);a.mats.forEach(m=>{m.opacity=o;m.depthWrite=o>.95;});a.top.visible=o>.09;});
   S.R.render(S.scene,cam);labels();}
 
 /* ---------- CHƠI NHIỀU NGƯỜI: mọi máy cùng 1 đường đua, mỗi người tự điều khiển nhân vật của mình, AI do chủ phòng chạy ---------- */
