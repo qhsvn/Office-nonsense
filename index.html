@@ -5651,24 +5651,33 @@ function vbTick(dt){const b=VB.ball;if(!b)return;const P=VB.players.filter(c=>c.
 function zSndSafe(k){try{const ac=audioCtx();if(!ac||!MUSIC.on)return;const o=ac.createOscillator(),gn=ac.createGain();o.type='triangle';o.frequency.value=420;o.frequency.exponentialRampToValueAtTime(180,ac.currentTime+.08);gn.gain.setValueAtTime(.06,ac.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.1);o.connect(gn);gn.connect(ac.destination);o.start();o.stop(ac.currentTime+.12);}catch(e){}}
 {let last=0;const o=beachTick;beachTick=(...a)=>{const r=o(...a);if(BEACH.on&&BEACH.kind!=='dl'){const dt=last?Math.min(.1,simTime-last):0;vbTick(dt);}last=simTime;return r;};}
 
-/* ===== sóng biển dùng chung (lướt sóng + nhảy sóng): con sóng cuộn có mép bọt trắng ===== */
-function bWaveGeo(W,H,nx){const PR=[[-2.6,0],[-2,.1],[-1.4,.3],[-.9,.55],[-.45,.8],[-.1,.96],[.15,1],[.38,.9],[.52,.74],[.54,.62],[.46,.58],[.42,.5],[.5,.36],[.65,.21],[.86,.09],[1.15,0]];
-  const N=PR.length,pos=[],col=[],idx=[],cA=new THREE.Color('#0b7f9c'),cB=new THREE.Color('#3fd0de'),cW=new THREE.Color('#ffffff'),tmp=new THREE.Color();
-  for(let i=0;i<=nx;i++){const u=i/nx,x=(u-.5)*W,tp=Math.max(0,1-Math.pow(Math.abs(u-.5)*2,3)),wob=Math.sin(u*9.7)*.12;
-    for(let j=0;j<N;j++){const [z,y]=PR[j];pos.push(x,y*H*tp,z*(.75+.25*tp)+wob);
-      const lip=j>=6&&j<=10?1-Math.abs(j-8)/3:0,f=Math.min(1,y);tmp.copy(cA).lerp(cB,f);tmp.lerp(cW,Math.max(lip*.95,j>=13?(j-12)*.28:0));col.push(tmp.r,tmp.g,tmp.b);}}
-  for(let i=0;i<nx;i++)for(let j=0;j<N-1;j++){const a=i*N+j,b=a+N;idx.push(a,b,a+1,b,b+1,a+1);}
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();return g;}
-function bWaveMesh(S,W,H,x){const g=new THREE.Group();g.position.set(x,-.05,-20);S.add(g);
-  const m=new THREE.Mesh(bWaveGeo(W,H,40),new THREE.MeshStandardMaterial({vertexColors:true,roughness:.22,metalness:.05,transparent:true,opacity:.93,side:THREE.DoubleSide}));m.castShadow=false;m.receiveShadow=false;g.add(m);
-  const fm=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.7,depthWrite:false});const foam=new THREE.Mesh(new THREE.PlaneGeometry(W*.9,1.4),fm);foam.rotation.x=-PI/2;foam.position.set(0,.07,1.2);g.add(foam);
-  const spm=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.9}),sp=[];for(let k=0;k<16;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(.05+(k%3)*.025,8,6),spm);g.add(b);sp.push(b);}
-  g.visible=false;return{g,m,foam,fm,sp,W,H};}
-function bWaveSet(w,zc,S,t,foamK){w.g.visible=S>.01;if(!w.g.visible)return;w.g.position.z=zc;w.m.scale.set(1,S,1);w.fm.opacity=.25+.55*(foamK==null?S:foamK);w.foam.scale.set(1,1,.5+(1-S));
-  w.sp.forEach((b,k)=>{const a=(t*1.3+k*.137)%1;b.position.set(((k*.618)%1-.5)*w.W*.8,(w.H*S*.95)+Math.sin(a*PI)*.35*S,.35+a*.5);b.scale.setScalar((1-a)*(.4+S));b.visible=S>.15;});}
-// độ cao mặt sóng tại khoảng cách dz trước đỉnh sóng (dz>0 = phía bờ)
-function bWaveY(w,dz,S){const PR=[[-2.6,0],[-1.4,.3],[-.45,.8],[.15,1],[.42,.5],[.5,.36],[.65,.21],[.86,.09],[1.15,0]];if(dz<=PR[0][0]||dz>=1.15)return 0;
-  for(let k=0;k<PR.length-1;k++){const [z0,y0]=PR[k],[z1,y1]=PR[k+1];if(dz>=z0&&dz<=z1)return(y0+(y1-y0)*(dz-z0)/(z1-z0))*w.H*S;}return 0;}
+/* ===== sóng biển dùng chung (lướt sóng + nhảy sóng): một mảng mặt biển mịn được nâng lên thành con sóng, nhô lên từ mặt biển nên không có cạnh cứng ===== */
+function bSeaRip(x,z,t){const ly=-z-32.6;return Math.sin(ly*.42+t*1.3)*.06+Math.sin(x*.18+ly*.2+t*.8)*.035;}
+function bWavePatch(S,x0,x1,z0,z1,nx,nz,H,k){k=k||1;const geo=new THREE.PlaneGeometry(x1-x0,z1-z0,nx,nz);geo.rotateX(-PI/2);const cx=(x0+x1)/2,cz=(z0+z1)/2;
+  const P=geo.attributes.position,n=P.count,X=new Float32Array(n),Z=new Float32Array(n);for(let i=0;i<n;i++){X[i]=P.getX(i)+cx;Z[i]=P.getZ(i)+cz;}
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(n*3),3));
+  const sea=new THREE.Color((BEACH_DEST[BEACH.dest&&BEACH.dest.n]||{}).sea||'#27c2d3');
+  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.2,metalness:.06,transparent:true,opacity:.97}));m.position.set(cx,0,cz);m.castShadow=false;m.receiveShadow=false;m.visible=false;S.add(m);
+  const spm=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.85,depthWrite:false}),sp=[];for(let k=0;k<14;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(.045+(k%3)*.02,8,6),spm);b.castShadow=false;b.visible=false;S.add(b);sp.push(b);}
+  return{m,geo,X,Z,n,x0,x1,z0,z1,H,k,LF:1.15*k,cx,cz,zc:-99,A:0,brk:0,nf:0,sp,c0:sea,c1:new THREE.Color('#0f8aa3'),c2:new THREE.Color('#a6f3f4'),cw:new THREE.Color('#ffffff')};}
+// độ cao con sóng (chưa cộng mặt biển) tại điểm X,Z
+function wpRaw(w,X,Z){if(w.A<=.001)return 0;const d=Z-w.zc,pr=d<0?Math.exp(-Math.pow(-d/(1.5*w.k),1.7)):Math.pow(Math.max(0,1-d/w.LF),2.2);if(pr<.002)return 0;
+  const u=(X-w.x0)/(w.x1-w.x0);if(u<=0||u>=1)return 0;const tx=Math.pow(Math.sin(PI*u),.55)*(1+.13*Math.sin(X*1.15+w.zc*.6)+.07*Math.sin(X*2.9));
+  const tz=Math.min(1,(w.z1-Z)/1.1,(Z-w.z0)/1.5);if(tz<=0)return 0;return w.H*w.A*pr*tx*tz*tz*(3-2*tz);}
+function wpH(w,X,Z,t){return -.04+bSeaRip(X,Z,t)+Math.max(0,(w?wpRaw(w,X,Z):0)-.035);}   // độ cao mặt nước thật (để đặt ván)
+function wpSet(w,zc,A,brk,t){w.zc=zc;w.A=A;w.brk=brk;const on=A>.01||brk>.02;w.m.visible=on;w.sp.forEach(b=>b.visible=false);if(!on)return;
+  const P=w.geo.attributes.position.array,C=w.geo.attributes.color.array,c=new THREE.Color(),HA=w.H*Math.max(A,.05);
+  for(let i=0;i<w.n;i++){const X=w.X[i],Z=w.Z[i],h=wpRaw(w,X,Z),d=Z-zc;P[i*3+1]=-.075+bSeaRip(X,Z,t)+h;
+    const r=h/HA,nz=.5+.5*Math.sin(X*3.3+t*.9+Z*.7)*Math.sin(X*1.9-t*.5),nz2=.5+.5*Math.sin(X*5.1-t*1.3+Z*2.3);
+    const K=w.k,LF=w.LF;c.copy(w.c0);if(d>0)c.lerp(w.c1,Math.min(.85,r*1.5));else c.lerp(w.c1,Math.min(.25,r*.4));
+    c.lerp(w.c2,Math.max(0,Math.min(1,(r-.6)/.4))*(d<.1?.9:.2));
+    let f=Math.max(0,Math.min(1,(r-.78)/.18))*brk*(.6+.4*nz)*(d>-.5?1:.4);                               // bọt trắng trên đỉnh sóng
+    if(d>LF*.5&&d<2.8*K){const e=d-LF*1.2;f=Math.max(f,brk*Math.exp(-(e*e)/(.45*K*K))*(.55+.45*nz2)*Math.min(1,A*2.2+.35));}   // bọt trắng xoá đổ phía trước
+    if(d<-.3&&d>-3*K){const e=d+1.2*K;f=Math.max(f,brk*.32*Math.exp(-(e*e)/(.6*K*K))*nz*nz2);}              // vệt bọt phía sau
+    c.lerp(w.cw,Math.min(1,f));C[i*3]=c.r;C[i*3+1]=c.g;C[i*3+2]=c.b;if(f>.3)P[i*3+1]+=f*.03;}
+  w.geo.attributes.position.needsUpdate=true;w.geo.attributes.color.needsUpdate=true;if((w.nf=(w.nf+1)%2)===0)w.geo.computeVertexNormals();
+  if(brk>.25&&A>.15)w.sp.forEach((b,k)=>{const a=(t*1.25+k*.173)%1,X=w.x0+.8+((k*.618)%1)*(w.x1-w.x0-1.6),hc=wpRaw(w,X,zc);if(hc<.12)return;b.visible=true;
+    b.position.set(X+Math.sin(k*7.1+t)*.15,-.04+hc+Math.sin(a*PI)*.32*A,zc+.05+a*.5*w.k);b.scale.setScalar((1-a)*(.6+A*.6));});}
 /* ===== lướt sóng: chèo ván đứng ra khơi → quay đầu chờ sóng → cưỡi con sóng lớn vào bờ (mọi người lướt cùng 1 con sóng, đồng bộ theo giờ chung) ===== */
 const SB={players:[],wave:null,rack:null,L:14};const SB_COL=[['#ff6b6b','#ffffff'],['#4dabf7','#ffd43b'],['#ffd43b','#e8590c'],['#63e6be','#1864ab'],['#ff8fab','#ffffff'],['#845ef7','#ffe066'],['#ffa94d','#1c7ed6'],['#ffffff','#f03e3e']];
 const SB_ZS=-10.55,SB_ZL=-16.7,SB_LANE=k=>3.9+(k%6)*1.35;
@@ -5680,7 +5689,7 @@ function sbBoard(k,par){const [c1,c2]=SB_COL[k%SB_COL.length];const g=new THREE.
   bMk(new THREE.BoxGeometry(.014,.14,.15),bMat('#343a40'),0,-.08,-.64,g);par&&par.add(g);return g;}
 function sbPaddle(){const g=new THREE.Group();const w=bMat('#2b2f36',{roughness:.5});bMk(new THREE.CylinderGeometry(.018,.018,1.35,8),w,0,-.25,0,g);
   const bl=bMk(new THREE.BoxGeometry(.16,.34,.03),bMat('#ffd43b',{roughness:.4}),0,-.98,0,g);bMk(new THREE.BoxGeometry(.1,.04,.04),w,0,.42,0,g);return g;}
-function sbBuild(S){SB.players=[];SB.wave=bWaveMesh(S,10.5,.95,8.1);
+function sbBuild(S){SB.players=[];SB.wave=bWavePatch(S,2.4,13.8,-25.5,-9.85,46,100,1.05,1);
   const g=new THREE.Group();g.position.set(12.3,0,-8.1);g.rotation.y=-.35;S.add(g);SB.rack=g;const w=bMat('#a0703f',{roughness:.9});
   for(const sx of[-1,1]){bMk(new THREE.BoxGeometry(.08,1.1,.08),w,sx*.95,.55,-.2,g);bMk(new THREE.BoxGeometry(.08,1.1,.08),w,sx*.95,.55,.2,g);}
   bMk(new THREE.BoxGeometry(2,.07,.07),w,0,.95,-.2,g);bMk(new THREE.BoxGeometry(2,.07,.07),w,0,.3,-.2,g);
@@ -5688,7 +5697,7 @@ function sbBuild(S){SB.players=[];SB.wave=bWaveMesh(S,10.5,.95,8.1);
   const sg=new THREE.Mesh(new THREE.PlaneGeometry(1.3,.36),new THREE.MeshBasicMaterial({map:canvasTex(360,100,(x,W,H)=>{x.fillStyle='#fff3d6';x.fillRect(0,0,W,H);x.strokeStyle='#a0703f';x.lineWidth=8;x.strokeRect(4,4,W-8,H-8);x.fillStyle='#1864ab';x.font='bold 46px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🏄 SURF',W/2,H/2+3);})}));
   sg.position.set(0,1.22,-.2);g.add(sg);bMk(new THREE.BoxGeometry(.06,.35,.06),w,0,1.05,-.22,g);
   for(const dx of[-.7,0,.7])B_OBS.push({x:12.3+dx*Math.cos(.35),z:-8.1+dx*Math.sin(.35),r:.38});B_PLAN.push({x:12.3,z:-8.1,r:1.3});
-  JW.wave=bWaveMesh(S,7.5,.42,-10);JW.players=[];}
+  JW.wave=bWavePatch(S,-13.6,-6.4,-17.5,-9.85,30,56,.42,.6);JW.players=[];}
 function sbSlot(c){if(c._sbSlot==null){const used=new Set(SB.players.map(p=>p._sbSlot));let k=0;while(used.has(k))k++;c._sbSlot=k;SB.players.push(c);}return SB_LANE(c._sbSlot);}
 function sbHide(c){if(c._sb){c._sb.g.visible=false;c._sb.p.visible=false;}}
 function sbLeave(c){const was=c._surf;c._surf=false;c._sbSlot=null;c._sfP=null;SB.players=SB.players.filter(p=>p!==c);sbHide(c);
@@ -5697,22 +5706,22 @@ function sbGear(c){if(c._sb&&c._sb.g.parent===BW.S)return c._sb;const g=sbBoard(
 const sbEz=v=>v<.5?2*v*v:1-Math.pow(-2*v+2,2)/2;
 // giai đoạn chung theo giờ: 0–6.5 chèo ra · 6.5–8 quay đầu chờ sóng · 8–12.6 cưỡi sóng · 12.6–14 sóng tan, quay lại
 function sbPhase(t){const u=((t%SB.L)+SB.L)%SB.L;return u;}
-function sbWaveState(u){if(u<6)return{zc:-21,S:0};if(u<8){const v=(u-6)/2;return{zc:-21+(SB_ZL-.45+21)*v,S:sbEz(v)};}
-  if(u<12.6){const v=sbEz((u-8)/4.6),zc=SB_ZL-.45+(SB_ZS-.45-(SB_ZL-.45))*v;return{zc,S:zc>-13.2?1-(zc+13.2)/2.65*.7:1};}
-  const v=(u-12.6)/1.4;return{zc:SB_ZS-.45+v*.5,S:.3*(1-v),foam:.9*(1-v)};}
-function sbTick(){const t=simTime,u=sbPhase(t),W=SB.wave;if(W){const ws=sbWaveState(u);bWaveSet(W,ws.zc,ws.S,t,ws.foam);SB.ws=ws;}
+function sbWaveState(u){if(u<6)return{zc:-23,A:0,brk:0};if(u<8){const v=(u-6)/2;return{zc:-22+(SB_ZL-.4+22)*v,A:sbEz(v),brk:0};}
+  if(u<12.6){const v=sbEz((u-8)/4.6),zc=SB_ZL-.4+(SB_ZS-.15-(SB_ZL-.4))*v;return{zc,A:zc>-13.2?1-(zc+13.2)/2.9*.55:1,brk:Math.min(1,.2+Math.max(0,(zc+16.5)/3.5)*.8)};}
+  const v=(u-12.6)/1.4;return{zc:SB_ZS-.15+v*.4,A:.45*(1-v),brk:1-v};}
+function sbTick(){const t=simTime,u=sbPhase(t),W=SB.wave;if(W){const ws=sbWaveState(u);wpSet(W,ws.zc,ws.A,ws.brk,t);SB.ws=ws;}
   BEACH.ppl.forEach(c=>{if(!c._surf||!c._sf){if(c._sb&&c._sb.g.visible)sbHide(c);c._sfP=null;return;}
   const F=c._sf,G=sbGear(c),lane=SB_LANE(c._sbSlot||0);c.path=[];c.walking=false;
   if(!F.go){if(u<4.2){F.go=1;F.zs=c.pos.z;F.xs=c.pos.x;F.u0=u;}else{   // chờ đợt sóng sau: ôm ván đứng mép nước
       c._sfP={ph:'wait'};G.g.visible=true;G.p.visible=false;G.g.position.set(c.pos.x+.38,.04,c.pos.z-.1);G.g.rotation.set(0,PI,0);c.pos.y=0;c.root.rotation.set(0,c.yaw,0);return;}}
-  const bob=Math.sin(t*2.1+(c._sbSlot||0)*1.3)*.03;let x,z,y,yaw,by=.03+bob,bp=0,br=0,ph;
+  let x,z,y,yaw,by=0,bp=0,br=0,ph;
   if(u<6.5){ph='pad';const u0=Math.min(F.u0||0,6),v=sbEz(Math.max(0,Math.min(1,(u-u0)/(6.5-u0))));const zs=F.zs!=null?F.zs:SB_ZS,xs=F.xs!=null?F.xs:lane;
-    x=xs+(lane-xs)*v;z=zs+(SB_ZL-zs)*v;yaw=PI;y=by+.05;}
-  else if(u<8){ph='turn';const v=sbEz((u-6.5)/1.5);x=lane;z=SB_ZL;yaw=PI*(1-v);y=by+.05;F.zs=F.xs=null;F.u0=0;}
-  else if(u<12.6){ph='ride';const ws=SB.ws,v=sbEz((u-8)/4.6),dz=.74;z=ws.zc+dz;x=lane+.8*v+Math.sin((u-8)*1.7)*.22;by=bWaveY(W,dz,ws.S)+.03;y=by+.05;
-    yaw=Math.cos((u-8)*1.7)*.3;bp=.28*ws.S;br=Math.sin((u-8)*1.7)*.12;
+    x=xs+(lane-xs)*v;z=zs+(SB_ZL-zs)*v;yaw=PI;by=Math.max(wpH(W,x,z,t),-.12)+.035;y=by+.05;}
+  else if(u<8){ph='turn';const v=sbEz((u-6.5)/1.5);x=lane;z=SB_ZL;yaw=PI*(1-v);by=wpH(W,x,z,t)+.035;y=by+.05;F.zs=F.xs=null;F.u0=0;}
+  else if(u<12.6){ph='ride';const ws=SB.ws,v=sbEz((u-8)/4.6);z=ws.zc+.4;x=lane+.8*v+Math.sin((u-8)*1.7)*.22;by=wpH(W,x,z,t)+.035;y=by+.05;
+    yaw=Math.cos((u-8)*1.7)*.3;bp=Math.max(-.1,Math.min(.5,-Math.atan((wpH(W,x,z+.2,t)-wpH(W,x,z-.2,t))/.4)));br=Math.sin((u-8)*1.7)*.12;
     if(!F.ch&&u>10.4){F.ch=1;const r=srand(hashStr(BEACH.key+c.id+'sb'+Math.floor(t/SB.L)))();if(r<.4)c.think(pick(['🏄','🌊','😎','🤙']),1.3);else if(r<.55)c.say(pick(['Yeahhh! 🤙','Đã quá trời! 🌊','Cưỡi sóng nè! 🏄']),1.8);}}
-  else{ph='back';const v=sbEz((u-12.6)/1.4);x=lane+.8;z=SB_ZS+.29*(1-v);yaw=PI*v;y=by+.05;F.ch=0;F.zs=SB_ZS;F.xs=lane+.8;F.u0=0;}
+  else{ph='back';const v=sbEz((u-12.6)/1.4);x=lane+.8;z=SB_ZS+.29*(1-v);yaw=PI*v;by=Math.max(wpH(W,x,z,t),-.1)+.035;y=by+.05;F.ch=0;F.zs=SB_ZS;F.xs=lane+.8;F.u0=0;}
   c._sfP={ph,v:0};G.g.visible=true;G.g.position.set(x,by,z);G.g.rotation.set(bp,yaw,br);
   const sk=ph==='ride'?1:ph==='turn'?Math.max(0,Math.min(1,(u-7.2)/.8)):ph==='back'?1-sbEz((u-12.6)/1.4):0;c.yaw=yaw+PI/2*sk;c.pos.set(x,y,z);c.root.rotation.set(0,c.yaw,br*.6*sk);
   // mái chèo: cầm khi chèo ra, lúc cưỡi sóng thì để nằm trên ván
@@ -5729,7 +5738,7 @@ const JW={players:[],wave:null,L:4.6};
 function jwSlot(c){if(c._jwSlot==null){const used=new Set(JW.players.map(p=>p._jwSlot));let k=0;while(used.has(k))k++;c._jwSlot=k;JW.players.push(c);}
   const k=c._jwSlot;return{x:-12.2+(k%5)*1.0+(Math.floor(k/5)%2)*.5,z:-10.45-Math.floor(k/5)*.95};}
 function jwLeave(c){const was=c._jw;c._jw=null;c._jwSlot=null;c._jwP=null;JW.players=JW.players.filter(p=>p!==c);c.root.rotation.x=0;if(was){c.pos.y=0;if(c.pos.z<-9.7)c.pos.z=-9.6;}}
-function jwTick(){const t=simTime,u=((t%JW.L)+JW.L)%JW.L/JW.L,zc=-14.2+4.4*u,S=u<.15?u/.15:u>.85?Math.max(0,(1-u)/.15):1;if(JW.wave)bWaveSet(JW.wave,zc,S*.95,t,u>.8?.9:null);
+function jwTick(){const t=simTime,u=((t%JW.L)+JW.L)%JW.L/JW.L,zc=-14.2+4.4*u,S=u<.15?u/.15:u>.85?Math.max(0,(1-u)/.15):1;if(JW.wave)wpSet(JW.wave,zc,S,.55+.45*u,t);
   BEACH.ppl.forEach(c=>{const J=c._jw;if(!J){c._jwP=null;return;}c.path=[];c.walking=false;
     if(J.t0+2.2>t){const v=Math.min(1,(t-J.t0)/2.2);c.pos.set(c.pos.x+(J.x-c.pos.x)*.08,-.2*v,J.z0+(J.z-J.z0)*v);c.yaw=PI;c._jwP={j:0};return;}  // lội xuống nước
     const d=(zc-(J.z-.55))/1.1;let j=0;if(d>0&&d<1&&S>.3)j=Math.sin(d*PI);
@@ -6270,7 +6279,7 @@ async function zCure(g){zDeco(g,false);g._state='cured';g.path=[];g.walking=fals
   g.think('😳',1.4);g.say(pick(['Ơ… mình bị sao vậy? Cảm ơn nha! 🙇','Tỉnh rồi! Cảm ơn mọi người 🙏','Hết bệnh rồi, cảm ơn nha! 😭']),2.2);g.gesture('bow',1.4);await wait(1.6);
   try{if(g.pos.x<12){await Promise.race([g.goStand(EXIT.in),wait(8)]);await doorIn();await walkDirect(g,[{x:12.5,z:EXIT.in.z},EXIT.out]);doorOut();}else await Promise.race([walkDirect(g,[{x:17.5,z:g.pos.z}]),wait(6)]);}finally{g.root.visible=false;g._state='idle';g.spd=0;}}
 // ---------- cửa ----------
-async function zDoorBreak(){Z.broken=true;ZBAR.visible=false;if(/Zombie sắp tới/.test(evBanT.textContent))bannerOff();setStatus(Z.built?'💥 Zombie đã phá rào chắn! Bắn thuốc ngay — 3 zombie vào tới giữa văn phòng là thua!':'💥 Không ai chặn cửa — zombie ùa vào văn phòng! Bắn thuốc ngay!');beep(false);zSnd('groan');
+async function zDoorBreak(){Z.broken=true;ZBAR.visible=false;if(/Zombie sắp tới/.test(evBanT.textContent))bannerOff();setStatus(Z.built?'💥 Zombie đã phá rào chắn! Bắn thuốc ngay — cả văn phòng bị nhiễm là thất thủ!':'💥 Không ai chặn cửa — zombie ùa vào văn phòng! Bắn thuốc ngay!');beep(false);zSnd('groan');
   await doorIn();zActive().filter(g=>g._state==='bang').forEach((g,k)=>zEnter(g,k));}
 function zDoorRebuilt(){ZBAR.visible=true;doorOut();Z.built=true;setStatus('🚪 Đã kéo bàn chặn cửa! Chuẩn bị sẵn bình xịt — zombie phá được cửa là bắn ngay!');if(/Zombie sắp tới/.test(evBanT.textContent))bannerOff();}
 async function zEnter(g,k){if(g._state!=='bang')return;Z.inN=(Z.inN|0)+1;const ln=((Z.inN-1)%5)-2;g._state='in';
@@ -6288,13 +6297,13 @@ function zVaxBurst(){if(!Z||Z.bursted)return;Z.bursted=true;setStatus(`💉 ${Z.
   const t0=simTime;const iv=setInterval(()=>{const u=(simTime-t0)/2.2;if(u>=1||!ring.parent){clearInterval(iv);scene.remove(ring);return;}ring.scale.setScalar(1+u*28);ring.material.opacity=.8*(1-u);},50);
   zActive().forEach(g=>{zMist(new THREE.Vector3(g.pos.x,2,g.pos.z),new THREE.Vector3(g.pos.x,.8,g.pos.z),'#b2f2bb');zCure(g);});CHARS.forEach(c=>{if(c._zInf)zHeal(c);});if(CAT_HOST)Z.win='vax';}
 // ---------- HUD ----------
-const ZHUD=(()=>{const el=document.createElement('div');el.className='zhud';el.innerHTML='<div class="zinfo"><span id="zT">🧟 R1 ⏳ 40s</span><span id="zD">🚪 100%</span><span id="zN">🧟 Giữa VP 0/3</span></div><div class="zhint" id="zHint">Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 · 3 zombie vào giữa văn phòng là thua</div><div class="zbtns"></div>';stage.appendChild(el);
+const ZHUD=(()=>{const el=document.createElement('div');el.className='zhud';el.innerHTML='<div class="zinfo"><span id="zT">🧟 R1 ⏳ 40s</span><span id="zD">🚪 100%</span><span id="zN">🤢 Bị nhiễm 0</span></div><div class="zhint" id="zHint">Chữa 1 zombie +1 KPI · Sống sót: cả phòng +2 · 3 zombie vào giữa văn phòng là thua</div><div class="zbtns"></div>';stage.appendChild(el);
   el.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const me=ME.id&&byId(ME.id);if(!zCanAct(me))return;const a=b.dataset.z;
     if(a==='spray'){const t=zNearest(me);if(t)run('zspray',me,{v:t.id});else setStatus('🧴 Chưa có zombie nào trong tầm xịt.');return;}
     run(a==='block'?'zblock':'zmask',me,{v:'1'});});return el;})();
 function zNearest(c){const L=zActive().filter(g=>g._state!=='cured').concat(CHARS.filter(x=>x._zInf&&x!==c));return L.sort((p,q)=>Math.hypot(p.pos.x-c.pos.x,p.pos.z-c.pos.z)-Math.hypot(q.pos.x-c.pos.x,q.pos.z-c.pos.z))[0];}
 function zHud(){if(!Z)return;const rd=Z.rd||1,left=Math.max(0,Math.ceil((Z.rlen||40)-(simTime-(Z.rt0||Z.t0))));$('#zT').textContent=rd===1.5?'⏸️ Nghỉ':rd===2?`👑 R2 ⏳ ${left}s`:`🧟 R1 ⏳ ${left}s`;$('#zT').classList.toggle('bad',rd!==1.5&&left<=10);$('#zD').textContent=Z.broken?'🚪 Vỡ!':Z.door<=0?'🚪 Chưa chặn!':`🚪 ${Math.round(Z.door)}%`;$('#zD').classList.toggle('bad',Z.broken||Z.door<35);
-  const nin=Math.min(3,Z.ent|0);{const ni=CHARS.filter(c=>c._zInf).length;$('#zN').textContent=`🧟 Giữa VP ${nin}/3`+(ni?` · 🤢 Bị nhiễm ${ni}`:'');}$('#zN').classList.toggle('bad',nin>=2);const me=ME.id&&byId(ME.id);const inf=me&&me._zInf;
+  {const H=zHere(),ni=H.filter(c=>c._zInf).length;$('#zN').textContent=`🤢 Bị nhiễm ${ni}/${H.length}`;$('#zN').classList.toggle('bad',H.length>0&&ni>=H.length-1);}const me=ME.id&&byId(ME.id);const inf=me&&me._zInf;
   ZHUD.classList.toggle('dis',!!inf||!me);$('#zHint').textContent=inf?'🧟 Bạn đã bị nhiễm — nhân vật đang tự đuổi theo người khác, chờ đồng nghiệp xịt thuốc cứu nha!':!me?'Chọn nhân vật để tham gia chống dịch':(!Z.broken?'🚪 Kéo bàn chặn cửa · Cửa vỡ mới bắn được zombie · 3 zombie vào giữa văn phòng là thua':'👆 Chạm vào zombie để bắn thuốc · Chữa 1 zombie +1 KPI · 3 zombie vào giữa văn phòng là thua');}
 // chạm vào zombie (hoặc đồng nghiệp bị nhiễm) để xịt
 {const o=tap;tap=e=>{if(Z&&!Z.end){const me=ME.id&&byId(ME.id);if(me&&me._zInf)return;if(zCanAct(me)){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
@@ -6337,7 +6346,7 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:0,built:false,vax:0
     thPop('☣️','DỊCH BỆNH BÙNG PHÁT!','Người bên ngoài đang biến thành zombie! Kéo bàn chặn cửa và bắn thuốc chữa cho zombie!','bad',2500);beep(false);zSnd('groan');
     banner('🚨','Zombie sắp tới cửa!','Kéo bàn chặn cửa ngay, không thì zombie ùa vào văn phòng!',{t:'🚪 Chặn cửa ngay',f:()=>{const c=ME.id&&byId(ME.id);if(c&&Z&&!Z.broken)run('zblock',c);bannerOff();}},'boss');beep(false);
     if(!MGR.away&&MGR.root.visible)MGR.say('Zombie tới rồi! Kéo bàn chặn cửa ngay mọi người ơi! 😱',2.8);
-    setStatus('🚨 Zombie sắp tới! Kéo bàn chặn cửa ngay! Khi zombie phá cửa thì chạm vào zombie để bắn thuốc. Round 1: cầm cự 40 giây, đừng để 3 zombie vào giữa văn phòng!');
+    setStatus('🚨 Zombie sắp tới! Kéo bàn chặn cửa ngay! Khi zombie phá cửa thì chạm vào zombie để bắn thuốc. Round 1: cầm cự 40 giây, đừng để tất cả nhân viên bị nhiễm!');
     CHARS.forEach(c=>zMaskOn(c,true));[DOC,NUR].concat(NURX).forEach(c=>zMaskOn(c,true));
     crew.forEach((c,i)=>{if(!c.busy)begin(c,'🛡️ Chống zombie');c.think(pick(['😱','😨','🫣']),2);zSprayProp(c).visible=true;});if(typeof CAT!=='undefined'&&CAT.think)CAT.think('🙀',3);
     const W=[[0,[1,2,3,4]],[14,[5,6,7,8]],[24,[9,10,11,12]]];let wi=0,k=0,lastNpc=-1;Z.rd=1;Z.rt0=simTime;Z.rlen=40;
@@ -6355,7 +6364,11 @@ async function actZombie(v){Z={key:String(v),t0:simTime,door:0,built:false,vax:0
       const tick=Math.floor(el/1.5);if(tick!==lastNpc){lastNpc=tick;zNpc(tick);}
       if(Math.floor(el)%6===0&&Math.floor(el)!==Z.gT&&zActive().length){Z.gT=Math.floor(el);const g=pick(zActive());g.say(pick(['Grừ… 🧠','Grààà…','Khò khè… 🧟']),1.4);zSnd('groan');}
       const here=zHere(),inf=here.filter(c=>c._zInf).length;
-      const nin=zActive().filter(g=>g._state==='in').length;let res=null;if((Z.ent|0)>=3)res='lost';else if(Z.win)res=Z.win;else if(Z.rd===2&&rel>=Z.rlen){res='fled';Z.bossFled=true;}
+      const H0=zHere(),allInf=H0.length>0&&H0.every(c=>c._zInf);
+      if(Z.rd===1&&allInf){zPush();run('zr1f',null,{v:Z.key});if(Z.r1p)await Z.r1p;if(!Z||Z.end)break;   // round 1 thất thủ: bác sĩ vào cứu xong mới tới round 2
+        Z.rd=1.5;Z.rt0=simTime;Z.rlen=3;zRoundFx(1.5);zPush();await wait(3);if(!Z||Z.end)break;
+        Z.rd=2;Z.rt0=simTime+2.6;Z.rlen=30;Z.ent=0;zRoundFx(2);zPush();await wait(2.6);if(!Z||Z.end)break;Z.rt0=simTime;zSpawn(ZPOOL[0],99);zSnd('groan');zPush();continue;}
+      let res=null;if(Z.rd===2&&allInf)res='lost';else if(Z.win)res=Z.win;else if(Z.rd===2&&rel>=Z.rlen){res='fled';Z.bossFled=true;}
       if(res){zPush();run('zend',null,{v:res+'|'+(Z.vaxBy?Z.vaxBy.id:'')});if(!Z.result)zEnd(res+'|'+(Z.vaxBy?Z.vaxBy.id:''));Z.end=true;break;}
       zHud();await wait(.25);k++;}
     ZHUD.classList.remove('show');Z.lost=Z.result==='lost';
@@ -6383,16 +6396,16 @@ async function zCelebrate(){const ppl=zHere(),bits=[],cols=['#ff6b6b','#ffd43b',
 function zFanfare(){if(!MUSIC.on)return;const c=audioCtx();if(!c)return;const t=c.currentTime,N=[[523,0,.16],[659,.16,.16],[784,.32,.16],[1047,.5,.5],[784,1.05,.14],[1047,1.2,.7]];
   N.forEach(([f,st,d])=>{const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(0,t+st);g.gain.linearRampToValueAtTime(.13,t+st+.02);g.gain.exponentialRampToValueAtTime(.001,t+st+d);o.start(t+st);o.stop(t+st+d+.05);});
   for(let k=0;k<14;k++){const n=c.createBufferSource(),b=c.createBuffer(1,Math.floor(c.sampleRate*.08),c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);n.buffer=b;const g=c.createGain(),hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=1800;n.connect(hp);hp.connect(g);g.connect(c.destination);g.gain.value=.05;n.start(t+1.9+k*.09+Math.random()*.05);}}
-function zRoundFx(rd){if(rd===1.5){thPop('✅','Round 1 hoàn thành!','Cả team đã cầm cự qua đợt zombie thường… Nhưng có thứ gì đó đáng sợ hơn đang tới 👑','ok',2500);setStatus('✅ Round 1 xong! Chuẩn bị đối đầu Zombie Chúa…');zHere().forEach(c=>c.think(pick(['😌','💪','😰']),2));}
-  else if(rd===2){zSnd('groan');beep(false);thPop('👑','ROUND 2: ZOMBIE CHÚA XUẤT HIỆN!','Bắn thuốc liên tục, đừng để Zombie Chúa vào tới giữa văn phòng trong 30 giây!','bad',2500);banner('👑','Zombie Chúa!','Round 2 · Cầm cự 30 giây trước Zombie Chúa',null,'boss');setTimeout(()=>{if(Z&&/Chúa/.test(evBanT.textContent))bannerOff();},3000);
-    setStatus('👑 Zombie Chúa xuất hiện! Bắn thuốc liên tục, đừng để nó vào tới giữa văn phòng!');zHere().forEach(c=>c.think(pick(['😱','😨','🫣']),2));}zHud();}
-async function zDoctor(){const big=Z.rd===2,who=big?'Đội 5 bác sĩ và y tá':'Bác sĩ và y tá';
-  const why=(Z.ent|0)>=3?(big?'Zombie Chúa đã vào tới giữa văn phòng.':'3 zombie đã vào tới giữa văn phòng.'):(big?'Hết 30 giây mà chưa hạ được Zombie Chúa.':(zActive().length?'Hết 40 giây mà chưa chữa hết zombie.':'Hết 40 giây mà vẫn còn đồng nghiệp bị nhiễm chưa được chữa.'));
+function zRoundFx(rd){if(rd===1.5&&Z&&Z.r1fail){setStatus('🩺 Mọi người đã được chữa khỏi… Chuẩn bị đối đầu Zombie Chúa!');zHud();return;}if(rd===1.5){thPop('✅','Round 1 hoàn thành!','Cả team đã cầm cự qua đợt zombie thường… Nhưng có thứ gì đó đáng sợ hơn đang tới 👑','ok',2500);setStatus('✅ Round 1 xong! Chuẩn bị đối đầu Zombie Chúa…');zHere().forEach(c=>c.think(pick(['😌','💪','😰']),2));}
+  else if(rd===2){zSnd('groan');beep(false);thPop('👑','ROUND 2: ZOMBIE CHÚA XUẤT HIỆN!','Cầm cự 30 giây, bắn thuốc liên tục — đừng để cả văn phòng bị nhiễm!','bad',2500);banner('👑','Zombie Chúa!','Round 2 · Cầm cự 30 giây trước Zombie Chúa',null,'boss');setTimeout(()=>{if(Z&&/Chúa/.test(evBanT.textContent))bannerOff();},3000);
+    setStatus('👑 Zombie Chúa xuất hiện! Bắn thuốc liên tục, đừng để cả văn phòng bị nhiễm!');zHere().forEach(c=>c.think(pick(['😱','😨','🫣']),2));}zHud();}
+async function zDoctor(r1){const big=!r1&&Z.rd===2,who=big?'Đội 5 bác sĩ và y tá':'Bác sĩ và y tá';Z.docOn=true;CHARS.forEach(c=>{if(c._zInf){c.path=[];c.walking=false;}});
+  const why='Tất cả nhân viên đã bị nhiễm zombie.';
   setStatus(`☣️ ${why} ${who} đang tới cứu mọi người…`);
   zActive().forEach(g=>{g._state='held';g.path=[];g.walking=false;});await wait(2.2);
   const T=big?[DOC,NUR].concat(NURX):[DOC,NUR];
   T.forEach((H,i)=>{H.pos.set(EXIT.out.x+(i>>1)*.7,0,EXIT.out.z+(i%2)*.8);H.yaw=-PI/2;H.root.visible=true;H.spd=2.2;zSprayProp(H).visible=true;H.arms='cup';});
-  await doorIn();await Promise.all(T.map((H,i)=>wait(i*.35).then(()=>walkDirect(H,[{x:12.5,z:EXIT.in.z+(i%3-1)*.6},{x:EXIT.in.x-(i>>1)*.6,z:EXIT.in.z+(i%3-1)*.6}]))));
+  if(!(r1&&Z.broken))await doorIn();await Promise.all(T.map((H,i)=>wait(i*.35).then(()=>walkDirect(H,[{x:12.5,z:EXIT.in.z+(i%3-1)*.6},{x:EXIT.in.x-(i>>1)*.6,z:EXIT.in.z+(i%3-1)*.6}]))));
   DOC.say(big?'Đội cấp cứu tới rồi! Bao vây Zombie Chúa! 👩‍⚕️':'Bác sĩ tới rồi! Mọi người bình tĩnh nha 👩‍⚕️',2.2);NUR.say('Y tá đây, xịt thuốc cho mọi người nha! 🧴',2.2);
   const list=CHARS.filter(c=>c._zInf).concat(ZPOOL.filter(g=>g._state==='held'));
   const boss=list.find(t=>t._boss);
@@ -6402,10 +6415,11 @@ async function zDoctor(){const big=Z.rd===2,who=big?'Đội 5 bác sĩ và y tá
   const rest=list.filter(t=>t!==boss);
   await Promise.all(T.map(async(H,hi)=>{for(let k=hi;k<rest.length;k+=T.length){const t=rest[k];if(t.pos.x<12)await Promise.race([H.goStand({x:t.pos.x+.9,z:t.pos.z}),wait(3)]);zShoot(H,t,'#69db7c');zSnd('pssh');await wait(.5);if(t._zInf)zHeal(t);else{t._state='bang';zCure(t);}}}));
   zActive().filter(g=>g._state==='bang'||g._state==='out').forEach(g=>zCure(g));
-  thPop('☣️','Văn phòng thất thủ!',`${why} ${who} đã vào cứu chữa, cả văn phòng đã an toàn 💚 Lần sau nhớ giữ chặt cửa nha!`,'bad',2500);setStatus(`☣️ Văn phòng thất thủ! ${who} đã chữa khỏi cho cả văn phòng.`);
+  if(r1){thPop('☣️','Round 1 thất thủ!',`${why} ${who} đã chữa khỏi cho mọi người 💚 Chuẩn bị Round 2 — Zombie Chúa đang tới! 👑`,'bad',2500);setStatus(`☣️ Round 1 thất thủ! ${who} đã chữa khỏi cho mọi người. Chuẩn bị Round 2…`);}
+  else{thPop('☣️','Văn phòng thất thủ!',`${why} ${who} đã vào cứu chữa, cả văn phòng đã an toàn 💚 Lần sau nhớ giữ chặt cửa nha!`,'bad',2500);setStatus(`☣️ Văn phòng thất thủ! ${who} đã chữa khỏi cho cả văn phòng.`);}
   zHere().forEach(c=>{c.think('🙏',1.6);});await wait(1.5);
   await Promise.all(T.map((H,i)=>Promise.race([H.goStand({x:EXIT.in.x-(i>>1)*.6,z:EXIT.in.z+(i%3-1)*.6}),wait(8)]).then(()=>walkDirect(H,[{x:12.5,z:EXIT.in.z+(i%3-1)*.6},{x:EXIT.out.x+(i>>1)*.5,z:EXIT.out.z+(i%3-1)*.6}]))));
-  doorOut();T.forEach(H=>{H.root.visible=false;H.tagEl.style.display='none';});}
+  if(!(r1&&Z&&Z.broken))doorOut();T.forEach(H=>{H.root.visible=false;H.tagEl.style.display='none';});if(Z)Z.docOn=false;}
 // đang có zombie / trộm: quản lý không tự đi trao bằng khen hay đi nhắc nhở (nhất là khi người chơi đang điều khiển quản lý)
 {const o=autoTick;autoTick=(...a)=>{if(EV.zombie||EV.thief)return;return o(...a);};}
 {const o=setStatus;setStatus=(m,...a)=>{if((EV.zombie||EV.thief)&&/^🎓/.test(String(m||'')))return;return o(m,...a);};}
@@ -6429,7 +6443,7 @@ function zSnap(){if(!Z)return null;return{k:Z.key,d:Math.round(Z.door),v:Math.ro
 function zMoveTo(c,x,z,outside){const d=Math.hypot(c.pos.x-x,c.pos.z-z);if(d<.25)return;if(d>3.2){c.path=[];c.walking=false;c.pos.set(x,c.pos.y,z);return;}
   if(outside||c.pos.x>11.9||x>11.9){c.path=[{x,z}];c.walking=true;return;}if(c._zW)return;c._zW=true;Promise.race([c.walkTo(x,z),wait(1.6)]).catch(()=>{}).finally(()=>{c._zW=false;});}
 function zApply(s){if(!Z||CAT_HOST||!s||s.k!==Z.key||Z.end)return;Z.vax=s.v;Z.ent=s.e|0;if(s.rd&&s.rd!==(Z.rd||1))zRoundFx(s.rd);Z.rd=s.rd||1;Z.rlen=s.rl||40;Z.rt0=simTime-((s.rl||40)-(s.tl||0));
-  if(s.b&&!Z.broken){Z.broken=true;ZBAR.visible=false;doorIn();setStatus('💥 Zombie đã phá rào chắn! Xịt thuốc ngay — 3 zombie vào tới giữa văn phòng là thua!');}
+  if(s.b&&!Z.broken){Z.broken=true;ZBAR.visible=false;doorIn();setStatus('💥 Zombie đã phá rào chắn! Xịt thuốc ngay — cả văn phòng bị nhiễm là thất thủ!');}
   if(!s.b&&!Z.broken&&s.d>0&&Z.door<=0)zDoorRebuilt();Z.door=s.d;ZBAR.visible=!Z.broken&&Z.door>0;
   const seen=new Set();s.g.forEach(([id,st,hp,x,z])=>{const g=ZPOOL.find(q=>q.id===id);if(!g)return;seen.add(g);const S=ZST_R[st]||'idle';
     if(g._state==='idle'&&S!=='idle'&&S!=='cured'){g._boss=g===ZPOOL[0];g._hp=hp;g._zm.color.set(g._sk);g.mLeg.color.set(g._lg);zDeco(g,true);g.arms='hold';g.spd=g._boss?.55:.38;g.pos.set(x,0,z);g.yaw=-PI/2;g.root.visible=true;g.lookAt=null;}
@@ -6529,6 +6543,11 @@ const CAT_HIDE={x:2.2,z:-6.45};
         if(wa){a1.pos.x+=nx*k*wa;a1.pos.z+=nz*k*wa;if(BEACH.on&&BEACH.ppl.includes(a1))bPush(a1);}
         if(wb){b1.pos.x-=nx*k*wb;b1.pos.z-=nz*k*wb;if(BEACH.on&&BEACH.ppl.includes(b1))bPush(b1);}}}
     return o(...a);};}
+
+// round 1 thất thủ (cả văn phòng bị nhiễm): mọi máy cùng thấy bác sĩ vào cứu, xong mới sang round 2
+{const o=run;run=(n,c,...a)=>{if(n==='zr1f'){if(!Z||Z.end||Z.r1f)return false;Z.r1f=true;Z.r1fail=true;const iv=setInterval(()=>{try{if(Z)zHud();}catch(e){}},300);Z.r1p=zDoctor(true).catch(e=>console.error(e)).finally(()=>clearInterval(iv));return true;}return o(n,c,...a);};}
+setTimeout(()=>{try{SYNC_GROUP.add('zr1f');}catch(e){}},0);
+{const o=zInfect;zInfect=(c,...a)=>{if(Z&&Z.docOn)return;return o(c,...a);};}
 
 /* ================= 7. Giao file Word / Excel / PowerPoint ================= */
 const FT={docx:{e:'📄',n:'Word'},xlsx:{e:'📊',n:'Excel'},pptx:{e:'📽️',n:'PowerPoint'},txt:{e:'📝',n:'Văn bản'},md:{e:'📝',n:'Văn bản'},csv:{e:'📊',n:'Bảng CSV'}};
