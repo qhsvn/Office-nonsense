@@ -888,7 +888,7 @@ header .hstats .mechip{font:inherit;font-size:11.5px;font-weight:700;border:0;bo
     </ul>
     <div class="rsec">✅ Cách cộng KPI</div>
     <ul class="rlist">
-      <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca đủ 1 phút <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
+      <li>📄 Báo cáo sếp <b>+12</b> · 🌙 Tăng ca <b>+15</b> · 🤝 Đi họp <b>+8</b></li>
       <li>🖨️ In tài liệu <b>+6</b> · 📞 Gọi khách <b>+6</b> · 💬 Trao đổi <b>+5</b> · 🧹 Quét văn phòng <b>+5</b></li>
       <li>🛠️ Xử lý sự cố <b>+8</b> · 👨‍💼 Sếp tổng khen <b>+5</b> (bắt lười <b>−8</b>) · 🎮 Minigame top 3 <b>+20/+10/+5</b></li>
       <li>💼 Gặp đối tác <b>+15</b> (ký được hợp đồng) / <b>+6</b> · 🚌 Team building <b>+10</b></li>
@@ -6365,7 +6365,7 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
 // tăng ca: ở lại tăng ca đủ 1 phút là được cộng KPI (không đợi tới lúc ra về)
 {const o=kpiEvent;kpiEvent=(c,k,...a)=>{if(k==='ot'&&c&&!c._otAward)return;if(k==='ot'&&c)c._otAward=false;return o(c,k,...a);};}
 setInterval(()=>{CHARS.forEach(c=>{if(!c.ot||c.away||c.leavingNow){c._otT0=null;if(!c.ot)c._otPaid=false;return;}
-  if(c._otT0==null)c._otT0=simTime;if(!c._otPaid&&simTime-c._otT0>=60){c._otPaid=true;c._otAward=true;kpiEvent(c,'ot');c.think('🌙',1.6);setStatus(`🌙 ${c.name} đã tăng ca đủ 1 phút — được ghi nhận KPI tăng ca!`);}});},1000);
+  if(c._otT0==null)c._otT0=simTime;if(!c._otPaid&&simTime-c._otT0>=60){c._otPaid=true;c._otAward=true;kpiEvent(c,'ot');}});},1000);
 // lên cấp: chỉ máy chủ phòng quyết định lúc trao bằng khen, rồi đồng bộ cho mọi máy (tránh lúc hiện cấp mới lúc hiện cấp cũ)
 {const o=promoTick;promoTick=(...a)=>{if(!CAT_HOST)return;if(EV.zombie||EV.thief)return;if(MGR.busy||MGR.away)return;
   const c=CHARS.find(x=>x.promoPending&&!x.busy&&!x.away&&!x.homeAfter);if(!c)return;c.promoPending=false;run('promo',c);};}
