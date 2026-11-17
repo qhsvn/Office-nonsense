@@ -6063,7 +6063,7 @@ const thPop=(()=>{const el=document.createElement('div');el.className='thpop';el
 let TH_SIREN=null;const TH_LIGHT=new THREE.PointLight(0xff2a3c,0,9);TH_LIGHT.position.set(EXIT.out.x+.6,2.2,EXIT.out.z);scene.add(TH_LIGHT);
 function thSiren(on){stage.classList.toggle('police-on',on);if(!on){TH_LIGHT.intensity=0;if(TH_SIREN){try{TH_SIREN.g.gain.setTargetAtTime(0,MUSIC.ctx.currentTime,.2);const S=TH_SIREN;setTimeout(()=>{try{S.o.stop();S.l.stop();}catch(e){}},900);}catch(e){}TH_SIREN=null;}return;}
   if(!TH_SIREN&&MUSIC.on){const c=audioCtx();if(c){const o=c.createOscillator(),l=c.createOscillator(),lg=c.createGain(),g=c.createGain();o.type='triangle';o.frequency.value=760;l.type='square';l.frequency.value=1.6;lg.gain.value=170;l.connect(lg);lg.connect(o.frequency);g.gain.value=0;o.connect(g);g.connect(c.destination);o.start();l.start();g.gain.setTargetAtTime(.07,c.currentTime,.2);TH_SIREN={o,l,g};}}}
-function thTick(){const T=THIEF;if(T._escort&&T.root.visible){const y=T.root.rotation.y,px=Math.cos(y),pz=-Math.sin(y);COPS.forEach((P,k)=>{const s2=k?1:-1;P.path=[];P.pos.x=T.pos.x+px*.5*s2;P.pos.z=T.pos.z+pz*.5*s2;P.yaw=T.yaw;P.root.rotation.y=T.root.rotation.y;P.walking=T.walking;P.arms='hold';});}
+function thTick(){const T=THIEF;if(T._escort&&T.root.visible){const y=T.root.rotation.y,px=Math.cos(y),pz=-Math.sin(y);const bx=-Math.sin(y),bz=-Math.cos(y);COPS.forEach((P,k)=>{const s2=k?1:-1;P.path=[];let X=T.pos.x+px*.5*s2,Z=T.pos.z+pz*.5*s2;if(!freeXZ(X,Z)){X=T.pos.x+bx*(.55+k*.5)+px*.15*s2;Z=T.pos.z+bz*(.55+k*.5)+pz*.15*s2;if(!freeXZ(X,Z)){X=T.pos.x+bx*.5;Z=T.pos.z+bz*.5;}}P.pos.x+=(X-P.pos.x)*.35;P.pos.z+=(Z-P.pos.z)*.35;P.yaw=T.yaw;P.root.rotation.y=T.root.rotation.y;P.walking=T.walking;P.arms='hold';});}
   if(!stage.classList.contains('police-on'))return;const k=Math.floor(simTime*4)%2;TH_LIGHT.color.setHex(k?0x2a5bff:0xff2a3c);TH_LIGHT.intensity=2.2;}
 {const o=scrTick;scrTick=(...a)=>{try{thTick();}catch(e){}return o(...a);};}
 
@@ -6095,7 +6095,7 @@ async function thChase(c,gen){const T=THIEF,alive=()=>TH&&TH.gen===gen&&TH.grab=
   while(alive()&&simTime-t0<9){await Promise.race([c.goStand({x:T.pos.x,z:T.pos.z+.35}),wait(.6)]);if(simTime-t0>2.4&&Math.hypot(c.pos.x-T.pos.x,c.pos.z-T.pos.z)<.9)break;}
   done=true;if(!alive())return;
   // tóm gọn: kẻ trộm giơ tay đầu hàng, người bắt giữ chặt
-  thStop(T);thStop(c);const a=c.pos.x-T.pos.x,b=c.pos.z-T.pos.z,d=Math.hypot(a,b)||1;c.pos.set(T.pos.x+a/d*.55,0,T.pos.z+b/d*.55);c.faceTo(T);T.faceTo(c);c.lookAt=T;T.lookAt=c;c.arms='hold';T.arms='hold';T._beam.visible=false;T._fl.visible=false;
+  thStop(T);thStop(c);{const a=c.pos.x-T.pos.x,b=c.pos.z-T.pos.z,d=Math.hypot(a,b)||1;let X=T.pos.x+a/d*.55,Z=T.pos.z+b/d*.55;if(!freeXZ(X,Z)){for(let q=0;q<8;q++){const an=q/8*TAU,x2=T.pos.x+Math.cos(an)*.55,z2=T.pos.z+Math.sin(an)*.55;if(freeXZ(x2,z2)){X=x2;Z=z2;break;}}}if(Math.hypot(X-c.pos.x,Z-c.pos.z)<1.2)c.pos.set(X,0,Z);}c.faceTo(T);T.faceTo(c);c.lookAt=T;T.lookAt=c;c.arms='hold';T.arms='hold';T._beam.visible=false;T._fl.visible=false;
   T.think('😵',1.8);
   await c.say(pick(['Tóm được rồi nhé! 💪','Đứng yên đó! Hết đường chạy rồi 😤']),2);T.say('Ối ối, tha cho tôi! 😭',1.8);
   // đòi lại chứng từ mật trong bao tải
@@ -6148,7 +6148,7 @@ async function thCatch(){const T=THIEF;await wait(2.8);{const pp=document.queryS
   thStop(T);await Promise.race([Promise.all(COPS.map((P,j)=>P.goStand({x:T.pos.x+(j?.55:-.55),z:T.pos.z+.35}))),wait(7)]);
   if(G){G._thMv=false;thStop(G);if(G._thSp!=null){G.spd=G._thSp;G._thSp=null;}G.lookAt=null;G.say('Giao cho các chú đó ạ! 👮',1.8);
     (async()=>{setAct(G,'📁 Cất chứng từ vào tủ');await Promise.race([G.goStand(TH_DESK),wait(8)]);G.yaw=PI/2;await wait(.8);if(G.doc)G.doc.visible=false;G.arms='idle';setStatus(`📁 ${G.name} đã cất chứng từ mật về tủ an toàn.`);if(G.busy)end(G,'standing');})();}
-  thStop(T);COPS.forEach(thStop);COPS.forEach((P,j)=>{P.pos.set(T.pos.x+(j?.55:-.55),0,T.pos.z+.15);P.faceTo(T);P.lookAt=T;});T.lookAt=COPS[0];T.arms='hold';T._cuffs.visible=true;T._beam.visible=false;T._fl.visible=false;
+  thStop(T);COPS.forEach(thStop);COPS.forEach((P,j)=>{let X=T.pos.x+(j?.55:-.55),Z=T.pos.z+.15;if(!freeXZ(X,Z)){for(let q=0;q<8;q++){const an=(q+j*4)/8*TAU,x2=T.pos.x+Math.cos(an)*.6,z2=T.pos.z+Math.sin(an)*.6;if(freeXZ(x2,z2)){X=x2;Z=z2;break;}}}if(Math.hypot(X-P.pos.x,Z-P.pos.z)<1.5)P.pos.set(X,0,Z);P.faceTo(T);P.lookAt=T;});T.lookAt=COPS[0];T.arms='hold';T._cuffs.visible=true;T._beam.visible=false;T._fl.visible=false;
   await COPS[1].say('Anh đã bị bắt! 🚔',1.8);await T.say('Tôi xin lỗi… tôi trả lại chứng từ 😭',2.2);T._sack.scale.set(1,1.15,.85);
   setStatus('🚔 Cảnh sát đã còng tay kẻ trộm! Chứng từ mật được trả lại an toàn 📁');
   present().forEach((c,i)=>{if(!thCanCall(c))return;c.lookAt=null;wait(i*.15).then(()=>{c.gesture('clap',2.2);if(i%2)c.say(pick(['👏 Bắt được rồi!','Hú hồn luôn 😌','Cảm ơn các chú cảnh sát! 👮']),2);});});
@@ -6165,7 +6165,7 @@ EVCMD.thief=()=>run('thief',null,{v:'1'});
   if(!this._thMv||!this.root.visible)return;const me=this,grp=[THIEF].concat(COPS),R0=.72;
   present().forEach(c=>{if(c===me||grp.indexOf(c)>=0||!c.root.visible)return;
     const dx=me.pos.x-c.pos.x,dz=me.pos.z-c.pos.z,d=Math.hypot(dx,dz);if(d<R0&&d>1e-4){const k=R0-d,nx=dx/d,nz=dz/d,fx=Math.sin(me.yaw),fz=Math.cos(me.yaw);let px=nz,pz=-nx;if(px*fx+pz*fz<0){px=-px;pz=-pz;}
-      const head=-(nx*fx+nz*fz);me.pos.x+=nx*k+(head>.2?px*k*1.2:0);me.pos.z+=nz*k+(head>.2?pz*k*1.2:0);}});};}
+      const head=-(nx*fx+nz*fz);nudge(me,nx*k+(head>.2?px*k*1.2:0),nz*k+(head>.2?pz*k*1.2:0));}});};}
 
 // ===================== ĐẠI DỊCH ZOMBIE =====================
 KPI_WHY.zcure='Chữa khỏi zombie';KPI_WHY.zvax='Hoàn thành vaccine';KPI_WHY.zwin='Cả phòng sống sót qua đại dịch';
@@ -6541,8 +6541,10 @@ function camfOff(){CAMF=false;document.querySelectorAll('[data-view]').forEach(b
   CHARS.concat(VISITORS).forEach(c=>{if(c===me||c.root.visible===false||(typeof par==='object'&&c.root.parent!==par)||c.lying||c._sunbathe||c._swim||c._surf||c._jw)return;
     const dx=me.pos.x-c.pos.x,dz=me.pos.z-c.pos.z,d=Math.hypot(dx,dz);if(d>=R0||d<1e-4)return;
     const k=(R0-d),nx=dx/d,nz=dz/d,fx=Math.sin(me.yaw),fz=Math.cos(me.yaw);let px=nz,pz=-nx;if(px*fx+pz*fz<0){px=-px;pz=-pz;}
-    const head=-(nx*fx+nz*fz);me.pos.x+=nx*k+(head>.1?px*k*1.8:0);me.pos.z+=nz*k+(head>.1?pz*k*1.8:0);me._sepAcc=(me._sepAcc||0)+dt;});
-  if(me._sepAcc>2.5){me._sepAcc=0;me._sepOff=simTime+4;}else if(me._sepAcc>0)me._sepAcc=Math.max(0,me._sepAcc-dt*.25);};}
+    const head=-(nx*fx+nz*fz);nudge(me,nx*k+(head>.1?px*k*1.8:0),nz*k+(head>.1?pz*k*1.8:0));me._sepAcc=(me._sepAcc||0)+dt;
+    if(head>.3&&!c.walking&&me._sepAcc>.7&&canStep(c))nudge(c,-px*dt*1.6,-pz*dt*1.6);     // người đứng chắn đường thì tránh sang một bên
+    if(me._sepAcc>1.8&&!me._detour){me._detour=1;detour(me,c,px,pz);}});
+  if(me._sepAcc>7){me._sepAcc=0;me._detour=0;me._sepOff=simTime+1.2;}else if(me._sepAcc>0){me._sepAcc=Math.max(0,me._sepAcc-dt*.25);if(me._sepAcc<.3)me._detour=0;}};}
 {const o=updateOverlay;updateOverlay=(...a)=>{if(typeof CAT!=='undefined'&&CAT.g&&CAT.g.visible!==false&&!CAT.hold&&!window.__altScene){const P=CAT.g.position,R0=.42;
     if(CAT.path&&CAT.path.length){const L=CAT.path[CAT.path.length-1];
       CHARS.concat(VISITORS).forEach(c=>{if(c.root.visible===false||(typeof CAT.g.parent==='object'&&c.root.parent!==CAT.g.parent)||c.lying)return;const dx=P.x-c.pos.x,dz=P.z-c.pos.z,d=Math.hypot(dx,dz);
@@ -6580,8 +6582,8 @@ const CAT_HIDE={x:2.2,z:-6.45};
         const fa=free(a1)&&!a1.walking,fb=free(b1)&&!b1.walking;if(!fa&&!fb)continue;
         let nx=dx,nz=dz,dd=d;if(dd<1e-3){const h=hashStr(a1.id+b1.id)%628/100;nx=Math.cos(h);nz=Math.sin(h);dd=1;}nx/=dd;nz/=dd;
         const k=Math.min(R0-d,mv),wa=fa&&fb?.5:fa?1:0,wb=1-wa;
-        if(wa){a1.pos.x+=nx*k*wa;a1.pos.z+=nz*k*wa;if(BEACH.on&&BEACH.ppl.includes(a1))bPush(a1);}
-        if(wb){b1.pos.x-=nx*k*wb;b1.pos.z-=nz*k*wb;if(BEACH.on&&BEACH.ppl.includes(b1))bPush(b1);}}}
+        if(wa){nudge(a1,nx*k*wa,nz*k*wa);if(BEACH.on&&BEACH.ppl.includes(a1))bPush(a1);}
+        if(wb){nudge(b1,-nx*k*wb,-nz*k*wb);if(BEACH.on&&BEACH.ppl.includes(b1))bPush(b1);}}}
     return o(...a);};}
 
 // round 1 thất thủ (cả văn phòng bị nhiễm): mọi máy cùng thấy bác sĩ vào cứu, xong mới sang round 2
@@ -6596,6 +6598,17 @@ function zR2Spawn(w){if(!Z)return;Z.r2w=w;if(w===0)zSpawn(ZPOOL[0],99);const n=[
 
 // round 1: 3/5 nhân viên bị nhiễm là thất thủ (ít người hơn thì tính theo tỉ lệ, tối thiểu 1)
 function zNeed1(n){return Math.max(1,Math.min(n,Math.ceil(n*.6)));}
+
+// ===== không đi xuyên đồ đạc khi bị đẩy / né nhau =====
+function inOffice(c){return !window.__altScene&&!(BEACH&&BEACH.on&&BEACH.ppl&&BEACH.ppl.includes(c));}
+function freeXZ(x,z){try{const k=toCell(x,z);return !blockedAt(k[0],k[1]);}catch(e){return true;}}
+// dịch chuyển nhỏ: chỉ đi tới chỗ trống (nếu đang đứng sẵn trong ô có đồ — ví dụ đứng sát máy in — thì vẫn cho dịch, miễn không lấn sâu thêm)
+function nudge(c,dx,dz){if(!dx&&!dz)return;if(!inOffice(c)){c.pos.x+=dx;c.pos.z+=dz;return;}const x=c.pos.x+dx,z=c.pos.z+dz,here=freeXZ(c.pos.x,c.pos.z);
+  if(freeXZ(x,z)||!here){c.pos.x=x;c.pos.z=z;return;}if(freeXZ(x,c.pos.z))c.pos.x=x;else if(freeXZ(c.pos.x,z))c.pos.z=z;}
+function canStep(c){return !(isHuman(c)&&c.id!==ME.id)&&c.pose!=='sit'&&!c.lying&&!c._thMv&&!ZPOOL.includes(c)&&!c._zInf&&!c.seat;}
+// kẹt đối đầu: chèn một điểm vòng qua bên cạnh người chắn (nếu chỗ đó trống) rồi đi tiếp đường cũ
+function detour(me,c,px,pz){if(!me.path||!me.path.length||!inOffice(me))return;for(const s of[1,-1]){const x=c.pos.x+px*s*.75,z=c.pos.z+pz*s*.75;if(freeXZ(x,z)){me.path.unshift({x,z});return;}}}
+window.__freeXZ=freeXZ;
 
 /* ================= 🏃 OFFICE RACE – AI NHANH NGƯỜI ĐÓ THOÁT DEADLINE! (minigame 3D chơi một mình với 4 AI) ================= */
 const ORX=(()=>{
