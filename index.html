@@ -6628,7 +6628,7 @@ function css(){if($o('#orxCss'))return;const st=document.createElement('style');
 .orx table{border-collapse:collapse;background:rgba(19,35,91,.9);border-radius:12px;overflow:hidden;font-size:14px;margin:6px 0 10px;min-width:min(420px,92vw)}.orx td{padding:6px 10px;border-bottom:1px solid rgba(165,216,255,.25)}.orx tr.me td{background:#ff922b;color:#13235b;font-weight:900}.orx td.p{font-size:20px;text-align:center}
 .orx .res{position:absolute;left:0;right:0;bottom:0;display:none;justify-content:center;padding:0 10px 12px}.orx .res.on{display:flex}
 .orx .rcard{position:relative;width:min(460px,100%);background:#13235b;border:3px solid #a5d8ff;border-radius:20px;padding:12px 12px 8px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
-.orx .rh{text-align:center;font-size:clamp(17px,4.6vw,22px);font-weight:900;color:#ffd43b;margin-bottom:8px}
+.orx .rh{text-align:center;font-size:clamp(16px,4.4vw,21px);font-weight:900;color:#ffd43b;margin-bottom:8px;padding:2px 36px;line-height:1.25}
 .orx .rl{display:flex;flex-direction:column;gap:5px;max-height:44vh;overflow:auto}
 .orx .rr{display:flex;align-items:center;gap:9px;background:#1d3275;border-radius:12px;padding:6px 10px}
 .orx .rr.me{background:#ff922b;color:#13235b}.orx .rr .md{font-size:22px;width:28px;text-align:center}
@@ -6641,6 +6641,11 @@ function css(){if($o('#orxCss'))return;const st=document.createElement('style');
 .orx .tc{position:absolute;inset:0;pointer-events:none;display:none}.orx.touch.run .tc{display:block}
 .orx .tc button{position:absolute;pointer-events:auto;border-radius:50%;border:3px solid rgba(255,255,255,.8);background:rgba(19,35,91,.55);color:#fff;font-size:24px;font-weight:900;width:64px;height:64px}
 .orx .tc button.on{background:rgba(255,146,43,.75)}
+.orx .joy{position:absolute;left:14px;bottom:14px;width:150px;height:150px;border-radius:50%;pointer-events:auto;touch-action:none;background:radial-gradient(circle,rgba(165,216,255,.18) 0,rgba(19,35,91,.55) 70%);border:3px solid rgba(255,255,255,.75)}
+.orx .joy .jr{position:absolute;inset:22%;border-radius:50%;border:2px dashed rgba(255,255,255,.35)}
+.orx .joy:before,.orx .joy:after{content:'▲';position:absolute;left:50%;top:4px;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.7)}.orx .joy:after{content:'▼';top:auto;bottom:4px}
+.orx .joy .jt{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe066,#ff922b);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.35);transition:transform .08s}
+.orx .joy.on .jt{transition:none}.orx .joy.sp .jt{box-shadow:0 0 18px #ffd43b,0 0 6px #fff}
 .orx.touch .bl{left:auto;right:12px;bottom:122px;flex-direction:row-reverse}.orx.touch .bl .sl{width:56px;height:56px;font-size:22px}.orx.touch .sl .ky{display:none}.orx.touch .st{bottom:auto;top:34px;height:8px}.orx.touch .st:after{content:'';}.orx.touch .bf{position:absolute;right:0;bottom:64px}
 `;document.head.appendChild(st);}
 function ui(){if($o('#orx'))return;css();const d=document.createElement('div');d.id='orx';d.className='orx';d.innerHTML=`
@@ -6653,7 +6658,7 @@ function ui(){if($o('#orx'))return;css();const d=document.createElement('div');d
  <div class="st"><i id="orxSt"></i></div></div>
 <div class="tb" id="orxTb"><button type="button" id="orxPause" title="Tạm dừng">⏸</button><button type="button" id="orxMute" title="Âm thanh">🔊</button><button type="button" id="orxX" title="Thoát">✕</button></div>
 <div class="ban" id="orxBan"></div><div class="cnt" id="orxCnt"></div>
-<div class="tc" id="orxTc"><button type="button" data-k="u" style="left:72px;bottom:118px">▲</button><button type="button" data-k="l" style="left:10px;bottom:62px">◀</button><button type="button" data-k="r" style="left:134px;bottom:62px">▶</button><button type="button" data-k="d" style="left:72px;bottom:6px">▼</button>
+<div class="tc" id="orxTc"><div class="joy" id="orxJoy"><div class="jr"></div><div class="jt" id="orxJoyT"></div></div>
  <button type="button" data-k="j" style="right:14px;bottom:22px;width:88px;height:88px;font-size:20px">⤒<br><small style="font-size:11px">NHẢY</small></button></div>
 <div class="scr on" id="orxTitle"><div class="logo">OFFICE<br>RACE</div><div class="sub">🏃 AI NHANH NGƯỜI ĐÓ THOÁT DEADLINE! 🏃</div><div class="sub2">OFFICE NONSENSE – CÔNG SỞ VÔ TRI</div>
  <button type="button" class="bt" id="orxPlay">▶ PLAY</button><button type="button" class="bt g" id="orxQuit1">↩ Về văn phòng</button></div>
@@ -6670,6 +6675,13 @@ function ui(){if($o('#orx'))return;css();const d=document.createElement('div');d
   on('#orxMute',()=>{S.mute=!S.mute;$o('#orxMute').textContent=S.mute?'🔇':'🔊';if(S.mute)bgmStop();else if(S.state==='run'||S.state==='count')bgmStart();});
   on('#orxSk',()=>{if(S.me)useSkill(S.me);});on('#orxIt',()=>{if(S.me)useItem(S.me);});
   if('ontouchstart' in window||navigator.maxTouchPoints>0)d.classList.add('touch');
+  {const J=d.querySelector('#orxJoy'),T=d.querySelector('#orxJoyT');let id=null;const R0=52;
+    const mv=(cx,cy)=>{const b=J.getBoundingClientRect();let dx=cx-(b.left+b.width/2),dy=cy-(b.top+b.height/2);const m=Math.hypot(dx,dy);if(m>R0){dx*=R0/m;dy*=R0/m;}T.style.transform=`translate(${dx}px,${dy}px)`;S.joy={x:dx/R0,y:dy/R0};};
+    const end=()=>{id=null;S.joy=null;S.joyUp=0;J.classList.remove('on','sp');T.style.transform='';};
+    J.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();const t=e.changedTouches[0];id=t.identifier;J.classList.add('on');mv(t.clientX,t.clientY);},{passive:false});
+    J.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===id)mv(t.clientX,t.clientY);},{passive:false});
+    const te=e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===id)end();};J.addEventListener('touchend',te,{passive:false});J.addEventListener('touchcancel',te,{passive:false});
+    let md=false;J.addEventListener('mousedown',e=>{e.preventDefault();md=true;J.classList.add('on');mv(e.clientX,e.clientY);});window.addEventListener('mousemove',e=>{if(md)mv(e.clientX,e.clientY);});window.addEventListener('mouseup',()=>{if(md){md=false;end();}});}
   d.querySelectorAll('#orxTc button').forEach(b=>{const k=b.dataset.k;const dn=e=>{e.preventDefault();e.stopPropagation();b.classList.add('on');if(k==='l')S.key.l=1;if(k==='r')S.key.r=1;if(k==='u'){S.key.f=1;S.upT=performance.now();}if(k==='d')S.key.b=1;if(k==='j')S.key.jp=1;};
     const up=e=>{e.preventDefault();b.classList.remove('on');if(k==='l')S.key.l=0;if(k==='r')S.key.r=0;if(k==='u')S.key.f=0;if(k==='d')S.key.b=0;};
     b.addEventListener('touchstart',dn,{passive:false});b.addEventListener('touchend',up,{passive:false});b.addEventListener('touchcancel',up,{passive:false});b.addEventListener('mousedown',dn);b.addEventListener('mouseup',up);b.addEventListener('mouseleave',up);});
@@ -6839,7 +6851,7 @@ function close(){if(!S)return;$o('#orxShow')&&$o('#orxShow').classList.remove('o
 function scr(id){['#orxTitle','#orxSel','#orxPs','#orxLobby'].forEach(s=>$o(s).classList.toggle('on',s===id));}
 function showTitle(){S.state='title';scr('#orxTitle');$o('#orx').classList.remove('run');$o('#orxEnd').classList.remove('on');}
 function helpHTML(){const touch=$o('#orx').classList.contains('touch');
-  const ctl=touch?`<b>📱 Điều khiển:</b> giữ <kbd>▲</kbd> để chạy (giữ lâu tự tăng tốc) · <kbd>▼</kbd> chậm lại · <kbd>◀</kbd> <kbd>▶</kbd> né trái phải · nút <kbd>NHẢY</kbd> để nhảy qua chướng ngại<br>⚡ Chạm ô <b>kỹ năng</b> (phía trên nút nhảy) để dùng kỹ năng riêng · chạm ô <b>🍌</b> để thả bẫy chuối khi đang cầm`
+  const ctl=touch?`<b>📱 Điều khiển:</b> kéo <b>cần điều khiển</b> ở góc trái — đẩy lên để chạy (đẩy hết cỡ giữ lâu sẽ tự tăng tốc), kéo xuống để chậm lại, nghiêng trái/phải để né · nút <kbd>NHẢY</kbd> bên phải để nhảy qua chướng ngại<br>⚡ Chạm ô <b>kỹ năng</b> (phía trên nút nhảy) để dùng kỹ năng riêng · chạm ô <b>🍌</b> để thả bẫy chuối khi đang cầm`
    :`<b>🎮 Điều khiển:</b> <kbd>W</kbd>/<kbd>↑</kbd> chạy · <kbd>S</kbd>/<kbd>↓</kbd> chậm lại · <kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd> né trái phải · <kbd>SPACE</kbd> nhảy · <kbd>SHIFT</kbd> tăng tốc<br>⚡ <kbd>Q</kbd> dùng kỹ năng riêng · <kbd>E</kbd> thả bẫy chuối khi đang cầm · <kbd>P</kbd>/<kbd>Esc</kbd> tạm dừng`;
   return ctl+`<br>📦 Hộp vật phẩm: ⚡ tăng tốc · 🛡️ lá chắn · 🧲 nam châm · 🍌 bẫy chuối · 🦘 siêu nhảy. Va chạm chỉ bị chậm lại, không bị loại!<br>🗺️ 3 khu: 🏢 Office Zone → ⚠️ Chaos Zone → 👑 Final Boss Zone. Coi chừng sếp, họp đột xuất và deadline rơi từ trời!`;}
 function showSel(){S.state='select';scr('#orxSel');$o('#orxHelp').innerHTML=helpHTML();const box=$o('#orxCards');box.innerHTML='';const multi=!!(ME.id&&byId(ME.id)&&humansOnline().length);S.multi=multi;if(multi)S.meIdx=CHARS.findIndex(c=>c.id===ME.id);
@@ -6877,7 +6889,10 @@ function updObs(dt){const t=(S.state==='run'||S.state==='count'||S.state==='resu
   if(S.state==='run'&&Math.random()<dt*10)S.winds.forEach(w=>{if(Math.abs(w.z0-(S.me?S.me.z:0))<25)part((Math.random()-.5)*2*HW,.3+Math.random()*1.4,w.z1,{vz:-9,col:'#e7f5ff',sz:.06,life:.7,stretch:1});});}
 
 /* ---------- điều khiển người chơi ---------- */
-function input(r){const k=S.key,touch=$o('#orx').classList.contains('touch');r.inX=(k.l?1:0)-(k.r?1:0);   /* camera nhìn về +z nên bên phải màn hình là −x */r.inF=k.b?.25:k.f?1:0;r.inSp=!!k.sh||(touch&&k.f&&performance.now()-(S.upT||0)>700&&r.sta>20);r.inJ=!!k.jp;k.jp=0;}
+function input(r){const k=S.key,touch=$o('#orx').classList.contains('touch');const j=S.joy;
+  if(j){const now=performance.now(),up=-j.y;r.inX=Math.abs(j.x)<.15?0:-j.x;r.inF=up>.2?Math.min(1,(up-.1)*1.4):up<-.45?.25:0;if(up>.82){if(!S.joyUp)S.joyUp=now;}else S.joyUp=0;
+    r.inSp=!!(S.joyUp&&now-S.joyUp>600&&r.sta>15);$o('#orxJoy').classList.toggle('sp',r.inSp);r.inJ=!!k.jp;k.jp=0;return;}
+  r.inX=(k.l?1:0)-(k.r?1:0);   /* camera nhìn về +z nên bên phải màn hình là −x */r.inF=k.b?.25:k.f?1:0;r.inSp=!!k.sh||(touch&&k.f&&performance.now()-(S.upT||0)>700&&r.sta>20);r.inJ=!!k.jp;k.jp=0;}
 /* ---------- AI ---------- */
 function blocks(o,x,z0,z1,m){if(!o.on||!o.solid&&!['slip','wet','spinout','slow'].includes(o.eff))return false;if(o.k==='doorctl')return false;if(o.z<z0||o.z>z1)return false;const w=(o.hw!=null?o.hw:o.r)+m;return Math.abs(o.x-x)<w;}
 function ai(r,dt){r.ai.rt-=dt;const ahead=7.5;
@@ -7091,10 +7106,10 @@ function podView(on){S.podView=on;$o('#orxEnd').classList.toggle('on',!on);$o('#
 function showResult(){if(S.state==='result')return;S.state='result';S.podView=false;$o('#orxShow').classList.remove('on');scr(null);if(S.mp)S.mp.done=true;S.rt=0;bgmStop();$o('#orx').classList.remove('run');const od=S.rac.slice().sort((a,b)=>a.place-b.place);
   S.result=od.map(r=>({name:r.name,place:r.place,time:r.time,me:r.me}));
   // bục vinh danh
-  const z0=L+16;S.podZ=z0;const g=new THREE.Group();g.position.set(0,0,z0);S.dyn.add(g);const H=[1.25,.85,.55],X=[0,-1.7,1.7],C=['#ffd43b','#dee2e6','#e8a87c'];
+  const z0=L+16;S.podZ=z0;const g=new THREE.Group();g.position.set(0,0,z0);S.dyn.add(g);const H=[1.25,.85,.55],X=[0,1.7,-1.7],C=['#ffd43b','#dee2e6','#e8a87c'];
   for(let i=0;i<3;i++){mk(new THREE.BoxGeometry(1.6,H[i],1.4),M(C[i],{roughness:.35,metalness:.2}),X[i],H[i]/2,0,g);const n=new THREE.Mesh(new THREE.PlaneGeometry(.8,.6),MB('#ffffff',{map:txt(128,96,(x,W,Hh)=>{x.fillStyle=C[i];x.fillRect(0,0,W,Hh);x.fillStyle='#13235b';x.font='900 72px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(String(i+1),W/2,Hh/2+4);}),transparent:true}));n.position.set(X[i],H[i]/2,-.71);n.rotation.y=PI;g.add(n);}
-  const rug=mk(new THREE.PlaneGeometry(10,6),M('#c92a2a'),0,.01,0,g,false);rug.rotation.x=-PI/2;const bk=mk(new THREE.PlaneGeometry(6.4,1.6),MB('#ffffff',{map:banTex('🏆 TOP RACERS','Office Race – thoát deadline thành công!',['#13235b','#1c7ed6'])}),0,3.4,1.6,g,false);bk.rotation.y=PI;
-  od.forEach((r,i)=>{r.px=i<3?X[i]:(i===3?-3.3:3.3);r.py=i<3?H[i]:0;r.pz=z0+(i<3?0:-.6);r.x=r.px;r.z=r.pz;r.y=r.py;r.stun=0;r.frz=0;r.phone=0;r.slip=0;r.shield=0;r.dodge=0;r.lap.visible=r.ph.visible=r.sh.visible=false;r.obj.scale.set(1,1,1);});
+  const rug=mk(new THREE.PlaneGeometry(10,6),M('#c92a2a'),0,.01,0,g,false);rug.rotation.x=-PI/2;const bk=mk(new THREE.PlaneGeometry(6.4,1.6),MB('#ffffff',{map:banTex('🏆 TOP RACERS','Office Race – thoát deadline thành công!',['#13235b','#1c7ed6'])}),0,4.5,2.2,g,false);bk.rotation.y=PI;
+  od.forEach((r,i)=>{r.px=i<3?X[i]:(i===3?3.3:-3.3);r.py=i<3?H[i]:0;r.pz=z0+(i<3?0:-.6);r.x=r.px;r.z=r.pz;r.y=r.py;r.stun=0;r.frz=0;r.phone=0;r.slip=0;r.shield=0;r.dodge=0;r.lap.visible=r.ph.visible=r.sh.visible=false;r.obj.scale.set(1,1,1);});
   {const w=od[0],cup=new THREE.Group(),gm=M('#ffd43b',{metalness:.6,roughness:.25,emissive:'#7a5a00',emissiveIntensity:.35});mk(new THREE.CylinderGeometry(.16,.07,.22,18),gm,0,.2,0,cup);mk(new THREE.CylinderGeometry(.03,.03,.1,8),gm,0,.05,0,cup);mk(new THREE.CylinderGeometry(.09,.09,.04,14),gm,0,0,0,cup);
     for(const sx of[-1,1]){const h=mk(new THREE.TorusGeometry(.06,.015,6,12,PI),gm,sx*.17,.22,0,cup);h.rotation.z=sx>0?-PI/2:PI/2;}const st=sprite(emojiTex('🎖️'),.3,cup);st.position.y=.45;
     cup.position.set(0,1.68,.05);cup.scale.setScalar(1.55);cup.visible=true;w.obj.add(cup);S.trophy=cup;S.trophyOf=w;}
