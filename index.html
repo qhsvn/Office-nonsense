@@ -7046,7 +7046,7 @@ function anim(r,dt){const P=r.P,o=r.obj,t=S.wt;r.ph2+=dt*(2.2+r.v*1.9);
   if(P.hips){const sq=r.land>0?1-r.land*1.2:1;P.hips.position.y=LEGH*sq;o.scale.set(1+(1-sq)*.4,1,1+(1-sq)*.4);}
   r.lap.visible=r.frz>0;r.ph.visible=r.phone>0;r.sh.visible=r.shield>0||r.dodge>0;if(r.sh.visible){r.sh.material.opacity=.2+Math.sin(t*10)*.08;r.sh.material.color.set(r.dodge>0?'#ffffff':'#74c0fc');}
   if(r.stun>0&&Math.random()<dt*6)part(r.x,1.5,r.z,{vx:Math.cos(t*8)*1,vy:.5,vz:Math.sin(t*8)*1,col:'#ffd43b',sz:.09,life:.5});}
-function podiumAnim(dt){const V=S.podView;S.rac.forEach(r=>{const P=r.P,t=S.rt+r.i,o=r.obj,k=1-Math.exp(-dt*10);let Lz=.12,Rz=-.12,Lx=0,Rx=0,rx=0,y=r.py,spin=0;
+function podiumAnim(dt){const V=S.podView;if(S.trophy){S.trophy.rotation.y+=dt*1.6;if(Math.random()<dt*5){const w=S.trophyOf;part(w.px+(Math.random()-.5)*.5,w.obj.position.y+1.9+Math.random()*.4,w.pz+(Math.random()-.5)*.3,{vx:0,vy:.4,vz:0,col:'#fff3bf',sz:.06,life:.6,g:0,glow:1});}}S.rac.forEach(r=>{const P=r.P,t=S.rt+r.i,o=r.obj,k=1-Math.exp(-dt*10);let Lz=.12,Rz=-.12,Lx=0,Rx=0,rx=0,y=r.py,spin=0;
   if(r.place===1){if(V){const j=Math.abs(Math.sin(S.rt*4.2));y+=j*.65;Lx=Rx=-.25;Lz=2.75+Math.sin(S.rt*8)*.15;Rz=-2.75-Math.sin(S.rt*8)*.15;if(Math.floor(S.rt/3.2)%2===1)spin=(S.rt%3.2)/3.2*TAU;if(j>.98&&Math.random()<.4)confettiAt(r.px,r.pz,6);}else{y+=Math.abs(Math.sin(t*4))*.35;Lz=2.4;Rz=-2.4;}}
   else if(V&&r.place===4){const c=Math.abs(Math.sin(t*12));Lx=Rx=-1.2;Lz=.4-c*.5;Rz=-.4+c*.5;y+=Math.abs(Math.sin(t*5))*.08;}else if(r.place<=3){const c=Math.abs(Math.sin(t*12));Lx=Rx=-1.2;Lz=.4-c*.5;Rz=-.4+c*.5;}else if(r.place===5){rx=-.0;y=r.py-.2;Lx=Rx=-.8;Lz=.6;Rz=-.6;}
   if(V&&r.place>=2&&r.place<=3)y+=Math.abs(Math.sin(t*5))*.1;o.position.set(r.px,y,r.pz);o.rotation.set(rx,PI+spin+(r.place===4&&!V?Math.sin(t*2)*.3:0),0);if(P.armL){P.armL.rotation.x+=(Lx-P.armL.rotation.x)*k;P.armL.rotation.z+=(Lz-P.armL.rotation.z)*k;P.armR.rotation.x+=(Rx-P.armR.rotation.x)*k;P.armR.rotation.z+=(Rz-P.armR.rotation.z)*k;}
@@ -7087,7 +7087,7 @@ function checkEnd(dt){const me=S.me;if(S.mp){mpEnd(dt);return;}if(!me.fin)return
   S.rac.forEach(r=>{if(!r.fin){const sp=Math.max(3.5,r.z/Math.max(1,S.t));r.time=S.t+(L-r.z)/sp;r.est=true;}});
   const un=S.rac.filter(r=>!r.place).sort((a,b)=>a.time-b.time);un.forEach(r=>{r.place=++S.finN;r.fin=true;});showResult();}
 function podView(on){S.podView=on;$o('#orxEnd').classList.toggle('on',!on);$o('#orxShow').classList.toggle('on',on);
-  if(on){S.rt=0;sfx('win');confettiAt(0,S.podZ,120);if(S.trophy)S.trophy.visible=true;}else if(S.trophy)S.trophy.visible=false;}
+  if(on){S.rt=0;sfx('win');confettiAt(0,S.podZ,120);}if(S.trophy)S.trophy.visible=true;}
 function showResult(){if(S.state==='result')return;S.state='result';S.podView=false;$o('#orxShow').classList.remove('on');scr(null);if(S.mp)S.mp.done=true;S.rt=0;bgmStop();$o('#orx').classList.remove('run');const od=S.rac.slice().sort((a,b)=>a.place-b.place);
   S.result=od.map(r=>({name:r.name,place:r.place,time:r.time,me:r.me}));
   // bục vinh danh
@@ -7097,10 +7097,10 @@ function showResult(){if(S.state==='result')return;S.state='result';S.podView=fa
   od.forEach((r,i)=>{r.px=i<3?X[i]:(i===3?-3.3:3.3);r.py=i<3?H[i]:0;r.pz=z0+(i<3?0:-.6);r.x=r.px;r.z=r.pz;r.y=r.py;r.stun=0;r.frz=0;r.phone=0;r.slip=0;r.shield=0;r.dodge=0;r.lap.visible=r.ph.visible=r.sh.visible=false;r.obj.scale.set(1,1,1);});
   {const w=od[0],cup=new THREE.Group(),gm=M('#ffd43b',{metalness:.6,roughness:.25,emissive:'#7a5a00',emissiveIntensity:.35});mk(new THREE.CylinderGeometry(.16,.07,.22,18),gm,0,.2,0,cup);mk(new THREE.CylinderGeometry(.03,.03,.1,8),gm,0,.05,0,cup);mk(new THREE.CylinderGeometry(.09,.09,.04,14),gm,0,0,0,cup);
     for(const sx of[-1,1]){const h=mk(new THREE.TorusGeometry(.06,.015,6,12,PI),gm,sx*.17,.22,0,cup);h.rotation.z=sx>0?-PI/2:PI/2;}const st=sprite(emojiTex('🎖️'),.3,cup);st.position.y=.45;
-    cup.position.set(0,1.62,.05);cup.visible=false;w.obj.add(cup);S.trophy=cup;S.trophyOf=w;}
+    cup.position.set(0,1.68,.05);cup.scale.setScalar(1.55);cup.visible=true;w.obj.add(cup);S.trophy=cup;S.trophyOf=w;}
   confettiAt(0,z0,90);sfx('win');if(od[4].me)setTimeout(()=>sfx('sad'),2200);
   const me=od.find(r=>r.me);$o('#orxEndH').textContent=me.place===1?'🏆 VÔ ĐỊCH! BẠN ĐÃ THOÁT DEADLINE!':me.place===5?'😭 VỀ CHÓT… DEADLINE ĐUỔI KỊP RỒI!':`🏁 BẠN VỀ HẠNG ${me.place}!`;
-  const medal=['🥇','🥈','🥉','4','5'];$o('#orxTbl').innerHTML=od.map((r,i)=>`<div class="rr${r.me?' me':''}"><span class="md">${medal[i]}</span><span class="av3" data-av="${r.i}"></span><span class="nm"><b>${esc(r.name)}${r.me?' (bạn)':''}</b><small>${r.sk.e} ${r.sk.n}</small></span><span class="tm"><b>${fmt(r.time)}</b><small>${i===0?'Vô địch 🎉':(r.est?'ước tính · ':'')+'+'+(r.time-od[0].time).toFixed(1)+'s'}</small></span></div>`).join('');
+  const medal=['🥇','🥈','🥉','4','5'];$o('#orxTbl').innerHTML=od.map((r,i)=>`<div class="rr${r.me?' me':''}"><span class="md">${i===0?'🏆':medal[i]}</span><span class="av3" data-av="${r.i}"></span><span class="nm"><b>${esc(r.name)}${r.me?' (bạn)':''}</b><small>${r.sk.e} ${r.sk.n}</small></span><span class="tm"><b>${fmt(r.time)}</b><small>${i===0?'Vô địch 🎉':(r.est?'ước tính · ':'')+'+'+(r.time-od[0].time).toFixed(1)+'s'}</small></span></div>`).join('');
   fillAv($o('#orxTbl'));$o('#orxEnd').classList.add('on');}
 
 /* ---------- camera & vẽ ---------- */
