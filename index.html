@@ -6280,7 +6280,7 @@ function zSpray(c,v){if(!zCanAct(c))return false;const t=zByIdAny(v);if(!t)retur
 const ZSPOT=[{x:4.4,z:3.4},{x:4.4,z:2.1},{x:3.1,z:2.75},{x:5.6,z:3.9},{x:3.1,z:4.0},{x:5.6,z:2.6},{x:1.9,z:2.4},{x:2.6,z:5.0}];
 function zBlock(c){if(!zCanAct(c))return false;if(c._zDrag)return false;if(Z.broken){if(isHuman(c))setStatus('💥 Cửa đã vỡ rồi, không chặn lại được nữa — xịt thuốc ngay!');return false;}
   if(!isHuman(c)&&CHARS.filter(x=>!isHuman(x)&&x!==c&&x._zDrag).length>=2)return false;
-  c._zDrag=true;const hu=isHuman(c),sp0=c.spd,dur=hu?10:15;if(hu){c._zDragSp=sp0;c.spd=2.8;setStatus('💺 Chạy ra kéo bàn chặn cửa… mất 10 giây!');}
+  c._zDrag=true;const hu=isHuman(c),sp0=c.spd,dur=5;if(hu){c._zDragSp=sp0;c.spd=2.8;setStatus('💺 Chạy ra kéo bàn chặn cửa… mất 5 giây!');}
   (async()=>{try{
     if(Math.hypot(c.pos.x-10.6,c.pos.z-EXIT.in.z)>1.4){c.standUp&&c.standUp();const used=new Set(CHARS.filter(x=>x!==c&&x._zDrag&&x._zSlot!=null).map(x=>x._zSlot));c._zSlot=[0,1,2,3].find(k=>!used.has(k));if(c._zSlot==null)c._zSlot=0;
       await Promise.race([c.goStand({x:10.55-(c._zSlot>>1)*.75,z:EXIT.in.z+[-.7,.7][c._zSlot&1]}),wait(hu?3:5)]);}
